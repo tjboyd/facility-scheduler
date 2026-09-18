@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Facility calendar — week</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Public+Sans:wght@400;500;600;700&amp;display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Public Sans',system-ui,sans-serif;background:#F5F3EE;color:#14161A;-webkit-font-smoothing:antialiased}
+a{color:#1F5B4E}a:hover{color:#17453A}
+</style>
+</helmet>
+
+<div style="width: 1280px; height: 820px; display: flex; flex-direction: column; background: #F5F3EE;">
+
+  <header style="height: 68px; flex-shrink: 0; background: #FFFFFF; border-bottom: 1px solid #E3E0D9; display: flex; align-items: center; gap: 30px; padding: 0 26px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <svg width="25" height="25" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2.5" y="4" width="19" height="16.5" rx="3" stroke="#1F5B4E" stroke-width="1.7"/><path d="M2.5 9h19" stroke="#1F5B4E" stroke-width="1.7"/><path d="M7.5 2.5v3M16.5 2.5v3" stroke="#1F5B4E" stroke-width="1.7" stroke-linecap="round"/><rect x="6" y="12" width="7.5" height="4.5" rx="1.2" fill="#1F5B4E"/></svg>
+      <span style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 15.5px; letter-spacing: 0.01em;">[FACILITY NAME]</span>
+    </div>
+    <nav style="display: flex; align-items: center; gap: 4px; flex-grow: 1;">
+      <a href="CoachCalendar.dc.html" style="padding: 9px 15px; border-radius: 9px; background: #EFEDE7; font-size: 14px; font-weight: 600; color: #14161A; text-decoration: none;">Calendar</a>
+      <a href="MyRequests.dc.html" style="padding: 9px 15px; border-radius: 9px; font-size: 14px; font-weight: 500; color: #5F646C; text-decoration: none;">My requests</a>
+    </nav>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border: 1px solid #E3E0D9; border-radius: 999px; font-size: 12.5px; font-weight: 600; color: #3F454D;">
+        <span style="width: 7px; height: 7px; border-radius: 999px; background: #1F5B4E;"></span>Head coach · 14U Gold
+      </span>
+      <span style="width: 34px; height: 34px; border-radius: 999px; background: #1F5B4E; color: #FFFFFF; font-size: 12.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; letter-spacing: 0.02em;">CR</span>
+    </div>
+  </header>
+
+  <main style="flex-grow: 1; padding: 22px 28px; display: flex; flex-direction: column;">
+
+    <div style="display: flex; align-items: center; gap: 14px; height: 44px; flex-shrink: 0;">
+      <div style="display: flex; align-items: center; border: 1px solid #DDD9D1; border-radius: 9px; overflow: hidden; background: #FFFFFF;">
+        <button type="button" aria-label="Previous week" style="width: 36px; height: 36px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="#3F454D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <span style="width: 1px; height: 22px; background: #E3E0D9;"></span>
+        <button type="button" aria-label="Next week" style="width: 36px; height: 36px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="#3F454D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>
+      <h1 style="margin: 0; font-family: Archivo, sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.015em;">Sep 20 – 26, 2026</h1>
+      <button type="button" style="height: 36px; padding: 0 14px; background: #FFFFFF; border: 1px solid #DDD9D1; border-radius: 9px; font-family: 'Public Sans', sans-serif; font-size: 13.5px; font-weight: 600; color: #3F454D; cursor: pointer;">Today</button>
+
+      <div style="flex-grow: 1;"></div>
+
+      <div style="display: flex; align-items: center; background: #EFEDE7; border-radius: 9px; padding: 3px;">
+        <button type="button" style="height: 30px; padding: 0 14px; background: #FFFFFF; border: 1px solid #E3E0D9; border-radius: 7px; font-family: 'Public Sans', sans-serif; font-size: 13px; font-weight: 600; color: #14161A; cursor: pointer;">Week</button>
+        <button type="button" style="height: 30px; padding: 0 14px; background: transparent; border: none; font-family: 'Public Sans', sans-serif; font-size: 13px; font-weight: 500; color: #5F646C; cursor: pointer;">Day</button>
+      </div>
+      <a href="RequestBooking.dc.html" style="display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 17px; background: #1F5B4E; color: #FFFFFF; border-radius: 9px; font-size: 14px; font-weight: 600; text-decoration: none;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"/></svg>
+        Request time
+      </a>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 20px; height: 24px; margin-top: 16px; flex-shrink: 0;">
+      <span style="display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: #3F454D;"><span style="width: 13px; height: 13px; border-radius: 4px; background: #E4EDE9; border: 1px solid #9CBFB3;"></span>Reserved — approved</span>
+      <span style="display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: #3F454D;"><span style="width: 13px; height: 13px; border-radius: 4px; background: #FBF0DB; border: 1px dashed #C9A35B;"></span>Pending approval</span>
+      <span style="display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: #3F454D;"><span style="width: 13px; height: 13px; border-radius: 4px; background: repeating-linear-gradient(135deg, #E7E4DD 0 3px, #F2F0EA 3px 6px); border: 1px solid #DDD9D1;"></span>Closed</span>
+      <div style="flex-grow: 1;"></div>
+      <span style="font-size: 12.5px; color: #5F646C;">30-minute blocks · 1.5 hours max per request · one team per block</span>
+    </div>
+
+    <div style="margin-top: 14px; border: 1px solid #E3E0D9; border-radius: 12px; overflow: hidden; background: #FFFFFF; flex-shrink: 0;">
+
+      <div style="display: flex; height: 44px; background: #FAF8F4; border-bottom: 1px solid #E3E0D9;">
+        <div style="width: 76px; flex-shrink: 0;"></div>
+        <div style="width: 164px; border-left: 1px solid #EFEDE7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;"><span style="font-size: 11px; font-weight: 600; letter-spacing: 0.07em; color: #7A7F87;">SUN</span><span style="font-family: Archivo, sans-serif; font-size: 15px; font-weight: 600;">20</span></div>
+        <div style="width: 164px; border-left: 1px solid #EFEDE7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;"><span style="font-size: 11px; font-weight: 600; letter-spacing: 0.07em; color: #7A7F87;">MON</span><span style="font-family: Archivo, sans-serif; font-size: 15px; font-weight: 600;">21</span></div>
+        <div style="width: 164px; border-left: 1px solid #EFEDE7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;"><span style="font-size: 11px; font-weight: 600; letter-spacing: 0.07em; color: #7A7F87;">TUE</span><span style="font-family: Archivo, sans-serif; font-size: 15px; font-weight: 600;">22</span></div>
+        <div style="width: 164px; border-left: 1px solid #EFEDE7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;"><span style="font-size: 11px; font-weight: 600; letter-spacing: 0.07em; color: #7A7F87;">WED</span><span style="font-family: Archivo, sans-serif; font-size: 15px; font-weight: 600;">23</span></div>
+        <div style="width: 164px; border-left: 1px solid #EFEDE7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;"><span style="font-size: 11px; font-weight: 600; letter-spacing: 0.07em; color: #7A7F87;">THU</span><span style="font-family: Archivo, sans-serif; font-size: 15px; font-weight: 600;">24</span></div>
+        <div style="width: 164px; border-left: 1px solid #EFEDE7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;"><span style="font-size: 11px; font-weight: 600; letter-spacing: 0.07em; color: #7A7F87;">FRI</span><span style="font-family: Archivo, sans-serif; font-size: 15px; font-weight: 600;">25</span></div>
+        <div style="width: 164px; border-left: 1px solid #EFEDE7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;"><span style="font-size: 11px; font-weight: 600; letter-spacing: 0.07em; color: #7A7F87;">SAT</span><span style="font-family: Archivo, sans-serif; font-size: 15px; font-weight: 600;">26</span></div>
+      </div>
+
+      <div style="display: flex; height: 408px;">
+
+        <div style="width: 76px; flex-shrink: 0; background: #FAF8F4; display: flex; flex-direction: column;">
+          <div style="height: 34px; display: flex; justify-content: flex-end; padding-right: 11px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; color: #3F454D; transform: translateY(-6px);">3:00 PM</span></div>
+          <div style="height: 34px; display: flex; justify-content: flex-end; padding-right: 11px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #9A9EA5; transform: translateY(-6px);">3:30</span></div>
+          <div style="height: 34px; display: flex; justify-content: flex-end; padding-right: 11px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; color: #3F454D; transform: translateY(-6px);">4:00 PM</span></div>
+          <div style="height: 34px; display: flex; justify-content: flex-end; padding-right: 11px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #9A9EA5; transform: translateY(-6px);">4:30</span></div>
+          <div style="height: 34px; display: flex; justify-content: flex-end; padding-right: 11px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; color: #3F454D; transform: translateY(-6px);">5:00 PM</span></div>
+          <div style="height: 34px; display: flex; justify-content: flex-end; padding-right: 11px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #9A9EA5; transform: translateY(-6px);">5:30</span></div>
+          <div style="height: 34px; display: flex; justify-content: flex-end; padding-right: 11px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; color: #3F454D; transform: translateY(-6px);">6:00 PM</span></div>
+          <div style="height: 34px; display: flex; justify-content: flex-end; padding-right: 11px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #9A9EA5; transform: translateY(-6px);">6:30</span></div>
+          <div style="height: 34px; display: flex; justify-content: flex-end; padding-right: 11px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; color: #3F454D; transform: translateY(-6px);">7:00 PM</span></div>
+          <div style="height: 34px; display: flex; justify-content: flex-end; padding-right: 11px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #9A9EA5; transform: translateY(-6px);">7:30</span></div>
+          <div style="height: 34px; display: flex; justify-content: flex-end; padding-right: 11px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; color: #3F454D; transform: translateY(-6px);">8:00 PM</span></div>
+          <div style="height: 34px; display: flex; justify-content: flex-end; padding-right: 11px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #9A9EA5; transform: translateY(-6px);">8:30</span></div>
+        </div>
+
+        <div style="width: 164px; position: relative; border-left: 1px solid #EFEDE7; background-color: #FFFFFF; background-image: repeating-linear-gradient(to bottom, #E7E4DD 0 1px, transparent 1px 68px), repeating-linear-gradient(to bottom, #F4F2EC 0 1px, transparent 1px 34px);">
+          <div style="position: absolute; left: 5px; right: 5px; top: 2px; height: 98px; background: #E4EDE9; border: 1px solid #9CBFB3; border-radius: 7px; padding: 7px 9px;">
+            <div style="font-size: 13px; font-weight: 700; color: #14453A; letter-spacing: -0.01em;">JV</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #35695C; margin-top: 3px;">3:00–4:30 PM</div>
+          </div>
+          <div style="position: absolute; left: 0; right: 0; top: 204px; height: 204px; background: repeating-linear-gradient(135deg, #E7E4DD 0 4px, #F2F0EA 4px 8px); border-top: 1px solid #DDD9D1; display: flex; align-items: center; justify-content: center;">
+            <span style="font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; color: #7A7F87; background: #F6F4EF; padding: 3px 9px; border-radius: 5px;">Closed</span>
+          </div>
+        </div>
+
+        <div style="width: 164px; position: relative; border-left: 1px solid #EFEDE7; background-color: #FFFFFF; background-image: repeating-linear-gradient(to bottom, #E7E4DD 0 1px, transparent 1px 68px), repeating-linear-gradient(to bottom, #F4F2EC 0 1px, transparent 1px 34px);">
+          <div style="position: absolute; left: 5px; right: 5px; top: 70px; height: 98px; background: #E4EDE9; border: 1px solid #9CBFB3; border-radius: 7px; padding: 7px 9px;">
+            <div style="font-size: 13px; font-weight: 700; color: #14453A; letter-spacing: -0.01em;">14U Gold</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #35695C; margin-top: 3px;">4:00–5:30 PM</div>
+            <div style="margin-top: 6px; display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.05em; color: #1F5B4E; background: #FFFFFF; border: 1px solid #B8D2C8; border-radius: 4px; padding: 2px 5px;">YOUR TEAM</div>
+          </div>
+          <div style="position: absolute; left: 5px; right: 5px; top: 240px; height: 98px; background: #E4EDE9; border: 1px solid #9CBFB3; border-radius: 7px; padding: 7px 9px;">
+            <div style="font-size: 13px; font-weight: 700; color: #14453A; letter-spacing: -0.01em;">Varsity</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #35695C; margin-top: 3px;">6:30–8:00 PM</div>
+          </div>
+        </div>
+
+        <div style="width: 164px; position: relative; border-left: 1px solid #EFEDE7; background-color: #FFFFFF; background-image: repeating-linear-gradient(to bottom, #E7E4DD 0 1px, transparent 1px 68px), repeating-linear-gradient(to bottom, #F4F2EC 0 1px, transparent 1px 34px);">
+          <div style="position: absolute; left: 5px; right: 5px; top: 36px; height: 98px; background: #FBF0DB; border: 1px dashed #C9A35B; border-radius: 7px; padding: 7px 9px;">
+            <div style="font-size: 13px; font-weight: 700; color: #6B420A; letter-spacing: -0.01em;">12U Navy</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #7A4A06; margin-top: 3px;">3:30–5:00 PM</div>
+            <div style="margin-top: 6px; display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.05em; color: #7A4A06; background: #FFFFFF; border: 1px solid #E0C48D; border-radius: 4px; padding: 2px 5px;">PENDING</div>
+          </div>
+          <div style="position: absolute; left: 5px; right: 5px; top: 206px; height: 98px; background: #E4EDE9; border: 1px solid #9CBFB3; border-radius: 7px; padding: 7px 9px;">
+            <div style="font-size: 13px; font-weight: 700; color: #14453A; letter-spacing: -0.01em;">16U Black</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #35695C; margin-top: 3px;">6:00–7:30 PM</div>
+          </div>
+        </div>
+
+        <div style="width: 164px; position: relative; border-left: 1px solid #EFEDE7; background-color: #FFFFFF; background-image: repeating-linear-gradient(to bottom, #E7E4DD 0 1px, transparent 1px 68px), repeating-linear-gradient(to bottom, #F4F2EC 0 1px, transparent 1px 34px);">
+          <div style="position: absolute; left: 5px; right: 5px; top: 138px; height: 98px; background: #E4EDE9; border: 1px solid #9CBFB3; border-radius: 7px; padding: 7px 9px;">
+            <div style="font-size: 13px; font-weight: 700; color: #14453A; letter-spacing: -0.01em;">10U Red</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #35695C; margin-top: 3px;">5:00–6:30 PM</div>
+          </div>
+          <div style="position: absolute; left: 5px; right: 5px; top: 308px; height: 98px; background: #FBF0DB; border: 1px dashed #C9A35B; border-radius: 7px; padding: 7px 9px;">
+            <div style="font-size: 13px; font-weight: 700; color: #6B420A; letter-spacing: -0.01em;">JV</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #7A4A06; margin-top: 3px;">7:30–9:00 PM</div>
+            <div style="margin-top: 6px; display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.05em; color: #7A4A06; background: #FFFFFF; border: 1px solid #E0C48D; border-radius: 4px; padding: 2px 5px;">PENDING</div>
+          </div>
+        </div>
+
+        <div style="width: 164px; position: relative; border-left: 1px solid #EFEDE7; background-color: #FFFFFF; background-image: repeating-linear-gradient(to bottom, #E7E4DD 0 1px, transparent 1px 68px), repeating-linear-gradient(to bottom, #F4F2EC 0 1px, transparent 1px 34px);">
+          <div style="position: absolute; left: 5px; right: 5px; top: 104px; height: 98px; background: #E4EDE9; border: 1px solid #9CBFB3; border-radius: 7px; padding: 7px 9px;">
+            <div style="font-size: 13px; font-weight: 700; color: #14453A; letter-spacing: -0.01em;">14U Gold</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #35695C; margin-top: 3px;">4:30–6:00 PM</div>
+            <div style="margin-top: 6px; display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.05em; color: #1F5B4E; background: #FFFFFF; border: 1px solid #B8D2C8; border-radius: 4px; padding: 2px 5px;">YOUR TEAM</div>
+          </div>
+          <a href="RequestBooking.dc.html" style="position: absolute; left: 5px; right: 5px; top: 274px; height: 98px; background: rgba(31, 91, 78, 0.05); border: 1.5px dashed #8FB2A6; border-radius: 7px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="#1F5B4E" stroke-width="2.2" stroke-linecap="round"/></svg>
+            <span style="font-size: 11.5px; font-weight: 600; color: #1F5B4E;">Request 7:00–8:30</span>
+          </a>
+        </div>
+
+        <div style="width: 164px; position: relative; border-left: 1px solid #EFEDE7; background-color: #FFFFFF; background-image: repeating-linear-gradient(to bottom, #E7E4DD 0 1px, transparent 1px 68px), repeating-linear-gradient(to bottom, #F4F2EC 0 1px, transparent 1px 34px);">
+          <div style="position: absolute; left: 5px; right: 5px; top: 2px; height: 98px; background: #E4EDE9; border: 1px solid #9CBFB3; border-radius: 7px; padding: 7px 9px;">
+            <div style="font-size: 13px; font-weight: 700; color: #14453A; letter-spacing: -0.01em;">16U Black</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #35695C; margin-top: 3px;">3:00–4:30 PM</div>
+          </div>
+          <div style="position: absolute; left: 5px; right: 5px; top: 172px; height: 98px; background: #FBF0DB; border: 1px dashed #C9A35B; border-radius: 7px; padding: 7px 9px;">
+            <div style="font-size: 13px; font-weight: 700; color: #6B420A; letter-spacing: -0.01em;">12U Navy</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #7A4A06; margin-top: 3px;">5:30–7:00 PM</div>
+            <div style="margin-top: 6px; display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.05em; color: #7A4A06; background: #FFFFFF; border: 1px solid #E0C48D; border-radius: 4px; padding: 2px 5px;">PENDING</div>
+          </div>
+        </div>
+
+        <div style="width: 164px; position: relative; border-left: 1px solid #EFEDE7; background-color: #FFFFFF; background-image: repeating-linear-gradient(to bottom, #E7E4DD 0 1px, transparent 1px 68px), repeating-linear-gradient(to bottom, #F4F2EC 0 1px, transparent 1px 34px);">
+          <div style="position: absolute; left: 5px; right: 5px; top: 2px; height: 98px; background: #E4EDE9; border: 1px solid #9CBFB3; border-radius: 7px; padding: 7px 9px;">
+            <div style="font-size: 13px; font-weight: 700; color: #14453A; letter-spacing: -0.01em;">10U Red</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #35695C; margin-top: 3px;">3:00–4:30 PM</div>
+          </div>
+          <div style="position: absolute; left: 5px; right: 5px; top: 206px; height: 98px; background: #E4EDE9; border: 1px solid #9CBFB3; border-radius: 7px; padding: 7px 9px;">
+            <div style="font-size: 13px; font-weight: 700; color: #14453A; letter-spacing: -0.01em;">Varsity</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #35695C; margin-top: 3px;">6:00–7:30 PM</div>
+          </div>
+          <div style="position: absolute; left: 0; right: 0; top: 340px; height: 68px; background: repeating-linear-gradient(135deg, #E7E4DD 0 4px, #F2F0EA 4px 8px); border-top: 1px solid #DDD9D1; display: flex; align-items: center; justify-content: center;">
+            <span style="font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; color: #7A7F87; background: #F6F4EF; padding: 3px 9px; border-radius: 5px;">Closed</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div style="flex-grow: 1;"></div>
+
+    <div style="flex-shrink: 0; background: #FFFFFF; border: 1px solid #E3E0D9; border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; gap: 20px;">
+      <div style="flex-shrink: 0;">
+        <div style="font-family: Archivo, sans-serif; font-size: 14px; font-weight: 700; letter-spacing: -0.01em;">Next up for 14U Gold</div>
+        <a href="MyRequests.dc.html" style="font-size: 12.5px; font-weight: 600; text-decoration: none;">See all my requests</a>
+      </div>
+      <div style="width: 1px; height: 42px; background: #EFEDE7;"></div>
+      <div style="display: flex; gap: 10px; flex-grow: 1;">
+        <div style="flex-grow: 1; background: #E4EDE9; border: 1px solid #9CBFB3; border-radius: 9px; padding: 9px 13px;">
+          <div style="font-size: 12.5px; font-weight: 700; color: #14453A;">Mon, Sep 21 · 4:00–5:30 PM</div>
+          <div style="font-size: 11.5px; color: #35695C; margin-top: 2px;">Reserved · approved Sep 13</div>
+        </div>
+        <div style="flex-grow: 1; background: #E4EDE9; border: 1px solid #9CBFB3; border-radius: 9px; padding: 9px 13px;">
+          <div style="font-size: 12.5px; font-weight: 700; color: #14453A;">Thu, Sep 24 · 4:30–6:00 PM</div>
+          <div style="font-size: 11.5px; color: #35695C; margin-top: 2px;">Reserved · approved Sep 16</div>
+        </div>
+        <div style="flex-grow: 1; background: #FBF0DB; border: 1px dashed #C9A35B; border-radius: 9px; padding: 9px 13px;">
+          <div style="font-size: 12.5px; font-weight: 700; color: #6B420A;">Thu, Sep 24 · 7:00–8:30 PM</div>
+          <div style="font-size: 11.5px; color: #7A4A06; margin-top: 2px;">Pending · sent to approver</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":820}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

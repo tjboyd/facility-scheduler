@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin — people &amp; access</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Public+Sans:wght@400;500;600;700&amp;display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Public Sans',system-ui,sans-serif;background:#F5F3EE;color:#14161A;-webkit-font-smoothing:antialiased}
+a{color:#1F5B4E}a:hover{color:#17453A}
+</style>
+</helmet>
+
+<div style="width: 1280px; height: 780px; display: flex; flex-direction: column; background: #F5F3EE;">
+
+  <header style="height: 68px; flex-shrink: 0; background: #FFFFFF; border-bottom: 1px solid #E3E0D9; display: flex; align-items: center; gap: 30px; padding: 0 26px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <svg width="25" height="25" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2.5" y="4" width="19" height="16.5" rx="3" stroke="#1F5B4E" stroke-width="1.7"/><path d="M2.5 9h19" stroke="#1F5B4E" stroke-width="1.7"/><path d="M7.5 2.5v3M16.5 2.5v3" stroke="#1F5B4E" stroke-width="1.7" stroke-linecap="round"/><rect x="6" y="12" width="7.5" height="4.5" rx="1.2" fill="#1F5B4E"/></svg>
+      <span style="font-family: Archivo, sans-serif; font-weight: 700; font-size: 15.5px;">[FACILITY NAME]</span>
+    </div>
+    <nav style="display: flex; align-items: center; gap: 4px; flex-grow: 1;">
+      <a href="CoachCalendar.dc.html" style="padding: 9px 15px; border-radius: 9px; font-size: 14px; font-weight: 500; color: #5F646C; text-decoration: none;">Calendar</a>
+      <a href="ApproverQueue.dc.html" style="display: inline-flex; align-items: center; gap: 8px; padding: 9px 15px; border-radius: 9px; font-size: 14px; font-weight: 500; color: #5F646C; text-decoration: none;">Approvals <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px; background: #B27A16; color: #FFFFFF; border-radius: 999px; font-size: 11.5px; font-weight: 700;">3</span></a>
+      <a href="AdminUsers.dc.html" style="padding: 9px 15px; border-radius: 9px; background: #EFEDE7; font-size: 14px; font-weight: 600; color: #14161A; text-decoration: none;">Admin</a>
+    </nav>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; background: #1F5B4E; border-radius: 999px; font-size: 12.5px; font-weight: 600; color: #FFFFFF;">Super admin</span>
+      <span style="width: 34px; height: 34px; border-radius: 999px; background: #3F454D; color: #FFFFFF; font-size: 12.5px; font-weight: 700; display: flex; align-items: center; justify-content: center;">TB</span>
+    </div>
+  </header>
+
+  <main style="flex-grow: 1; padding: 24px 28px; display: flex; flex-direction: column; gap: 16px;">
+
+    <div>
+      <h1 style="margin: 0 0 4px 0; font-family: Archivo, sans-serif; font-weight: 700; font-size: 26px; letter-spacing: -0.02em;">Facility settings</h1>
+      <p style="margin: 0; font-size: 14px; color: #5F646C;">Only super admins can change anything on these pages.</p>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 6px; border-bottom: 1px solid #E3E0D9;">
+      <a href="AdminUsers.dc.html" style="height: 40px; padding: 0 15px; display: inline-flex; align-items: center; border-bottom: 2px solid #1F5B4E; font-size: 14px; font-weight: 600; color: #14161A; text-decoration: none;">People &amp; access</a>
+      <a href="AdminHours.dc.html" style="height: 40px; padding: 0 15px; display: inline-flex; align-items: center; border-bottom: 2px solid transparent; font-size: 14px; font-weight: 500; color: #5F646C; text-decoration: none;">Hours</a>
+      <a href="AdminRules.dc.html" style="height: 40px; padding: 0 15px; display: inline-flex; align-items: center; border-bottom: 2px solid transparent; font-size: 14px; font-weight: 500; color: #5F646C; text-decoration: none;">Booking rules</a>
+    </div>
+
+    <div style="flex-grow: 1; display: flex; gap: 18px; min-height: 0;">
+
+      <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 12px;">
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="flex-grow: 1; height: 38px; display: flex; align-items: center; gap: 9px; padding: 0 13px; background: #FFFFFF; border: 1px solid #D9D5CC; border-radius: 9px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="#8A8F97" stroke-width="1.8"/><path d="M16 16l4 4" stroke="#8A8F97" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <span style="font-size: 13.5px; color: #9A9EA5;">Search by name, email, or team</span>
+          </div>
+          <button type="button" style="height: 38px; padding: 0 14px; background: #FFFFFF; border: 1px solid #D9D5CC; border-radius: 9px; font-family: 'Public Sans', sans-serif; font-size: 13.5px; font-weight: 600; color: #3F454D; cursor: pointer;">All roles</button>
+        </div>
+
+        <div style="background: #FFFFFF; border: 1px solid #E3E0D9; border-radius: 12px; overflow: hidden;">
+
+          <div style="display: flex; align-items: center; height: 40px; padding: 0 18px; background: #FAF8F4; border-bottom: 1px solid #E3E0D9; font-size: 11.5px; font-weight: 600; letter-spacing: 0.06em; color: #7A7F87;">
+            <div style="width: 300px;">EMAIL</div>
+            <div style="width: 160px;">NAME</div>
+            <div style="width: 130px;">TEAM</div>
+            <div style="width: 140px;">ROLE</div>
+            <div style="flex-grow: 1;">STATUS</div>
+            <div style="width: 40px;"></div>
+          </div>
+
+          <div style="display: flex; align-items: center; height: 56px; padding: 0 18px; border-bottom: 1px solid #F1EFE9;">
+            <div style="width: 300px; font-size: 13.5px; font-weight: 500;">you@yourclub.org</div>
+            <div style="width: 160px; font-size: 13.5px; color: #3F454D;">[YOUR NAME]</div>
+            <div style="width: 130px; font-size: 13.5px; color: #8A8F97;">—</div>
+            <div style="width: 140px;"><span style="padding: 4px 10px; background: #1F5B4E; border-radius: 999px; font-size: 11.5px; font-weight: 600; color: #FFFFFF;">Super admin</span></div>
+            <div style="flex-grow: 1; font-size: 13px; color: #3F454D;">Active</div>
+            <div style="width: 40px; text-align: right;"><button type="button" aria-label="More actions for you@yourclub.org" style="width: 30px; height: 30px; border: none; background: transparent; cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="5" cy="12" r="1.7" fill="#8A8F97"/><circle cx="12" cy="12" r="1.7" fill="#8A8F97"/><circle cx="19" cy="12" r="1.7" fill="#8A8F97"/></svg></button></div>
+          </div>
+
+          <div style="display: flex; align-items: center; height: 56px; padding: 0 18px; border-bottom: 1px solid #F1EFE9;">
+            <div style="width: 300px; font-size: 13.5px; font-weight: 500;">office@yourclub.org</div>
+            <div style="width: 160px; font-size: 13.5px; color: #3F454D;">Facility office</div>
+            <div style="width: 130px; font-size: 13.5px; color: #8A8F97;">—</div>
+            <div style="width: 140px;"><span style="padding: 4px 10px; background: #FFFFFF; border: 1px solid #9CBFB3; border-radius: 999px; font-size: 11.5px; font-weight: 600; color: #14453A;">Approver</span></div>
+            <div style="flex-grow: 1; font-size: 13px; color: #3F454D;">Active</div>
+            <div style="width: 40px; text-align: right;"><button type="button" aria-label="More actions for office@yourclub.org" style="width: 30px; height: 30px; border: none; background: transparent; cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="5" cy="12" r="1.7" fill="#8A8F97"/><circle cx="12" cy="12" r="1.7" fill="#8A8F97"/><circle cx="19" cy="12" r="1.7" fill="#8A8F97"/></svg></button></div>
+          </div>
+
+          <div style="display: flex; align-items: center; height: 56px; padding: 0 18px; border-bottom: 1px solid #F1EFE9;">
+            <div style="width: 300px; font-size: 13.5px; font-weight: 500;">rivera@yourclub.org</div>
+            <div style="width: 160px; font-size: 13.5px; color: #3F454D;">Coach Rivera</div>
+            <div style="width: 130px; font-size: 13.5px; color: #3F454D;">14U Gold</div>
+            <div style="width: 140px;"><span style="padding: 4px 10px; background: #F2F0EA; border: 1px solid #E0DCD3; border-radius: 999px; font-size: 11.5px; font-weight: 600; color: #3F454D;">Head coach</span></div>
+            <div style="flex-grow: 1; font-size: 13px; color: #3F454D;">Active</div>
+            <div style="width: 40px; text-align: right;"><button type="button" aria-label="More actions for rivera@yourclub.org" style="width: 30px; height: 30px; border: none; background: transparent; cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="5" cy="12" r="1.7" fill="#8A8F97"/><circle cx="12" cy="12" r="1.7" fill="#8A8F97"/><circle cx="19" cy="12" r="1.7" fill="#8A8F97"/></svg></button></div>
+          </div>
+
+          <div style="display: flex; align-items: center; height: 56px; padding: 0 18px; border-bottom: 1px solid #F1EFE9;">
+            <div style="width: 300px; font-size: 13.5px; font-weight: 500;">okafor@yourclub.org</div>
+            <div style="width: 160px; font-size: 13.5px; color: #3F454D;">Coach Okafor</div>
+            <div style="width: 130px; font-size: 13.5px; color: #3F454D;">12U Navy</div>
+            <div style="width: 140px;"><span style="padding: 4px 10px; background: #F2F0EA; border: 1px solid #E0DCD3; border-radius: 999px; font-size: 11.5px; font-weight: 600; color: #3F454D;">Head coach</span></div>
+            <div style="flex-grow: 1; font-size: 13px; color: #3F454D;">Active</div>
+            <div style="width: 40px; text-align: right;"><button type="button" aria-label="More actions for okafor@yourclub.org" style="width: 30px; height: 30px; border: none; background: transparent; cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="5" cy="12" r="1.7" fill="#8A8F97"/><circle cx="12" cy="12" r="1.7" fill="#8A8F97"/><circle cx="19" cy="12" r="1.7" fill="#8A8F97"/></svg></button></div>
+          </div>
+
+          <div style="display: flex; align-items: center; height: 56px; padding: 0 18px; border-bottom: 1px solid #F1EFE9;">
+            <div style="width: 300px; font-size: 13.5px; font-weight: 500;">barnes@yourclub.org</div>
+            <div style="width: 160px; font-size: 13.5px; color: #3F454D;">Coach Barnes</div>
+            <div style="width: 130px; font-size: 13.5px; color: #3F454D;">JV</div>
+            <div style="width: 140px;"><span style="padding: 4px 10px; background: #F2F0EA; border: 1px solid #E0DCD3; border-radius: 999px; font-size: 11.5px; font-weight: 600; color: #3F454D;">Head coach</span></div>
+            <div style="flex-grow: 1; font-size: 13px; color: #3F454D;">Active</div>
+            <div style="width: 40px; text-align: right;"><button type="button" aria-label="More actions for barnes@yourclub.org" style="width: 30px; height: 30px; border: none; background: transparent; cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="5" cy="12" r="1.7" fill="#8A8F97"/><circle cx="12" cy="12" r="1.7" fill="#8A8F97"/><circle cx="19" cy="12" r="1.7" fill="#8A8F97"/></svg></button></div>
+          </div>
+
+          <div style="display: flex; align-items: center; height: 56px; padding: 0 18px; border-bottom: 1px solid #F1EFE9;">
+            <div style="width: 300px; font-size: 13.5px; font-weight: 500;">lindqvist@yourclub.org</div>
+            <div style="width: 160px; font-size: 13.5px; color: #8A8F97;">Not signed in yet</div>
+            <div style="width: 130px; font-size: 13.5px; color: #3F454D;">16U Black</div>
+            <div style="width: 140px;"><span style="padding: 4px 10px; background: #F2F0EA; border: 1px solid #E0DCD3; border-radius: 999px; font-size: 11.5px; font-weight: 600; color: #3F454D;">Head coach</span></div>
+            <div style="flex-grow: 1;"><span style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #7A4A06;"><span style="width: 6px; height: 6px; border-radius: 999px; background: #B27A16;"></span>Invited Sep 14</span></div>
+            <div style="width: 40px; text-align: right;"><button type="button" aria-label="More actions for lindqvist@yourclub.org" style="width: 30px; height: 30px; border: none; background: transparent; cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="5" cy="12" r="1.7" fill="#8A8F97"/><circle cx="12" cy="12" r="1.7" fill="#8A8F97"/><circle cx="19" cy="12" r="1.7" fill="#8A8F97"/></svg></button></div>
+          </div>
+
+          <div style="display: flex; align-items: center; height: 56px; padding: 0 18px;">
+            <div style="width: 300px; font-size: 13.5px; font-weight: 500; color: #8A8F97; text-decoration: line-through;">delgado@yourclub.org</div>
+            <div style="width: 160px; font-size: 13.5px; color: #8A8F97;">Coach Delgado</div>
+            <div style="width: 130px; font-size: 13.5px; color: #8A8F97;">10U Red</div>
+            <div style="width: 140px;"><span style="padding: 4px 10px; background: #F5F3EE; border: 1px solid #E7E4DD; border-radius: 999px; font-size: 11.5px; font-weight: 600; color: #8A8F97;">Head coach</span></div>
+            <div style="flex-grow: 1; font-size: 13px; color: #8A8F97;">Access removed</div>
+            <div style="width: 40px; text-align: right;"><button type="button" aria-label="More actions for delgado@yourclub.org" style="width: 30px; height: 30px; border: none; background: transparent; cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="5" cy="12" r="1.7" fill="#8A8F97"/><circle cx="12" cy="12" r="1.7" fill="#8A8F97"/><circle cx="19" cy="12" r="1.7" fill="#8A8F97"/></svg></button></div>
+          </div>
+
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 9px; font-size: 12.5px; color: #5F646C;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10.5" rx="2.4" stroke="#8A8F97" stroke-width="1.6"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" stroke="#8A8F97" stroke-width="1.6"/></svg>
+          This list <em>is</em> the access control — an email that isn't here can't sign in, even with a valid link.
+        </div>
+
+      </div>
+
+      <div style="width: 340px; flex-shrink: 0; background: #FFFFFF; border: 1px solid #E3E0D9; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 16px; align-self: flex-start;">
+        <div>
+          <h2 style="margin: 0 0 4px 0; font-family: Archivo, sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.01em;">Add people</h2>
+          <p style="margin: 0; font-size: 12.5px; line-height: 1.5; color: #5F646C;">They get an invite email and can sign in straight away.</p>
+        </div>
+
+        <div>
+          <label for="add-emails" style="display: block; font-size: 12.5px; font-weight: 600; color: #3F454D; margin-bottom: 7px;">Email addresses</label>
+          <textarea id="add-emails" rows="3" placeholder="one per line, or paste a comma-separated list" style="width: 100%; padding: 10px 12px; font-family: 'Public Sans', sans-serif; font-size: 13.5px; line-height: 1.5; color: #14161A; background: #FFFFFF; border: 1px solid #D9D5CC; border-radius: 9px; outline: none; resize: none;"></textarea>
+        </div>
+
+        <div>
+          <label for="add-role" style="display: block; font-size: 12.5px; font-weight: 600; color: #3F454D; margin-bottom: 7px;">Role</label>
+          <select id="add-role" style="width: 100%; height: 42px; padding: 0 12px; font-family: 'Public Sans', sans-serif; font-size: 13.5px; color: #14161A; background: #FFFFFF; border: 1px solid #D9D5CC; border-radius: 9px; outline: none;">
+            <option>Head coach — can request time</option>
+            <option>Approver — can accept or decline</option>
+            <option>Super admin — can change settings</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="add-team" style="display: block; font-size: 12.5px; font-weight: 600; color: #3F454D; margin-bottom: 7px;">Team</label>
+          <select id="add-team" style="width: 100%; height: 42px; padding: 0 12px; font-family: 'Public Sans', sans-serif; font-size: 13.5px; color: #14161A; background: #FFFFFF; border: 1px solid #D9D5CC; border-radius: 9px; outline: none;">
+            <option>10U Red</option>
+            <option>12U Navy</option>
+            <option>14U Gold</option>
+            <option>16U Black</option>
+            <option>JV</option>
+            <option>Varsity</option>
+            <option>+ New team…</option>
+          </select>
+          <p style="margin: 7px 0 0 0; font-size: 12px; line-height: 1.5; color: #7A7F87;">The team name is what everyone sees on the calendar once a block is approved.</p>
+        </div>
+
+        <button type="button" style="height: 46px; background: #1F5B4E; border: none; border-radius: 9px; font-family: 'Public Sans', sans-serif; font-size: 14.5px; font-weight: 600; color: #FFFFFF; cursor: pointer;">Send invitations</button>
+      </div>
+
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":780}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
