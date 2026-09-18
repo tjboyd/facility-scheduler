@@ -1,17 +1,19 @@
 # Deploying the facility scheduler
 
-A follow-along guide for putting this online with **Vercel** (the app) and
-**Neon** (the database). No prior Vercel experience assumed.
+A follow-along guide for putting this online with **Railway** (the app and the
+database) and **Postmark** (email). No prior Railway experience assumed.
 
 Budget about an hour, most of which is waiting for DNS. You can stop after step
 6 and have a working app; steps 7 onward are polish.
 
-> **Why this stack.** The app is a Next.js server app that needs Postgres and
-> nothing else — no cron, no disk writes, no background worker. Vercel runs
-> Next.js natively and Neon installs into it as a marketplace add-on, so there
-> is one bill, one dashboard and no server to keep alive. It would run equally
-> well on Railway, Render or a VPS; nothing here is Vercel-specific except the
-> click paths.
+> **Why Railway.** The app is a Next.js server that needs Postgres and nothing
+> else — no cron, no disk writes, no background worker. Railway runs both in one
+> project, so there is one dashboard, one bill and one thing to hand to whoever
+> takes this over. It runs as a normal long-lived container, so there are no
+> cold starts: a coach tapping a link at the field gets the page immediately.
+>
+> Nothing here is Railway-specific except the click paths. `npm run build &&
+> npm start` plus `npm run db:deploy` will run this anywhere.
 
 ---
 
@@ -20,29 +22,24 @@ Budget about an hour, most of which is waiting for DNS. You can stop after step
 | | |
 | --- | --- |
 | **GitHub** | Access to `tjboyd/facility-scheduler`. |
-| **Vercel account** | Sign in with GitHub. The Hobby plan is free. |
-| **Postmark account** | For sign-in and approval emails. Free trial covers setup; ~$15/mo for the smallest paid plan once you exceed it, though this app sends very little. |
+| **Railway account** | Sign in with GitHub. Expect roughly $5–10/month for the app and database together at this traffic — check current pricing, it changes. |
+| **Postmark account** | For sign-in and approval emails. Free trial covers setup; the smallest paid plan is about $15/month, though this app sends very little. |
 | **DNS access** | Wherever the club's domain is managed — you will add two or three records. |
-| **Node 20+ and `psql` locally** | Only for the one-off seed in step 6. |
-
-A note on cost: Vercel Hobby is free but its terms restrict commercial use. A
-club's internal scheduling tool is very likely fine; if it ever becomes a
-question, Pro is $20/month.
+| **Node 20+ locally** | Only for the one-off seed in step 6. |
 
 ---
 
 ## Step 1 — Start the DNS records first
 
-Do this before anything else, because DNS can take anywhere from ten minutes to
-a few hours to propagate, and you will want it finished by the time you need it.
+Do this before anything else, because DNS can take from ten minutes to a few
+hours to propagate and you want it finished by the time you need it.
 
 **Send from a subdomain**, not the club's main domain — `mail.yourdomain.org`.
 If the scheduler ever generates bounces, that keeps the damage away from the
 domain the club sends its ordinary mail from.
 
-1. In Postmark, go to **Sender Signatures → Add Domain** and enter
-   `mail.yourdomain.org`.
-2. Postmark shows you the records to add. Add them at your DNS host:
+1. In Postmark: **Sender Signatures → Add Domain**, enter `mail.yourdomain.org`.
+2. Postmark shows the records to add. Add them at your DNS host:
 
 | Type | Host | Value |
 | --- | --- | --- |
@@ -62,69 +59,61 @@ domain the club sends its ordinary mail from.
 
 4. Back in Postmark, click **Verify**. Come back later if it has not propagated.
 
-Finally, get your server token: **Servers → (your server) → API Tokens**. Copy
-it somewhere for step 4. Make sure the message stream you use is a
-**transactional** one — `outbound` is the default Postmark creates. Never point
-this at a broadcast stream: sign-in links are not marketing, and they get
-filtered far harder on one.
+Then get your server token from **Servers → (your server) → API Tokens** and
+keep it for step 4. Use a **transactional** message stream — `outbound` is the
+default Postmark creates. Never point this at a broadcast stream: sign-in links
+are not marketing, and they get filtered far harder on one.
 
 ---
 
-## Step 2 — Create the Vercel project
+## Step 2 — Create the project and the database
 
-1. Go to <https://vercel.com/new>.
-2. Import `tjboyd/facility-scheduler`.
-3. Leave every build setting alone — Vercel detects Next.js correctly, and the
-   build command in `package.json` already does the right thing.
-4. Click **Deploy**.
+1. Go to <https://railway.app/new> and choose **Deploy from GitHub repo**.
+2. Pick `tjboyd/facility-scheduler`. Railway starts building immediately.
+3. While it builds, click **+ New → Database → Add PostgreSQL** in the same
+   project.
 
-**This first build will fail.** That is expected: the build runs database
-migrations, and there is no database yet. Carry on to step 3.
+You now have two services side by side: the app and Postgres.
+
+**The first deploy will fail**, because the app has no database connection yet.
+That is expected — carry on.
+
+Railway reads [`railway.json`](../railway.json) from the repo, so the build
+command, the start command, the migration step and the healthcheck are already
+configured. You should not need to touch the service's build settings.
 
 ---
 
-## Step 3 — Add the database
+## Step 3 — Connect the app to the database
 
-1. In the project, go to **Storage → Create Database → Neon**.
-2. Pick a region near the club — for Wisconsin, a US East or US Central region.
-3. Accept the free plan to start.
-
-Neon provisions the database, bills through Vercel, and sets several variables
-on the project automatically. Two of them matter:
-
-- `DATABASE_URL` — the **pooled** connection.
-- `DATABASE_URL_UNPOOLED` — the **direct** connection.
-
-### Add one variable by hand
-
-Go to **Settings → Environment Variables** and add:
+Open the **app** service → **Variables**, and add:
 
 | Name | Value |
 | --- | --- |
-| `DIRECT_DATABASE_URL` | paste the same string as `DATABASE_URL_UNPOOLED` |
+| `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` |
+| `DIRECT_DATABASE_URL` | `${{Postgres.DATABASE_URL}}` |
 
-**These two are not interchangeable, and both are needed.** The app queries
-through the pooler, because Vercel may answer every request from a fresh
-instance and a few hundred of those would exhaust Postgres' connection limit.
-Migrations cannot go through a transaction pooler at all — they run
-session-level statements it does not support — so they take the direct
-connection.
+Type those braces literally — they are Railway *reference variables*, which
+point at the Postgres service rather than hard-coding a password that would
+break the day the database is rotated. If you named the database service
+something other than `Postgres`, use that name.
 
-While you are there, check that `DATABASE_URL` ends with
-`?sslmode=require&pgbouncer=true&connection_limit=1`. Neon usually includes the
-first; add the other two if missing. Prisma needs to be told it is talking to a
-transaction pooler.
+**Both variables, and yes, the same value on Railway.** The app reads
+`DATABASE_URL` for queries and `DIRECT_DATABASE_URL` for migrations. On hosts
+that put a connection pooler in front of Postgres those are two different
+strings, because a transaction pooler cannot run migrations. Railway has no
+pooler in front, so here they are identical — the schema keeps both so the app
+can move to a pooled host later without a code change.
 
 ---
 
 ## Step 4 — Set the rest of the environment
 
-Still under **Settings → Environment Variables**, add these for **Production**
-and **Preview** both:
+Still in the app service's **Variables**, add:
 
 | Name | Value |
 | --- | --- |
-| `APP_URL` | `https://your-project.vercel.app` — your actual deployment URL |
+| `APP_URL` | your public URL, from step 5 — set a placeholder now and correct it |
 | `ORG_NAME` | `Hamilton Jr Chargers` |
 | `FACILITY_TIMEZONE` | `America/Chicago` |
 | `MAIL_TRANSPORT` | `postmark` |
@@ -134,31 +123,39 @@ and **Preview** both:
 | `POSTMARK_MESSAGE_STREAM` | `outbound` |
 
 **`APP_URL` is the one to get right.** Every sign-in link and every one-click
-approval link is built from it. If it is wrong, the emails go out with links
-that do not work. Update it the day you add a custom domain (step 7).
+approval link is built from it. If it is wrong, emails go out with links that do
+not work. You get the real URL in step 5 — come back and fix it.
 
 `MAIL_REPLY_TO` should be an address somebody reads. Coaches will hit reply
 whatever the From address says.
 
+Do **not** set `PORT`. Railway sets it and `next start` already honours it.
+
 > **If Postmark is not verified yet**, set `MAIL_TRANSPORT` to `console` for
-> now. Emails will be printed to the Vercel function logs instead of sent, which
-> is enough to get yourself signed in — see the troubleshooting table. Switch it
-> to `postmark` once DNS verifies.
+> now. Emails are printed to the Railway logs instead of sent, which is enough
+> to get yourself signed in. Switch it to `postmark` once DNS verifies.
 
 ---
 
-## Step 5 — Deploy
+## Step 5 — Get a public URL and deploy
 
-Go to **Deployments**, open the failed one, and click **Redeploy**.
+1. App service → **Settings → Networking → Generate Domain**. Railway gives you
+   something like `facility-scheduler-production.up.railway.app`.
+2. Go back to **Variables** and set `APP_URL` to `https://` + that domain.
+3. Saving variables triggers a redeploy. If it does not, use **Deploy** on the
+   latest commit.
 
-This time the build will:
+This deploy will:
 
-1. `prisma generate` — build the database client
-2. `prisma migrate deploy` — create every table
-3. `next build` — build the app
+1. **Build** — `prisma generate && next build`
+2. **Pre-deploy** — `prisma migrate deploy`, creating every table
+3. **Start** — `npm start`
 
-The schema is applied as part of every deployment, so there is no separate
-release step to remember, now or later.
+Migrations run as a pre-deploy step rather than inside the build on purpose.
+Railway's private network is only available at runtime, so a build-time
+migration could not reach `postgres.railway.internal` at all. Running it
+pre-deploy also means a failed migration stops the release instead of shipping
+an app whose schema is wrong.
 
 When it goes green, open the URL. You should get the sign-in screen. You cannot
 sign in yet — nobody exists.
@@ -167,18 +164,20 @@ sign in yet — nobody exists.
 
 ## Step 6 — Create the first account
 
-Nothing can happen in the app until one super admin exists, and Vercel gives you
-no shell to run the seed in. So run it once from your own machine, pointed at
-the production database.
+Nothing can happen in the app until one super admin exists. Run the seed once
+from your own machine, pointed at the production database.
 
-From **Storage → your database → Connect**, copy the **unpooled / direct**
-connection string. Then, in a clone of the repo:
+You need the database's **public** URL, because `postgres.railway.internal` only
+resolves inside Railway. Open the **Postgres** service → **Variables** and copy
+`DATABASE_PUBLIC_URL`.
+
+Then, in a clone of the repo:
 
 ```bash
 npm install
 
-DATABASE_URL="<the unpooled Neon string>" \
-DIRECT_DATABASE_URL="<the unpooled Neon string>" \
+DATABASE_URL="<DATABASE_PUBLIC_URL>" \
+DIRECT_DATABASE_URL="<DATABASE_PUBLIC_URL>" \
 SEED_SUPER_ADMIN_EMAIL="you@yourdomain.org" \
 SEED_SUPER_ADMIN_NAME="Your Name" \
 npm run db:seed
@@ -206,8 +205,6 @@ created if absent, and an existing admin is left alone.
 3. Go to **Admin → People & access** and add the other coaches — paste a whole
    list of addresses at once, then set each person's role and team.
 
-Roles:
-
 | Role | Can do |
 | --- | --- |
 | Head coach | Request time for their team. Must have a team. |
@@ -228,39 +225,43 @@ Then set the facility up for the season:
 
 ## Step 8 — A custom domain (optional)
 
-**Settings → Domains → Add**, then follow Vercel's DNS instructions.
+App service → **Settings → Networking → Custom Domain**. Railway gives you a
+CNAME to add at your DNS host.
 
-**Then change `APP_URL` to the new address and redeploy.** Environment variables
-are read at build time, so an edit alone does nothing until you redeploy. Skip
-this and sign-in links will keep pointing at the old `.vercel.app` address.
+**Then change `APP_URL` to the new address.** Skip this and sign-in links keep
+pointing at the old `.up.railway.app` address.
 
 ---
 
 ## Day to day
 
-**Deploying a change.** Push to `main`. Vercel builds and deploys it, migrations
-included. Nothing else to do.
+**Deploying a change.** Push to `main`. Railway builds, runs migrations and
+deploys. Nothing else to do.
 
-**Preview deployments.** Every pull request gets its own URL. Neon's integration
-gives each preview its own database branch, so a preview migrates its own copy
-rather than production. If you ever wire the database up by hand instead, do
-**not** give previews the production `DIRECT_DATABASE_URL` — every preview build
-would run migrations against live data.
+**Rolling back.** **Deployments** → pick an earlier one → **Redeploy**. Note
+that this rolls back *code*, not the database: a deploy that added a column
+leaves the column there. That is usually what you want.
+
+**Logs.** The app service's **Logs** tab shows every request and anything the
+app printed, including mail failures with their reason.
 
 **Backups.** The booking history, the allowlist and the season's assigned
 schedules are the product. Losing them mid-season is the failure that actually
 hurts, and it is worth five minutes to prevent.
 
-Neon offers point-in-time restore; check the retention window on your plan, as
-the free tier's is short. Independently of that, take a dump you control before
-each season and after loading the assigned schedule:
+Railway's Postgres has backups in the service's **Backups** tab — turn on a
+schedule and check the retention. Independently of that, take a dump you control
+before each season and after loading the assigned schedule:
 
 ```bash
-pg_dump "<the unpooled Neon string>" > facility-$(date +%F).sql
+pg_dump "<DATABASE_PUBLIC_URL>" > facility-$(date +%F).sql
 ```
 
-**Logs.** Vercel's **Logs** tab shows every request and anything the app printed.
-Mail failures are logged there with the reason.
+Restoring one:
+
+```bash
+psql "<DATABASE_PUBLIC_URL>" < facility-2027-03-01.sql
+```
 
 ---
 
@@ -268,23 +269,32 @@ Mail failures are logged there with the reason.
 
 | Symptom | What it is |
 | --- | --- |
-| Build fails: `Environment variable not found: DIRECT_DATABASE_URL` | Step 3's manual variable is missing, or was added to only one environment. |
-| Build fails: `Can't reach database server` | `DIRECT_DATABASE_URL` is the pooled string rather than the direct one, or the database is still provisioning. |
-| Build fails: `P3009 migrate found failed migrations` | A previous deploy died partway. Connect with `psql` and inspect `_prisma_migrations`; do not simply retry. |
-| No email arrives | Check Postmark's **Activity** tab. Nothing there means the app never sent — check `MAIL_TRANSPORT` is `postmark` and the token is right, then read the Vercel logs. Something there, marked bounced or suppressed, means the address is the problem. |
-| Emails send but the links 404 or hit the wrong site | `APP_URL` is wrong, or you changed it without redeploying. |
+| Deploy fails: `Environment variable not found: DIRECT_DATABASE_URL` | Step 3 is incomplete. Both variables are needed even though they hold the same value. |
+| Pre-deploy fails: `Can't reach database server at postgres.railway.internal` | The Postgres service is not running, or the reference variable names a service that does not exist — check the spelling inside `${{...}}`. |
+| Pre-deploy fails: `prisma: not found` | The `prisma` CLI must be a production dependency, since the pre-deploy step runs after install. It is in `dependencies` in this repo; check nothing moved it. |
+| Deploy fails: `P3009 migrate found failed migrations` | A previous deploy died partway. Connect with `psql` and inspect `_prisma_migrations`; do not simply retry. |
+| Healthcheck fails but the app looks fine | The healthcheck hits `/signin`, which does not touch the database — so if it fails, the Node process itself is not serving. Check the logs for a crash on boot. |
+| No email arrives | Check Postmark's **Activity** tab. Nothing there means the app never sent — check `MAIL_TRANSPORT` is `postmark` and the token is right, then read the Railway logs. Something there, bounced or suppressed, means the address is the problem. |
+| Emails send but the links 404 or hit the wrong site | `APP_URL` is wrong, or was never updated after you generated the domain. |
 | "That sign-in link is no longer valid" | They expire after 15 minutes and work once. Clicking the same link twice does this. Request a new one. |
 | A coach says the app rejects them | They are not on the allowlist, or their access was removed. Check **Admin → People & access**. An address that is not on the list cannot sign in even with a valid link — that is the access control working. |
-| `too many connections` under load | `DATABASE_URL` is missing `?pgbouncer=true&connection_limit=1`, or it is the direct string rather than the pooled one. |
 | A coach has no **Request time** button | Head coaches must be on a team. Assign one in **People & access**. |
+| `psql` from your laptop hangs or refuses | You are using `DATABASE_URL` (internal). Use `DATABASE_PUBLIC_URL`. |
 | You locked yourself out | The app will not let the last super admin be demoted or removed, so this should not be possible from inside. If it happens anyway, re-run the step 6 seed with your address — it promotes an existing user to super admin. |
 
 ---
 
-## If you outgrow this
+## If you move off Railway
 
-Nothing here is load-bearing on Vercel. The app is a standard Next.js server
-with a Postgres connection: `npm run build && npm start` runs it anywhere, and
-`prisma migrate deploy` applies the schema. Moving to Railway, Render, Fly or a
-VPS means re-pointing `DATABASE_URL`, `DIRECT_DATABASE_URL` and `APP_URL`, and
-nothing else.
+Nothing here is load-bearing. The app is a standard Next.js server with a
+Postgres connection:
+
+- Build: `npm run build`
+- Migrate: `npm run db:deploy` — as a release step, before the new version serves
+- Start: `npm start`, honouring `PORT`
+
+Moving to Vercel, Render, Fly or a VPS means re-pointing `DATABASE_URL`,
+`DIRECT_DATABASE_URL` and `APP_URL`, and nothing else. On a serverless host
+— Vercel among them — put a connection pooler in front of Postgres and give
+`DATABASE_URL` the pooled string while `DIRECT_DATABASE_URL` keeps the direct
+one; that is exactly the split those two variables exist for.

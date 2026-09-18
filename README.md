@@ -85,7 +85,7 @@ printed to the server log.
 | `npm test` | Unit tests for the domain rules |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run db:migrate` | Create/apply migrations in development |
-| `npm run db:deploy` | Apply existing migrations — what the build runs |
+| `npm run db:deploy` | Apply existing migrations — the deploy step |
 | `npm run db:seed` | Seed a super admin and the club's teams |
 | `node tools/smoke.mjs` | End-to-end browser check: sign-in and people (see below) |
 | `node tools/smoke-schedule.mjs` | End-to-end browser check: schedules, release, pick up |
@@ -193,27 +193,33 @@ reveal either way.
 
 ## Deploying
 
-**[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) is the step-by-step guide** — Vercel
-for the app, Neon for Postgres, Postmark for email, with the DNS records, the
-first-admin seed and a troubleshooting table.
+**[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) is the step-by-step guide** —
+Railway for the app and the database, Postmark for email, with the DNS records,
+the first-admin seed and a troubleshooting table.
 
 The short version:
 
-- The build command is `prisma generate && prisma migrate deploy && next build`,
-  so **the schema is applied as part of every deployment** and there is no
-  separate release step.
-- **Two connection strings, not interchangeable.** `DATABASE_URL` is pooled and
-  is what the app queries through; `DIRECT_DATABASE_URL` is direct and is what
-  migrations use, because a transaction pooler cannot run them.
+- [`railway.json`](railway.json) already sets the build, the migration step, the
+  start command and the healthcheck, so there is nothing to configure by hand.
+- **Migrations run as a pre-deploy step, not in the build.** The build does not
+  need a database — every page is dynamic, so nothing queries at build time —
+  and Railway's private network only exists at runtime. Running them pre-deploy
+  also means a failed migration stops the release instead of shipping an app
+  whose schema is wrong.
+- **`DATABASE_URL` and `DIRECT_DATABASE_URL` are both required.** Queries use
+  the first, migrations the second. On Railway they hold the same value; on a
+  host with a connection pooler they differ, because a transaction pooler cannot
+  run migrations.
 - **`APP_URL` must match how people actually reach the app.** Every sign-in and
   approval link is built from it.
 - **Seed one super admin** before anyone can sign in — the app is useless until
   somebody can get in and invite the rest.
-- **Take a backup you control.** Neon's retention depends on the plan, and the
-  season's assigned schedules are not something to lose.
+- **Take a backup you control.** The season's assigned schedules are not
+  something to lose.
 
-Nothing is Vercel-specific. `npm run build && npm start` runs the app anywhere
-that can reach Postgres — no cron, no disk writes, no custom server.
+Nothing is Railway-specific. `npm run build`, `npm run db:deploy`, `npm start`
+runs the app anywhere that can reach Postgres — no cron, no disk writes, no
+custom server.
 
 ## Layout
 
