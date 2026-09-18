@@ -1,6 +1,7 @@
 # Facility Scheduler — design spec
 
-Status: **for review, nothing implemented yet.**
+Status: **people & access is built; the calendar and booking are not.**
+See the README for what works today.
 
 **PDF for review:** [`facility-scheduler-mockups.pdf`](./facility-scheduler-mockups.pdf)
 — one screen per landscape page, with a cover, contents and a caption on each.
@@ -32,7 +33,7 @@ Roles are per person, set by a super admin. An approver does not have to be a
 super admin, and a super admin does not have to be an approver — the list of
 people who get request emails is its own setting.
 
-## 3. Access control
+## 3. Access control  ·  *built*
 
 The people list **is** the access control. An email address that isn't on it
 cannot sign in, even with a valid sign-in link.
@@ -212,6 +213,24 @@ modal title bars.
 
 Nav on the white bar: the active item is a crimson block with white text, the
 rest are `#555555`.
+
+## 9a. What is built
+
+| Area | State |
+| --- | --- |
+| Sign in by emailed link, allowlist enforced | built |
+| People & access: invite, role, team, remove, restore | built |
+| Teams: add, archive, restore | built |
+| Week calendar, requests, approvals | designed, not built |
+| Facility hours, booking rules | designed, not built |
+| Notification emails for requests | designed, not built |
+
+Two rules the built screens enforce that are worth knowing about:
+
+- A head coach cannot be left without a team.
+- The last super admin cannot be demoted or removed, and nobody can remove their
+  own access. Locking everyone out is the one mistake this screen could make
+  that the app could not undo.
 
 ## 10. Decisions made
 

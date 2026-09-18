@@ -7,3 +7,14 @@ build/
 *.log
 .next/
 coverage/
+
+# next / prisma
+.next/
+next-env.d.ts
+*.db
+*.db-journal
+prisma/dev.db*
+.env
+
+# local server log from the smoke check
+server.log

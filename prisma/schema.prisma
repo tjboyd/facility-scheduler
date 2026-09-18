@@ -1,0 +1,87 @@
+// Facility scheduler — data model.
+//
+// SQLite for development; switch the provider to "postgresql" for production.
+// Prisma enums are not supported on SQLite, so role and status are stored as
+// strings and constrained in the application layer (src/lib/domain.ts), which
+// is also where the allowed values are defined and validated.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Team {
+  id         String    @id @default(cuid())
+  /// Shown on the calendar once a block is approved, e.g. "12U Red".
+  name       String    @unique
+  /// Archived teams keep their history but can no longer be assigned.
+  archivedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  members User[]
+
+  @@index([archivedAt])
+}
+
+/// A person who may sign in. This table *is* the access control: an address
+/// that is not here cannot sign in, even with a valid link.
+model User {
+  id     String  @id @default(cuid())
+  /// Always stored lowercase and trimmed — see normalizeEmail().
+  email  String  @unique
+  name   String?
+  /// HEAD_COACH | APPROVER | SUPER_ADMIN
+  role   String
+  /// INVITED | ACTIVE | DISABLED
+  status String
+
+  teamId String?
+  team   Team?   @relation(fields: [teamId], references: [id], onDelete: SetNull)
+
+  invitedAt    DateTime  @default(now())
+  lastSignInAt DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  sessions  Session[]
+  signInTokens SignInToken[]
+
+  @@index([role])
+  @@index([status])
+  @@index([teamId])
+}
+
+/// Single-use magic-link token. Only the SHA-256 hash is stored, so a leaked
+/// database row cannot be replayed as a sign-in link.
+model SignInToken {
+  id         String    @id @default(cuid())
+  tokenHash  String    @unique
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+/// Server-side session. The cookie holds the secret; only its hash is stored,
+/// and deleting the row revokes the session immediately.
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}

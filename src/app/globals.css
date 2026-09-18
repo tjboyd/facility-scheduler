@@ -1,0 +1,196 @@
+@import "tailwindcss";
+
+/* Hamilton Jr Chargers brand tokens — see docs/DESIGN.md §9. */
+@theme {
+  --color-crimson: #ad0303;
+  --color-crimson-deep: #8a0202;
+  --color-crimson-tint: #fcf3f3;
+  --color-crimson-line: #d98a8a;
+  --color-ink: #0a0a0a;
+  --color-ink-2: #333333;
+  --color-muted: #555555;
+  --color-faint: #767676;
+  --color-disabled: #949494;
+  --color-paper: #f5f5f5;
+  --color-line: #cccccc;
+  --color-line-soft: #dddddd;
+  --color-line-faint: #eeeeee;
+
+  --font-body: var(--font-barlow), system-ui, sans-serif;
+  --font-display: var(--font-barlow-condensed), var(--font-barlow), sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --radius-control: 4px;
+  --radius-card: 6px;
+}
+
+@layer base {
+  html {
+    background: var(--color-paper);
+  }
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  a {
+    color: var(--color-crimson);
+  }
+  a:hover {
+    color: var(--color-crimson-deep);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-crimson);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Condensed uppercase — headings, team names, buttons, nav. */
+  .display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    line-height: 1;
+  }
+  .eyebrow {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 11.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-crimson);
+  }
+  .field-label {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    margin-bottom: 6px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 42px;
+    padding: 0 18px;
+    border-radius: var(--radius-control);
+    border: 1px solid transparent;
+    font-family: var(--font-display);
+    font-size: 16.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .btn-primary {
+    background: var(--color-crimson);
+    color: #fff;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--color-crimson-deep);
+  }
+  .btn-secondary {
+    background: #fff;
+    border-color: var(--color-line);
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--color-paper);
+  }
+  .btn-outline-dark {
+    background: #fff;
+    border: 1.5px solid var(--color-ink);
+    color: var(--color-ink);
+  }
+  .btn-sm {
+    height: 34px;
+    padding: 0 13px;
+    font-size: 14.5px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+  }
+
+  .input,
+  .select,
+  .textarea {
+    width: 100%;
+    padding: 0 13px;
+    height: 44px;
+    font-family: var(--font-body);
+    font-size: 14.5px;
+    color: var(--color-ink);
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-control);
+  }
+  .textarea {
+    height: auto;
+    padding: 11px 13px;
+    line-height: 1.5;
+    resize: vertical;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 2px;
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .chip-crimson {
+    background: var(--color-crimson);
+    color: #fff;
+  }
+  .chip-outline {
+    background: #fff;
+    border: 1.5px solid var(--color-crimson);
+    color: var(--color-crimson-deep);
+  }
+  .chip-neutral {
+    background: #efefef;
+    border: 1px solid var(--color-line-soft);
+    color: var(--color-ink-2);
+  }
+  .chip-quiet {
+    background: var(--color-paper);
+    border: 1px solid var(--color-line-faint);
+    color: var(--color-disabled);
+  }
+
+  /* Black strip used for table headers and the calendar's day row. */
+  .thead {
+    background: var(--color-ink);
+    color: #a8a8a8;
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+  }
+}
