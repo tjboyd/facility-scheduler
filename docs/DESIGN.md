@@ -58,7 +58,10 @@ Defaults shown; every value is a super admin setting.
 | Minimum notice | 24 hours before start |
 | Approved bookings per team per week | 3 |
 | Open pending requests per team | 2 |
-| Coach can release an approved slot until | 12 hours before start |
+
+A team can release a block **right up to its start time** — there is no cutoff.
+Late notice is better than an empty facility. Blocks a team has *picked up* do
+not count against its weekly limit either: that is time nobody else wanted.
 
 Invariants that are *not* settings:
 
@@ -146,7 +149,7 @@ plans by the time you end the schedule.
                   │
   [coach submits] ├──► pending ──► approved ──► completed
                   │       │            │
-                  │       │            └──────► released (coach, before cutoff)
+                  │       │            └──────► released (coach, any time before it starts)
                   │       └──► declined (approver, with a reason)
                   │
                   └──► rejected on the spot if the slot is taken or out of hours
@@ -322,6 +325,14 @@ Two rules the built screens enforce that are worth knowing about:
   archived here: it keeps its history but cannot be assigned or booked against.
   15 active, 5 archived.
 - **Approving from the email takes one click.** See section 7.
+- **Only super admins set up repeating time.** Coaches release and pick up; they
+  never define a schedule.
+- **Admins define the facility's hours, and may assign time outside them.** An
+  8:00 Saturday block is fine whether or not the coach-bookable window opens
+  then — the club opens the building when it needs to.
+- **No release cutoff, and no email when a released block is picked up.** Both
+  were offered and both declined: the calendar is the record.
+- **Picked-up blocks don't count against a team's weekly limit.**
 
 ## 10a. Still open
 
@@ -334,18 +345,8 @@ Two rules the built screens enforce that are worth knowing about:
    it, or auto-cancel and notify the coach? The spec currently says flag.
 4. **Decline without a free alternative** — should declining suggest the nearest
    open slot of the same length?
-5. **One team** — 20 of the club's 21 SportsEngine teams are loaded; the row
-   above `U10 - Red` was cut off in the screenshots and is still unknown.
-6. **Do picked-up blocks count against a team's weekly limit?** They are time
-   nobody else wanted, so probably not — but the limits aren't built yet, so it
-   costs nothing to decide later.
-7. **Should the releasing team hear who picked their slot up?** An email would
-   be easy and is probably wanted.
-8. **How late can a team release?** The booking rules screen has a cutoff
-   ("up to 12 hours before"); nothing enforces it yet.
-9. **Should assigned time have to sit inside facility hours?** It currently
-   doesn't — an admin can assign 8:00 Saturday whether or not the coach-bookable
-   window opens then, on the grounds that the admin knows best.
+5. **Teams are complete** at 20. SportsEngine's 21st row is an admin chat
+   group, not a team.
 
 ## 11. Not in scope yet
 
