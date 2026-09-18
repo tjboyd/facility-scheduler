@@ -108,9 +108,55 @@ provider, that file and `src/lib/guards.ts` are the only places to change.
 
 ### Sending email
 
-Development prints emails to the server log. Wire a real transport in
-`src/lib/mail.ts` and set `MAIL_TRANSPORT` to switch — nothing else needs to
-change.
+Development prints emails to the server log, so the app runs with no mail
+credentials and the sign-in link is right there in the terminal. Production goes
+through **Postmark**.
+
+Nothing about the club's name, domain or addresses is hardcoded — moving to a
+different sending domain is an `.env` change plus DNS, with no code edits.
+
+```bash
+MAIL_TRANSPORT="postmark"
+MAIL_FROM="Jr Chargers Facility <no-reply@mail.yourdomain.org>"
+MAIL_REPLY_TO="facility@yourdomain.org"
+POSTMARK_SERVER_TOKEN="…"        # Postmark → Servers → API Tokens
+POSTMARK_MESSAGE_STREAM="outbound"
+ORG_NAME="Hamilton Jr Chargers"
+APP_URL="https://…"              # sign-in links are built from this
+```
+
+**Send from a subdomain** (`mail.yourdomain.org`). If the scheduler ever
+generates bounces, that keeps the reputation damage off the domain the club
+sends its ordinary mail from.
+
+Two DNS records, both shown by Postmark once you add the domain under
+*Sender Signatures → Domains*:
+
+| Type | Host | Value |
+| --- | --- | --- |
+| TXT | `<selector>._domainkey.mail.yourdomain.org` | the DKIM key Postmark generates |
+| CNAME | `pm-bounces.mail.yourdomain.org` | `pm.mtasv.net` |
+
+The CNAME is Postmark's custom Return-Path. It is what makes SPF *align* for
+DMARC, which is why you do **not** need to add Postmark to your main domain's
+SPF record. Worth adding a DMARC record too — start at `p=none` and tighten once
+you can see reports:
+
+| Type | Host | Value |
+| --- | --- | --- |
+| TXT | `_dmarc.yourdomain.org` | `v=DMARC1; p=none; rua=mailto:you@yourdomain.org` |
+
+Keep `POSTMARK_MESSAGE_STREAM` on a **transactional** stream. Sign-in links sent
+down a broadcast stream get filtered far harder, and an auth email in the spam
+folder is worse than no auth email.
+
+**Failures are contained.** A send that fails never undoes the thing that caused
+it: people are added to the allowlist first and emailed second, so a Postmark
+outage or a missing token leaves them on the list with a message saying the
+invite did not go out and to use *Resend*. Sign-in is the same — a failure is
+logged, and the visitor still gets the identical "check your inbox" answer,
+because whether an address is on the list is not something the form should
+reveal either way.
 
 ## Layout
 

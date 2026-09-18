@@ -54,7 +54,7 @@ export default async function SignInPage({
               autoComplete="email"
               required
               defaultValue={email ?? ""}
-              placeholder="you@jrchargersbaseball.com"
+              placeholder="you@yourclub.org"
               className="input h-12 border-[1.5px] border-crimson"
             />
             <button type="submit" className="btn btn-primary w-full h-[50px] mt-4 text-[18px] tracking-[0.07em]">

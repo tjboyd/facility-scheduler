@@ -128,7 +128,20 @@ decided.
 | Slot released by a coach | the approver list |
 
 Options: one email per request or a daily digest; coach decision emails can be
-turned off. Approval/decline buttons in the email are deep links into the app.
+turned off.
+
+**Transport: Postmark**, on a transactional message stream, sending from a
+subdomain (`mail.<domain>`) so the scheduler's sending reputation is separate
+from the club's everyday mail. The domain is configuration, not code — see the
+README. Sending never rolls back the action that triggered it: the booking or
+the invite is written first and emailed second, and a failure is reported rather
+than thrown away.
+
+**Open — the approve/decline buttons in the approver email.** Either they act on
+one click (fast, but a forwarded email can approve), or they deep-link into the
+app and require a signed-in session (barely slower, given sign-in is itself a
+link). The recommendation is to require the session; the design is unchanged
+either way, since both routes already do the same thing.
 
 ## 8. Screens
 

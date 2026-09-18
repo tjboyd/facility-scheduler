@@ -38,6 +38,18 @@ export function AddPeopleForm({ teams }: { teams: { id: string; name: string }[]
         </p>
       )}
 
+      {state.mailProblem && (
+        <p className="rounded-[4px] border border-line-soft bg-paper px-3 py-2.5 text-[12.5px] leading-snug text-muted">
+          {state.mailProblem}
+        </p>
+      )}
+
+      {state.notEmailed && state.notEmailed.length > 0 && (
+        <p className="text-[12px] leading-snug text-crimson-deep">
+          On the list but not emailed: {state.notEmailed.join(", ")}
+        </p>
+      )}
+
       {state.invalid && state.invalid.length > 0 && (
         <p className="text-[12px] leading-snug text-crimson-deep">
           Not added — doesn&rsquo;t look like an address: {state.invalid.join(", ")}

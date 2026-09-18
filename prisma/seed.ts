@@ -12,9 +12,13 @@ const db = new PrismaClient();
 const SAMPLE_TEAMS = ["8U", "10U", "12U Red", "12U Black", "13U", "14U"];
 
 async function main() {
-  const email = (process.env.SEED_SUPER_ADMIN_EMAIL || "you@jrchargersbaseball.com")
-    .trim()
-    .toLowerCase();
+  const email = process.env.SEED_SUPER_ADMIN_EMAIL?.trim().toLowerCase();
+  if (!email) {
+    throw new Error(
+      "SEED_SUPER_ADMIN_EMAIL is not set. Put your address in .env — it becomes the\n" +
+        "first account that can sign in and add everyone else.",
+    );
+  }
   const name = process.env.SEED_SUPER_ADMIN_NAME?.trim() || null;
 
   for (const teamName of SAMPLE_TEAMS) {

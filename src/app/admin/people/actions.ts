@@ -14,7 +14,7 @@ import {
   wouldRemoveLastSuperAdmin,
   type Role,
 } from "@/lib/domain";
-import { sendInviteEmail } from "@/lib/mail";
+import { MailError, sendInviteEmail } from "@/lib/mail";
 import { assertSuperAdmin, NotAuthorized } from "@/lib/guards";
 
 const PEOPLE_PATH = "/admin/people";
@@ -30,6 +30,18 @@ async function activeSuperAdminIds(): Promise<string[]> {
 
 function backWith(message: string, kind: "ok" | "error" = "ok"): never {
   redirect(`${PEOPLE_PATH}?msg=${encodeURIComponent(message)}&kind=${kind}`);
+}
+
+/** Sends an invite, returning a readable problem instead of throwing, so the
+ *  caller can redirect (which throws by design) outside of a try block. */
+async function tryEmailInvite(email: string, actor: SessionUser): Promise<string | null> {
+  try {
+    await emailInvite(email, actor);
+    return null;
+  } catch (error) {
+    console.error(`[people] invite email failed for ${email}:`, error);
+    return describeMailError(error);
+  }
 }
 
 /** Issues a fresh single-use link and mails it. No-op for a disabled account. */
@@ -49,6 +61,10 @@ export type InviteState = {
   invited?: string[];
   alreadyThere?: string[];
   invalid?: string[];
+  /** Added to the list, but the invite email did not go out. */
+  notEmailed?: string[];
+  /** Why it did not go out, in words a club admin can act on. */
+  mailProblem?: string;
 };
 
 const inviteSchema = z.object({
@@ -111,7 +127,18 @@ export async function invitePeople(
     await db.user.create({
       data: { email, role, status: "INVITED", teamId: teamId ?? undefined },
     });
-    await emailInvite(email, actor);
+  }
+
+  const notEmailed: string[] = [];
+  let mailProblem: string | undefined;
+  for (const email of fresh) {
+    try {
+      await emailInvite(email, actor);
+    } catch (error) {
+      notEmailed.push(email);
+      if (!mailProblem) mailProblem = describeMailError(error);
+      console.error(`[people] invite email failed for ${email}:`, error);
+    }
   }
 
   revalidatePath(PEOPLE_PATH);
@@ -125,16 +152,26 @@ export async function invitePeople(
     };
   }
 
+  const added = fresh.length === 1 ? `Added ${fresh[0]}` : `Added ${fresh.length} people`;
+
   return {
-    status: "ok",
+    status: notEmailed.length > 0 ? "error" : "ok",
     message:
-      fresh.length === 1
-        ? `Invited ${fresh[0]}.`
-        : `Invited ${fresh.length} people.`,
+      notEmailed.length === 0
+        ? `${added} and sent ${fresh.length === 1 ? "an invite" : "invites"}.`
+        : `${added}, but ${notEmailed.length === fresh.length ? "the invite email could not be sent" : `${notEmailed.length} invite emails could not be sent`}. They're on the list — use Resend once it's fixed.`,
     invited: fresh,
     alreadyThere: [...existingSet],
     invalid,
+    notEmailed,
+    mailProblem,
   };
+}
+
+/** A sentence a club admin can act on, without leaking a stack trace. */
+function describeMailError(error: unknown): string {
+  if (error instanceof MailError) return error.message;
+  return "The email service could not be reached.";
 }
 
 // ---------------------------------------------------------------------------
@@ -224,9 +261,10 @@ export async function restoreAccess(formData: FormData): Promise<void> {
     where: { id: userId },
     data: { status: "INVITED", invitedAt: new Date() },
   });
-  await emailInvite(target.email, actor);
 
+  const problem = await tryEmailInvite(target.email, actor);
   revalidatePath(PEOPLE_PATH);
+  if (problem) backWith(`Restored ${target.email}, but the email didn't send. ${problem}`, "error");
   backWith(`Restored ${target.email} and sent a fresh sign-in link.`);
 }
 
@@ -238,9 +276,9 @@ export async function resendInvite(formData: FormData): Promise<void> {
   if (!target) backWith("That person is no longer on the list.", "error");
   if (target.status === "DISABLED") backWith(`${target.email} doesn't have access.`, "error");
 
-  await emailInvite(target.email, actor);
-
+  const problem = await tryEmailInvite(target.email, actor);
   revalidatePath(PEOPLE_PATH);
+  if (problem) backWith(`Couldn't email ${target.email}. ${problem}`, "error");
   backWith(`Sent a new sign-in link to ${target.email}.`);
 }
 

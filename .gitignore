@@ -17,4 +17,4 @@ prisma/dev.db*
 .env
 
 # local server log from the smoke check
-server.log
+server*.log
