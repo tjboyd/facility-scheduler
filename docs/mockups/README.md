@@ -24,5 +24,11 @@ canvas runtime's `support.js`).
 | `AdminRules.dc.html` | Super admin · booking rules |
 
 Sample data throughout (team names, coach names, dates in the week of
-Sep 20–26 2026) is illustrative. `[FACILITY NAME]`, `[YOUR NAME]` and
-`[APPROVER NAME]` are placeholders.
+Sep 20–26 2026) is illustrative. `[YOUR NAME]` and `[APPROVER NAME]` are
+placeholders, as is the baseball mark beside the wordmark — swap in the real
+Jr Chargers logo file before build.
+
+Styling follows the Jr Chargers Baseball brand already used by the club's
+tryout, camp and registration generators: crimson `#AD0303`, black `#0A0A0A`,
+light grey `#F5F5F5`, Barlow Condensed for display type. See section 9 of
+[`../DESIGN.md`](../DESIGN.md).

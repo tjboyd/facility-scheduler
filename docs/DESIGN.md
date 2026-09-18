@@ -12,7 +12,9 @@ Sources for those screens are in [`mockups/`](./mockups).
 
 One indoor facility, one bookable space. Head coaches request blocks of time for
 their team; a facility approver accepts or declines; the calendar is the shared
-source of truth for who has the turf and when.
+source of truth for who has the cage and turf time, and when.
+
+One location, one bookable space — confirmed, not an assumption.
 
 ## 2. Roles
 
@@ -36,7 +38,7 @@ cannot sign in, even with a valid sign-in link.
 - Each address moves through `invited → active`, and can be set to
   `access removed` without deleting its booking history.
 - Sign-in is passwordless: enter your email, get a one-time link (15-minute
-  expiry). Google sign-in is shown as a second option — see open question Q1.
+  expiry). Google sign-in is shown as a second option — still open, see 10a.1.
 
 ## 4. Booking rules
 
@@ -77,12 +79,12 @@ Sample configuration used in the mockups:
 | Monday – Friday | 3:00 PM – 9:00 PM |
 | Saturday | 8:00 AM – 8:00 PM |
 
-**Closures** are dated overrides — holidays, tournaments, floor work — that shut
+**Closures** are dated overrides — holidays, tournaments, maintenance — that shut
 the facility regardless of the weekly hours.
 
 Changing hours does not retroactively cancel bookings that are already approved.
 Approved bookings that fall outside the new hours stay put and are flagged to the
-super admin (see open question Q4).
+super admin — still open, see 10a.3.
 
 ## 6. Request lifecycle
 
@@ -98,9 +100,9 @@ super admin (see open question Q4).
                   └──► rejected on the spot if the slot is taken or out of hours
 ```
 
-- **pending** — slot is held, shown amber and dashed on the calendar, labelled
-  "Pending". The team name is visible (see open question Q3).
-- **approved** — shown solid green, labelled with the team name. This is the
+- **pending** — slot is held, shown as a crimson dashed outline over stripes and
+  labelled "Pending". The requesting team's name is visible to everyone.
+- **approved** — solid crimson fill, team name in white. This is the
   "reserved / blocked" state.
 - **declined** — the approver types a short reason; the coach sees it in email
   and in *My requests*, and the slot reopens immediately.
@@ -129,7 +131,7 @@ turned off. Approval/decline buttons in the email are deep links into the app.
 | --- | --- | --- |
 | Sign in | everyone | Email → one-time link. Says plainly that access is by invitation. |
 | Check your inbox | everyone | Confirmation, resend, and the "not on the list?" explanation. |
-| Week calendar | coach | The main screen. Seven day columns, 30-minute rows, status-coloured blocks, empty slots are click targets. |
+| Week calendar | coach | The main screen. Seven day columns, 30-minute rows, status blocks, empty slots are click targets. |
 | Request time | coach | Modal: team (fixed), date, start-time pills with taken times struck out, length segmented control capped at 1.5 hrs, live summary, optional note. |
 | My requests | coach | Every request the team has made with its status, the approver's reason when declined, and withdraw / release actions. |
 | Approvals | approver | Queue on the left, full detail on the right: who, when, the coach's note, an explicit no-conflicts check, and a strip of the rest of that day. Approve / Decline. |
@@ -140,33 +142,89 @@ turned off. Approval/decline buttons in the email are deep links into the app.
 | Hours | super admin | Per-day open/closed and times with a visual week-at-a-glance bar, plus closures. |
 | Booking rules | super admin | Block size, max length, timing limits, per-team limits, approver list, email options. |
 
-## 9. Visual language
+## 9. Brand and visual language
 
-- **Green, solid** — reserved / approved.
-- **Amber, dashed** — pending. Dashed on purpose: it reads as "not settled yet"
-  even in greyscale or for anyone who can't separate the two hues.
-- **Hatched grey** — closed.
-- Type: Archivo for headings, Public Sans for body, IBM Plex Mono for times.
-- Every status is carried by a text label as well as a colour.
+The app uses the Jr Chargers Baseball brand as it is already applied in the
+club's tryout, camp and registration materials — same palette, same typographic
+treatment, so a screen and a printed check-in sheet look like the same
+organisation.
 
-## 10. Open questions
+### Colour
+
+| Token | Hex | Use |
+| --- | --- | --- |
+| Crimson | `#AD0303` | Primary actions, active nav, reserved blocks, accents |
+| Black | `#0A0A0A` | Top bar, table headers, headings, primary text |
+| Light grey | `#F5F5F5` | Page background, inset panels |
+| White | `#FFFFFF` | Cards, inputs |
+| Secondary text | `#555555` | Supporting copy |
+| Muted text | `#767676` | Captions, hints (lightest usable on white at body size) |
+| Border | `#CCCCCC` / `#DDDDDD` / `#EEEEEE` | Card, control, and row rules |
+| Crimson on black | `#E05A5A` | Crimson text on the black bar, where `#AD0303` is too dark |
+
+Squared-off geometry throughout: 3–4px radii on controls, 6px on cards. No soft
+rounded corners.
+
+### Type
+
+| Face | Use |
+| --- | --- |
+| Barlow Condensed 600/700 | Wordmark, headings, team names, buttons, nav, table headers — uppercase with open letter-spacing |
+| Barlow 400–700 | Body copy, form labels, table cells |
+| IBM Plex Mono 400/500 | Times, block counts, numeric settings |
+
+Barlow Condensed is the web equivalent of the condensed face the printed
+materials use; the PDF generators substitute Liberation Sans Narrow for it.
+
+### Status treatment
+
+Everything is crimson, black, or grey — no green, no amber — so the three
+booking states are told apart by **fill, outline, and texture** rather than hue,
+and survive greyscale printing:
+
+| State | Treatment |
+| --- | --- |
+| Reserved (approved) | Solid crimson fill, team name in white |
+| Pending | Crimson dashed outline over diagonal crimson stripes, name in `#8A0202` |
+| Closed | Grey diagonal hatch |
+| Declined | Solid black chip |
+| Completed | Flat grey chip |
+
+Approve is the solid crimson button; Decline is a black outline. Two red buttons
+side by side would be unreadable, so the hierarchy carries the meaning.
+
+Every status also carries a text label, never colour alone.
+
+### Wordmark
+
+Black bar, `JR CHARGERS BASEBALL` in white condensed caps, `INDOOR FACILITY` in
+crimson beneath it — the same lockup as the printed page headers. The mark beside
+it is a placeholder baseball, not the club logo; swap in the real logo file
+before build.
+
+## 10. Decisions made
+
+- **One location, one bookable space.** Confirmed. The calendar, the conflict
+  rules, and the data model all assume a single area. If cages or half-turf are
+  ever booked separately, that is a schema change, not a display change.
+- **Pending requests show the team name.** Confirmed. Other coaches see which
+  team is holding a slot while it waits on the approver, not just that it's taken.
+- **Jr Chargers brand throughout.** See section 9.
+
+## 10a. Still open
 
 1. **Google sign-in** — the mockup shows it next to the email link. Worth it, or
-   is the magic link enough? It only matters if coaches' emails are Google
+   is the magic link enough? It only matters if coaches' club emails are Google
    accounts.
 2. **Teams** — a coach is currently tied to exactly one team. Does any coach run
    two teams, or does a team ever have two head coaches who both book?
-3. **Pending visibility** — should other coaches see *which* team has a pending
-   request, or just that the slot is held? Showing the name is friendlier;
-   hiding it avoids sniping.
-4. **Hours changed under an approved booking** — flag it to the admin and leave
+3. **Hours changed under an approved booking** — flag it to the admin and leave
    it, or auto-cancel and notify the coach? The spec currently says flag.
-5. **Decline without a free alternative** — should declining suggest the nearest
+4. **Decline without a free alternative** — should declining suggest the nearest
    open slot of the same length?
-6. **One space, or several?** — everything here assumes a single bookable area.
-   If the facility splits into cages, courts, or half-turf, that is a real change
-   to the calendar and the conflict rules, and is much cheaper to decide now.
-7. **Facility name and branding** — screens show `[FACILITY NAME]`.
+5. **The real logo file** — needed to replace the placeholder mark.
+6. **Team list** — mockups use 8U / 10U / 12U Red / 12U Black / 13U / 14U as
+   sample data. The real roster of teams needs confirming.
 
 ## 11. Not in scope yet
 
