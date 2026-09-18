@@ -18,3 +18,4 @@ prisma/dev.db*
 
 # local server log from the smoke check
 server*.log
+tsconfig.tsbuildinfo

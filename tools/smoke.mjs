@@ -222,6 +222,26 @@ try {
   check("a team with people on it cannot be archived", flash.includes("move them first"), flash);
 } finally {
   await browser.close();
+  await tidyUp();
+}
+
+/**
+ * Leave the database as we found it. Without this every run silently adds a
+ * coach and a team to whatever database it was pointed at.
+ */
+async function tidyUp() {
+  try {
+    const { PrismaClient } = await import("@prisma/client");
+    const db = new PrismaClient();
+    const users = await db.user.deleteMany({ where: { email: { startsWith: "smoke.coach." } } });
+    const teams = await db.team.deleteMany({ where: { name: { startsWith: "Smoke " } } });
+    await db.$disconnect();
+    if (users.count || teams.count) {
+      console.log(`\ncleaned up ${users.count} test user(s) and ${teams.count} test team(s)`);
+    }
+  } catch (error) {
+    console.log(`\ncould not clean up test data: ${error.message}`);
+  }
 }
 
 console.log(`\n${passed} passed, ${failures.length} failed`);

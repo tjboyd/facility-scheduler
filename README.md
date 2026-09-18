@@ -40,7 +40,7 @@ once a block is approved. Approvers and super admins needn't have one.
 npm install
 cp .env.example .env          # edit SEED_SUPER_ADMIN_EMAIL to your address
 npx prisma db push            # create the SQLite database
-npm run db:seed               # one super admin + starter teams
+npm run db:seed               # one super admin + the club's teams
 npm run dev
 ```
 
@@ -56,7 +56,7 @@ printed to the server log.
 | `npm run build` / `npm start` | Production build and serve |
 | `npm test` | Unit tests for the domain rules |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm run db:seed` | Seed a super admin and the starter teams |
+| `npm run db:seed` | Seed a super admin and the club's teams |
 | `node tools/smoke.mjs` | End-to-end browser check (see below) |
 | `npm run pdf` | Rebuild the mockup review PDF |
 

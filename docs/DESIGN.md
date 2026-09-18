@@ -137,11 +137,26 @@ README. Sending never rolls back the action that triggered it: the booking or
 the invite is written first and emailed second, and a failure is reported rather
 than thrown away.
 
-**Open — the approve/decline buttons in the approver email.** Either they act on
-one click (fast, but a forwarded email can approve), or they deep-link into the
-app and require a signed-in session (barely slower, given sign-in is itself a
-link). The recommendation is to require the session; the design is unchanged
-either way, since both routes already do the same thing.
+**Approve is one click from the email — decided.** No sign-in, no app. The
+button carries a *decision token*, built like the sign-in token and with the
+same properties, plus two more:
+
+- 256-bit random, stored only as a SHA-256 hash, single-use.
+- **Bound to one request and to approving it** — it cannot decline, cannot touch
+  another booking, and cannot be replayed.
+- Dead the moment the request is decided by anyone, whichever route decided it,
+  and expired once the slot has passed.
+- The booking records that it was approved from the email and which approver's
+  token was used, so the decision has a trail.
+
+The residual risk, stated plainly: anyone who gets that email forwarded can
+approve *that one request*. The mitigations above keep the blast radius to a
+single booking that was already going to be approved or declined by somebody on
+a short list, which for a club facility is a fair trade for approvers not having
+to sign in on a phone at the field.
+
+**Decline still opens the app**, because declining asks for a reason the coach
+will read. The button deep-links to that request with the reason box ready.
 
 ## 8. Screens
 
@@ -253,6 +268,11 @@ Two rules the built screens enforce that are worth knowing about:
 - **Pending requests show the team name.** Confirmed. Other coaches see which
   team is holding a slot while it waits on the approver, not just that it's taken.
 - **Hamilton Jr Chargers brand and logo throughout.** See section 9.
+- **Teams mirror SportsEngine**, names and all (`U12 - Red`, not `12U Red`), so
+  the two systems line up. A team SportsEngine has as Inactive is seeded
+  archived here: it keeps its history but cannot be assigned or booked against.
+  15 active, 5 archived.
+- **Approving from the email takes one click.** See section 7.
 
 ## 10a. Still open
 
@@ -265,8 +285,8 @@ Two rules the built screens enforce that are worth knowing about:
    it, or auto-cancel and notify the coach? The spec currently says flag.
 4. **Decline without a free alternative** — should declining suggest the nearest
    open slot of the same length?
-5. **Team list** — mockups use 8U / 10U / 12U Red / 12U Black / 13U / 14U as
-   sample data. The real roster of teams needs confirming.
+5. **One team** — 20 of the club's 21 SportsEngine teams are loaded; the row
+   above `U10 - Red` was cut off in the screenshots and is still unknown.
 
 ## 11. Not in scope yet
 
