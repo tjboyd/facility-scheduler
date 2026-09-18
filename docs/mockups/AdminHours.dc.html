@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Admin — facility hours</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&amp;family=Barlow+Condensed:wght@600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Barlow,system-ui,sans-serif;background:#F5F5F5;color:#0A0A0A;-webkit-font-smoothing:antialiased}
+a{color:#AD0303}a:hover{color:#8A0202}
+</style>
+</helmet>
+
+<div style="width: 1280px; height: 900px; display: flex; flex-direction: column; background: #F5F5F5;">
+
+  <header style="height: 72px; flex-shrink: 0; background: #FFFFFF; border-bottom: 3px solid #AD0303; display: flex; align-items: center; gap: 26px; padding: 0 24px;">
+    <a href="CoachCalendar.dc.html" style="display: flex; align-items: center; flex-shrink: 0;" aria-label="Hamilton Jr Chargers — facility calendar"><img src="/_blob/276a6e8e1ad0852476b2eb89afb293e4" alt="Hamilton Jr Chargers" style="height: 48px; display: block;"></a>
+    <nav style="display: flex; align-items: center; gap: 4px; flex-grow: 1;">
+      <a href="CoachCalendar.dc.html" style="display: flex; align-items: center; height: 38px; padding: 0 16px; border-radius: 3px; font-family: 'Barlow Condensed', sans-serif; font-size: 16.5px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: #555555; text-decoration: none;">Calendar</a>
+      <a href="ApproverQueue.dc.html" style="display: flex; align-items: center; height: 38px; padding: 0 16px; border-radius: 3px; font-family: 'Barlow Condensed', sans-serif; font-size: 16.5px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: #555555; text-decoration: none;">Approvals</a>
+      <a href="AdminHours.dc.html" style="display: flex; align-items: center; height: 38px; padding: 0 16px; background: #AD0303; border-radius: 3px; font-family: 'Barlow Condensed', sans-serif; font-size: 16.5px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: #FFFFFF; text-decoration: none;">Admin</a>
+    </nav>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="display: inline-flex; align-items: center; padding: 7px 12px; background: #AD0303; border-radius: 3px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: #FFFFFF;">Super admin</span>
+      <span style="width: 34px; height: 34px; border-radius: 999px; background: #0A0A0A; color: #FFFFFF; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center;">TB</span>
+    </div>
+  </header>
+
+  <main style="flex-grow: 1; padding: 22px 28px; display: flex; flex-direction: column; gap: 14px;">
+
+    <div style="display: flex; align-items: flex-end; gap: 14px;">
+      <div style="flex-grow: 1;">
+        <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 11.5px; letter-spacing: 0.16em; color: #AD0303;">CLUB ADMINISTRATION</div>
+        <h1 style="margin: 4px 0 4px 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 34px; line-height: 1; text-transform: uppercase; letter-spacing: 0.01em;">Facility settings</h1>
+        <p style="margin: 0; font-size: 14px; color: #555555;">Only super admins can change anything on these pages.</p>
+      </div>
+      <button type="button" style="height: 42px; padding: 0 18px; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px; font-family: 'Barlow Condensed', sans-serif; font-size: 16.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #0A0A0A; cursor: pointer;">Discard</button>
+      <button type="button" style="height: 42px; padding: 0 22px; background: #AD0303; border: none; border-radius: 4px; font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #FFFFFF; cursor: pointer;">Save changes</button>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 4px; border-bottom: 1px solid #DDDDDD;">
+      <a href="AdminUsers.dc.html" style="height: 40px; padding: 0 15px; display: inline-flex; align-items: center; border-bottom: 3px solid transparent; font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #555555; text-decoration: none;">People &amp; access</a>
+      <a href="AdminHours.dc.html" style="height: 40px; padding: 0 15px; display: inline-flex; align-items: center; border-bottom: 3px solid #AD0303; font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #0A0A0A; text-decoration: none;">Hours</a>
+      <a href="AdminRules.dc.html" style="height: 40px; padding: 0 15px; display: inline-flex; align-items: center; border-bottom: 3px solid transparent; font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #555555; text-decoration: none;">Booking rules</a>
+    </div>
+
+    <div style="background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 6px; padding: 20px 24px;">
+
+      <div style="display: flex; align-items: flex-end; margin-bottom: 14px;">
+        <div style="flex-grow: 1;">
+          <h2 style="margin: 0 0 3px 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1; text-transform: uppercase; letter-spacing: 0.01em;">Weekly hours</h2>
+          <p style="margin: 0; font-size: 13px; color: #555555;">Coaches can only request time inside these windows. Changing them doesn't touch bookings that are already approved.</p>
+        </div>
+        <div style="width: 460px; flex-shrink: 0; display: flex;">
+          <span style="width: 74px; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #767676;">6 AM</span>
+          <span style="width: 74px; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #767676;">9 AM</span>
+          <span style="width: 74px; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #767676;">12 PM</span>
+          <span style="width: 74px; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #767676;">3 PM</span>
+          <span style="width: 74px; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #767676;">6 PM</span>
+          <span style="width: 50px; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #767676;">9 PM</span>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; height: 56px; border-top: 1px solid #EEEEEE;">
+        <div style="width: 118px; font-family: 'Barlow Condensed', sans-serif; font-size: 21px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em;">Sunday</div>
+        <div style="width: 116px; display: flex; align-items: center; gap: 9px;">
+          <button type="button" aria-pressed="true" aria-label="Sunday open" style="width: 42px; height: 24px; padding: 0; border: none; border-radius: 999px; background: #AD0303; position: relative; cursor: pointer;"><span style="position: absolute; top: 3px; left: 21px; width: 18px; height: 18px; border-radius: 999px; background: #FFFFFF;"></span></button>
+          <span style="font-size: 13px; color: #333333;">Open</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px;">
+          <select aria-label="Sunday opening time" style="width: 118px; height: 38px; padding: 0 10px; font-family: Barlow, sans-serif; font-size: 13.5px; color: #0A0A0A; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px;"><option>8:00 AM</option></select>
+          <span style="font-size: 13px; color: #767676;">to</span>
+          <select aria-label="Sunday closing time" style="width: 118px; height: 38px; padding: 0 10px; font-family: Barlow, sans-serif; font-size: 13.5px; color: #0A0A0A; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px;"><option>6:00 PM</option></select>
+        </div>
+        <div style="flex-grow: 1;"></div>
+        <div style="width: 420px; flex-shrink: 0; position: relative; height: 26px; background: #F5F5F5; border: 1px solid #E4E4E4; border-radius: 3px; overflow: hidden;">
+          <div style="position: absolute; inset: 0; background-image: repeating-linear-gradient(to right, #DDDDDD 0 1px, transparent 1px 74px);"></div>
+          <div style="position: absolute; left: 49px; top: 4px; width: 247px; height: 16px; background: #AD0303; border-radius: 2px;"></div>
+        </div>
+        <div style="width: 40px; flex-shrink: 0; text-align: right;"><button type="button" aria-label="Copy Sunday hours to other days" style="width: 32px; height: 32px; border: none; background: transparent; cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="8.5" y="8.5" width="12" height="12" rx="1.6" stroke="#767676" stroke-width="1.7"/><path d="M15.5 5.5h-9a2 2 0 0 0-2 2v9" stroke="#767676" stroke-width="1.7" stroke-linecap="round"/></svg></button></div>
+      </div>
+      <div style="display: flex; align-items: center; height: 56px; border-top: 1px solid #EEEEEE;">
+        <div style="width: 118px; font-family: 'Barlow Condensed', sans-serif; font-size: 21px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em;">Monday</div>
+        <div style="width: 116px; display: flex; align-items: center; gap: 9px;">
+          <button type="button" aria-pressed="true" aria-label="Monday open" style="width: 42px; height: 24px; padding: 0; border: none; border-radius: 999px; background: #AD0303; position: relative; cursor: pointer;"><span style="position: absolute; top: 3px; left: 21px; width: 18px; height: 18px; border-radius: 999px; background: #FFFFFF;"></span></button>
+          <span style="font-size: 13px; color: #333333;">Open</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px;">
+          <select aria-label="Monday opening time" style="width: 118px; height: 38px; padding: 0 10px; font-family: Barlow, sans-serif; font-size: 13.5px; color: #0A0A0A; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px;"><option>3:00 PM</option></select>
+          <span style="font-size: 13px; color: #767676;">to</span>
+          <select aria-label="Monday closing time" style="width: 118px; height: 38px; padding: 0 10px; font-family: Barlow, sans-serif; font-size: 13.5px; color: #0A0A0A; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px;"><option>9:00 PM</option></select>
+        </div>
+        <div style="flex-grow: 1;"></div>
+        <div style="width: 420px; flex-shrink: 0; position: relative; height: 26px; background: #F5F5F5; border: 1px solid #E4E4E4; border-radius: 3px; overflow: hidden;">
+          <div style="position: absolute; inset: 0; background-image: repeating-linear-gradient(to right, #DDDDDD 0 1px, transparent 1px 74px);"></div>
+          <div style="position: absolute; left: 222px; top: 4px; width: 148px; height: 16px; background: #AD0303; border-radius: 2px;"></div>
+        </div>
+        <div style="width: 40px; flex-shrink: 0; text-align: right;"><button type="button" aria-label="Copy Monday hours to other days" style="width: 32px; height: 32px; border: none; background: transparent; cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="8.5" y="8.5" width="12" height="12" rx="1.6" stroke="#767676" stroke-width="1.7"/><path d="M15.5 5.5h-9a2 2 0 0 0-2 2v9" stroke="#767676" stroke-width="1.7" stroke-linecap="round"/></svg></button></div>
+      </div>
+      <div style="display: flex; align-items: center; height: 56px; border-top: 1px solid #EEEEEE;">
+        <div style="width: 118px; font-family: 'Barlow Condensed', sans-serif; font-size: 21px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em;">Tuesday</div>
+        <div style="width: 116px; display: flex; align-items: center; gap: 9px;">
+          <button type="button" aria-pressed="true" aria-label="Tuesday open" style="width: 42px; height: 24px; padding: 0; border: none; border-radius: 999px; background: #AD0303; position: relative; cursor: pointer;"><span style="position: absolute; top: 3px; left: 21px; width: 18px; height: 18px; border-radius: 999px; background: #FFFFFF;"></span></button>
+          <span style="font-size: 13px; color: #333333;">Open</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px;">
+          <select aria-label="Tuesday opening time" style="width: 118px; height: 38px; padding: 0 10px; font-family: Barlow, sans-serif; font-size: 13.5px; color: #0A0A0A; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px;"><option>3:00 PM</option></select>
+          <span style="font-size: 13px; color: #767676;">to</span>
+          <select aria-label="Tuesday closing time" style="width: 118px; height: 38px; padding: 0 10px; font-family: Barlow, sans-serif; font-size: 13.5px; color: #0A0A0A; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px;"><option>9:00 PM</option></select>
+        </div>
+        <div style="flex-grow: 1;"></div>
+        <div style="width: 420px; flex-shrink: 0; position: relative; height: 26px; background: #F5F5F5; border: 1px solid #E4E4E4; border-radius: 3px; overflow: hidden;">
+          <div style="position: absolute; inset: 0; background-image: repeating-linear-gradient(to right, #DDDDDD 0 1px, transparent 1px 74px);"></div>
+          <div style="position: absolute; left: 222px; top: 4px; width: 148px; height: 16px; background: #AD0303; border-radius: 2px;"></div>
+        </div>
+        <div style="width: 40px; flex-shrink: 0; text-align: right;"><button type="button" aria-label="Copy Tuesday hours to other days" style="width: 32px; height: 32px; border: none; background: transparent; cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="8.5" y="8.5" width="12" height="12" rx="1.6" stroke="#767676" stroke-width="1.7"/><path d="M15.5 5.5h-9a2 2 0 0 0-2 2v9" stroke="#767676" stroke-width="1.7" stroke-linecap="round"/></svg></button></div>
+      </div>
+      <div style="display: flex; align-items: center; height: 56px; border-top: 1px solid #EEEEEE;">
+        <div style="width: 118px; font-family: 'Barlow Condensed', sans-serif; font-size: 21px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em;">Wednesday</div>
+        <div style="width: 116px; display: flex; align-items: center; gap: 9px;">
+          <button type="button" aria-pressed="true" aria-label="Wednesday open" style="width: 42px; height: 24px; padding: 0; border: none; border-radius: 999px; background: #AD0303; position: relative; cursor: pointer;"><span style="position: absolute; top: 3px; left: 21px; width: 18px; height: 18px; border-radius: 999px; background: #FFFFFF;"></span></button>
+          <span style="font-size: 13px; color: #333333;">Open</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px;">
+          <select aria-label="Wednesday opening time" style="width: 118px; height: 38px; padding: 0 10px; font-family: Barlow, sans-serif; font-size: 13.5px; color: #0A0A0A; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px;"><option>3:00 PM</option></select>
+          <span style="font-size: 13px; color: #767676;">to</span>
+          <select aria-label="Wednesday closing time" style="width: 118px; height: 38px; padding: 0 10px; font-family: Barlow, sans-serif; font-size: 13.5px; color: #0A0A0A; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px;"><option>9:00 PM</option></select>
+        </div>
+        <div style="flex-grow: 1;"></div>
+        <div style="width: 420px; flex-shrink: 0; position: relative; height: 26px; background: #F5F5F5; border: 1px solid #E4E4E4; border-radius: 3px; overflow: hidden;">
+          <div style="position: absolute; inset: 0; background-image: repeating-linear-gradient(to right, #DDDDDD 0 1px, transparent 1px 74px);"></div>
+          <div style="position: absolute; left: 222px; top: 4px; width: 148px; height: 16px; background: #AD0303; border-radius: 2px;"></div>
+        </div>
+        <div style="width: 40px; flex-shrink: 0; text-align: right;"><button type="button" aria-label="Copy Wednesday hours to other days" style="width: 32px; height: 32px; border: none; background: transparent; cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="8.5" y="8.5" width="12" height="12" rx="1.6" stroke="#767676" stroke-width="1.7"/><path d="M15.5 5.5h-9a2 2 0 0 0-2 2v9" stroke="#767676" stroke-width="1.7" stroke-linecap="round"/></svg></button></div>
+      </div>
+      <div style="display: flex; align-items: center; height: 56px; border-top: 1px solid #EEEEEE;">
+        <div style="width: 118px; font-family: 'Barlow Condensed', sans-serif; font-size: 21px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em;">Thursday</div>
+        <div style="width: 116px; display: flex; align-items: center; gap: 9px;">
+          <button type="button" aria-pressed="true" aria-label="Thursday open" style="width: 42px; height: 24px; padding: 0; border: none; border-radius: 999px; background: #AD0303; position: relative; cursor: pointer;"><span style="position: absolute; top: 3px; left: 21px; width: 18px; height: 18px; border-radius: 999px; background: #FFFFFF;"></span></button>
+          <span style="font-size: 13px; color: #333333;">Open</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px;">
+          <select aria-label="Thursday opening time" style="width: 118px; height: 38px; padding: 0 10px; font-family: Barlow, sans-serif; font-size: 13.5px; color: #0A0A0A; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px;"><option>3:00 PM</option></select>
+          <span style="font-size: 13px; color: #767676;">to</span>
+          <select aria-label="Thursday closing time" style="width: 118px; height: 38px; padding: 0 10px; font-family: Barlow, sans-serif; font-size: 13.5px; color: #0A0A0A; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px;"><option>9:00 PM</option></select>
+        </div>
+        <div style="flex-grow: 1;"></div>
+        <div style="width: 420px; flex-shrink: 0; position: relative; height: 26px; background: #F5F5F5; border: 1px solid #E4E4E4; border-radius: 3px; overflow: hidden;">
+          <div style="position: absolute; inset: 0; background-image: repeating-linear-gradient(to right, #DDDDDD 0 1px, transparent 1px 74px);"></div>
+          <div style="position: absolute; left: 222px; top: 4px; width: 148px; height: 16px; background: #AD0303; border-radius: 2px;"></div>
+        </div>
+        <div style="width: 40px; flex-shrink: 0; text-align: right;"><button type="button" aria-label="Copy Thursday hours to other days" style="width: 32px; height: 32px; border: none; background: transparent; cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="8.5" y="8.5" width="12" height="12" rx="1.6" stroke="#767676" stroke-width="1.7"/><path d="M15.5 5.5h-9a2 2 0 0 0-2 2v9" stroke="#767676" stroke-width="1.7" stroke-linecap="round"/></svg></button></div>
+      </div>
+      <div style="display: flex; align-items: center; height: 56px; border-top: 1px solid #EEEEEE;">
+        <div style="width: 118px; font-family: 'Barlow Condensed', sans-serif; font-size: 21px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em;">Friday</div>
+        <div style="width: 116px; display: flex; align-items: center; gap: 9px;">
+          <button type="button" aria-pressed="true" aria-label="Friday open" style="width: 42px; height: 24px; padding: 0; border: none; border-radius: 999px; background: #AD0303; position: relative; cursor: pointer;"><span style="position: absolute; top: 3px; left: 21px; width: 18px; height: 18px; border-radius: 999px; background: #FFFFFF;"></span></button>
+          <span style="font-size: 13px; color: #333333;">Open</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px;">
+          <select aria-label="Friday opening time" style="width: 118px; height: 38px; padding: 0 10px; font-family: Barlow, sans-serif; font-size: 13.5px; color: #0A0A0A; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px;"><option>3:00 PM</option></select>
+          <span style="font-size: 13px; color: #767676;">to</span>
+          <select aria-label="Friday closing time" style="width: 118px; height: 38px; padding: 0 10px; font-family: Barlow, sans-serif; font-size: 13.5px; color: #0A0A0A; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px;"><option>9:00 PM</option></select>
+        </div>
+        <div style="flex-grow: 1;"></div>
+        <div style="width: 420px; flex-shrink: 0; position: relative; height: 26px; background: #F5F5F5; border: 1px solid #E4E4E4; border-radius: 3px; overflow: hidden;">
+          <div style="position: absolute; inset: 0; background-image: repeating-linear-gradient(to right, #DDDDDD 0 1px, transparent 1px 74px);"></div>
+          <div style="position: absolute; left: 222px; top: 4px; width: 148px; height: 16px; background: #AD0303; border-radius: 2px;"></div>
+        </div>
+        <div style="width: 40px; flex-shrink: 0; text-align: right;"><button type="button" aria-label="Copy Friday hours to other days" style="width: 32px; height: 32px; border: none; background: transparent; cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="8.5" y="8.5" width="12" height="12" rx="1.6" stroke="#767676" stroke-width="1.7"/><path d="M15.5 5.5h-9a2 2 0 0 0-2 2v9" stroke="#767676" stroke-width="1.7" stroke-linecap="round"/></svg></button></div>
+      </div>
+      <div style="display: flex; align-items: center; height: 56px; border-top: 1px solid #EEEEEE;">
+        <div style="width: 118px; font-family: 'Barlow Condensed', sans-serif; font-size: 21px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em;">Saturday</div>
+        <div style="width: 116px; display: flex; align-items: center; gap: 9px;">
+          <button type="button" aria-pressed="true" aria-label="Saturday open" style="width: 42px; height: 24px; padding: 0; border: none; border-radius: 999px; background: #AD0303; position: relative; cursor: pointer;"><span style="position: absolute; top: 3px; left: 21px; width: 18px; height: 18px; border-radius: 999px; background: #FFFFFF;"></span></button>
+          <span style="font-size: 13px; color: #333333;">Open</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px;">
+          <select aria-label="Saturday opening time" style="width: 118px; height: 38px; padding: 0 10px; font-family: Barlow, sans-serif; font-size: 13.5px; color: #0A0A0A; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px;"><option>8:00 AM</option></select>
+          <span style="font-size: 13px; color: #767676;">to</span>
+          <select aria-label="Saturday closing time" style="width: 118px; height: 38px; padding: 0 10px; font-family: Barlow, sans-serif; font-size: 13.5px; color: #0A0A0A; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px;"><option>8:00 PM</option></select>
+        </div>
+        <div style="flex-grow: 1;"></div>
+        <div style="width: 420px; flex-shrink: 0; position: relative; height: 26px; background: #F5F5F5; border: 1px solid #E4E4E4; border-radius: 3px; overflow: hidden;">
+          <div style="position: absolute; inset: 0; background-image: repeating-linear-gradient(to right, #DDDDDD 0 1px, transparent 1px 74px);"></div>
+          <div style="position: absolute; left: 49px; top: 4px; width: 296px; height: 16px; background: #AD0303; border-radius: 2px;"></div>
+        </div>
+        <div style="width: 40px; flex-shrink: 0; text-align: right;"><button type="button" aria-label="Copy Saturday hours to other days" style="width: 32px; height: 32px; border: none; background: transparent; cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="8.5" y="8.5" width="12" height="12" rx="1.6" stroke="#767676" stroke-width="1.7"/><path d="M15.5 5.5h-9a2 2 0 0 0-2 2v9" stroke="#767676" stroke-width="1.7" stroke-linecap="round"/></svg></button></div>
+      </div>
+    </div>
+
+    <div style="background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 6px; padding: 18px 24px;">
+      <div style="margin-bottom: 13px;">
+        <h2 style="margin: 0 0 3px 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1; text-transform: uppercase; letter-spacing: 0.01em;">Closures</h2>
+        <p style="margin: 0; font-size: 13px; color: #555555;">Dates the facility is shut regardless of the weekly hours — holidays, tournaments, maintenance.</p>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 9px;">
+        <span style="display: inline-flex; align-items: center; gap: 9px; height: 38px; padding: 0 9px 0 14px; background: #F5F5F5; border: 1px solid #DDDDDD; border-radius: 3px; font-size: 13.5px; font-weight: 500;">Nov 26, 2026 · Thanksgiving<button type="button" aria-label="Remove Nov 26, 2026 · Thanksgiving closure" style="width: 22px; height: 22px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="#767676" stroke-width="2.6" stroke-linecap="round"/></svg></button></span>
+        <span style="display: inline-flex; align-items: center; gap: 9px; height: 38px; padding: 0 9px 0 14px; background: #F5F5F5; border: 1px solid #DDDDDD; border-radius: 3px; font-size: 13.5px; font-weight: 500;">Dec 24 – 25, 2026 · Holiday closure<button type="button" aria-label="Remove Dec 24 – 25, 2026 · Holiday closure closure" style="width: 22px; height: 22px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="#767676" stroke-width="2.6" stroke-linecap="round"/></svg></button></span>
+        <span style="display: inline-flex; align-items: center; gap: 9px; height: 38px; padding: 0 9px 0 14px; background: #F5F5F5; border: 1px solid #DDDDDD; border-radius: 3px; font-size: 13.5px; font-weight: 500;">Jan 17, 2027 · Cage net replacement<button type="button" aria-label="Remove Jan 17, 2027 · Cage net replacement closure" style="width: 22px; height: 22px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="#767676" stroke-width="2.6" stroke-linecap="round"/></svg></button></span>
+        <button type="button" style="display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 15px; background: #FFFFFF; border: 1.5px dashed #C4C4C4; border-radius: 3px; font-family: 'Barlow Condensed', sans-serif; font-size: 15.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #AD0303; cursor: pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="#AD0303" stroke-width="2.4" stroke-linecap="round"/></svg>Add a closure</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

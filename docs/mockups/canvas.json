@@ -1,0 +1,162 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-09-18T20:15:00Z"
+  },
+  "title": "Facility Scheduler — Screen Mockups",
+  "launch": {
+    "view": "canvas"
+  },
+  "pages": [],
+  "designSystems": [],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1280,
+      "h": 820,
+      "title": "Sign in",
+      "is_interactive": true
+    },
+    "SignInSent.dc.html": {
+      "x": 1360,
+      "y": 0,
+      "w": 520,
+      "h": 460,
+      "title": "Check your inbox",
+      "is_interactive": true
+    },
+    "CoachCalendar.dc.html": {
+      "x": 1960,
+      "y": 0,
+      "w": 1280,
+      "h": 820,
+      "title": "Coach · week calendar",
+      "is_interactive": true
+    },
+    "RequestBooking.dc.html": {
+      "x": 3320,
+      "y": 0,
+      "w": 1280,
+      "h": 820,
+      "title": "Coach · request time",
+      "is_interactive": true
+    },
+    "MyRequests.dc.html": {
+      "x": 4680,
+      "y": 0,
+      "w": 1280,
+      "h": 760,
+      "title": "Coach · my requests",
+      "is_interactive": true
+    },
+    "ApproverQueue.dc.html": {
+      "x": 0,
+      "y": 1220,
+      "w": 1280,
+      "h": 820,
+      "title": "Approver · queue and decision",
+      "is_interactive": true
+    },
+    "ApprovalEmail.dc.html": {
+      "x": 1360,
+      "y": 1220,
+      "w": 700,
+      "h": 1060,
+      "title": "Notification emails",
+      "is_interactive": true
+    },
+    "MobileCalendar.dc.html": {
+      "x": 2140,
+      "y": 1220,
+      "w": 390,
+      "h": 844,
+      "title": "Phone · day view",
+      "is_interactive": true
+    },
+    "MobileRequest.dc.html": {
+      "x": 2610,
+      "y": 1220,
+      "w": 390,
+      "h": 844,
+      "title": "Phone · request sheet",
+      "is_interactive": true
+    },
+    "AdminUsers.dc.html": {
+      "x": 0,
+      "y": 2680,
+      "w": 1280,
+      "h": 780,
+      "title": "Super admin · people & access",
+      "is_interactive": true
+    },
+    "AdminHours.dc.html": {
+      "x": 1360,
+      "y": 2680,
+      "w": 1280,
+      "h": 900,
+      "title": "Super admin · hours",
+      "is_interactive": true
+    },
+    "AdminRules.dc.html": {
+      "x": 2720,
+      "y": 2680,
+      "w": 1280,
+      "h": 880,
+      "title": "Super admin · booking rules",
+      "is_interactive": true
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "SignInSent.dc.html",
+    "CoachCalendar.dc.html",
+    "RequestBooking.dc.html",
+    "MyRequests.dc.html",
+    "ApproverQueue.dc.html",
+    "ApprovalEmail.dc.html",
+    "MobileCalendar.dc.html",
+    "MobileRequest.dc.html",
+    "AdminUsers.dc.html",
+    "AdminHours.dc.html",
+    "AdminRules.dc.html"
+  ],
+  "notes": {
+    "row1": {
+      "x": 0,
+      "y": -260,
+      "text": "1 · Access and coach scheduling",
+      "kind": "title1",
+      "maxW": 5960
+    },
+    "row2": {
+      "x": 0,
+      "y": 960,
+      "text": "2 · Approval flow",
+      "kind": "title1",
+      "maxW": 3000
+    },
+    "row3": {
+      "x": 0,
+      "y": 2420,
+      "text": "3 · Super admin setup",
+      "kind": "title1",
+      "maxW": 4000
+    },
+    "legend": {
+      "x": -700,
+      "y": 0,
+      "w": 560,
+      "color": "red",
+      "text": "Brand\n\nCrimson #AD0303, black #0A0A0A, light grey #F5F5F5 — the same set the Jr Chargers tryout and camp materials use. Barlow Condensed for headings and team names, Barlow for body, IBM Plex Mono for times.\n\nHow a block reads on the calendar\n\nReserved — solid crimson, team name in white. Approved and locked.\n\nPending — crimson dashed outline over diagonal stripes. Requested but not decided; the slot is already held, and the requesting team's name is visible.\n\nClosed — grey hatch. Outside that day's hours, or a closure date.\n\nFill vs. outline vs. hatch, so the three read apart in greyscale too.\n\nOne facility, one bookable space."
+    },
+    "flow": {
+      "x": -700,
+      "y": 1220,
+      "w": 560,
+      "color": "gray",
+      "text": "The loop\n\nCoach picks an open slot → picks a length (30 / 60 / 90 min) → submits.\n\nThe request lands in the approver's inbox AND in the Approvals queue. Both do the same thing; whoever gets there first decides it.\n\nApprove → the block fills solid crimson with the team name. Decline → approver types a reason, coach sees it in email and in My requests.\n\nApprove is the solid crimson button; Decline is the black outline. Never two reds."
+    }
+  }
+}

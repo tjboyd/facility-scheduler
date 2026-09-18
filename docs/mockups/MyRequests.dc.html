@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>My requests</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&amp;family=Barlow+Condensed:wght@600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Barlow,system-ui,sans-serif;background:#F5F5F5;color:#0A0A0A;-webkit-font-smoothing:antialiased}
+a{color:#AD0303}a:hover{color:#8A0202}
+</style>
+</helmet>
+
+<div style="width: 1280px; height: 760px; display: flex; flex-direction: column; background: #F5F5F5;">
+
+  <header style="height: 72px; flex-shrink: 0; background: #FFFFFF; border-bottom: 3px solid #AD0303; display: flex; align-items: center; gap: 26px; padding: 0 24px;">
+    <a href="CoachCalendar.dc.html" style="display: flex; align-items: center; flex-shrink: 0;" aria-label="Hamilton Jr Chargers — facility calendar"><img src="/_blob/276a6e8e1ad0852476b2eb89afb293e4" alt="Hamilton Jr Chargers" style="height: 48px; display: block;"></a>
+    <nav style="display: flex; align-items: center; gap: 4px; flex-grow: 1;">
+      <a href="CoachCalendar.dc.html" style="display: flex; align-items: center; height: 38px; padding: 0 16px; border-radius: 3px; font-family: 'Barlow Condensed', sans-serif; font-size: 16.5px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: #555555; text-decoration: none;">Calendar</a>
+      <a href="MyRequests.dc.html" style="display: flex; align-items: center; height: 38px; padding: 0 16px; background: #AD0303; border-radius: 3px; font-family: 'Barlow Condensed', sans-serif; font-size: 16.5px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: #FFFFFF; text-decoration: none;">My requests</a>
+    </nav>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid #CCCCCC; border-radius: 3px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: #333333;"><span style="width: 7px; height: 7px; background: #AD0303;"></span>Head coach · 14U</span>
+      <span style="width: 34px; height: 34px; border-radius: 999px; background: #AD0303; color: #FFFFFF; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center;">CR</span>
+    </div>
+  </header>
+
+  <main style="flex-grow: 1; padding: 24px 28px; display: flex; flex-direction: column; gap: 16px;">
+
+    <div style="display: flex; align-items: flex-end; gap: 16px;">
+      <div style="flex-grow: 1;">
+        <div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 11.5px; letter-spacing: 0.16em; color: #AD0303;">14U · COACH RIVERA</div>
+        <h1 style="margin: 4px 0 4px 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 34px; line-height: 1; text-transform: uppercase; letter-spacing: 0.01em;">My requests</h1>
+        <p style="margin: 0; font-size: 14px; color: #555555;">Everything your team has asked for, and where it stands.</p>
+      </div>
+      <a href="RequestBooking.dc.html" style="display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 18px; background: #AD0303; color: #FFFFFF; border-radius: 4px; font-family: 'Barlow Condensed', sans-serif; font-size: 16.5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; text-decoration: none;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/></svg>
+        Request time
+      </a>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 4px; border-bottom: 1px solid #DDDDDD;">
+      <button type="button" style="height: 38px; padding: 0 14px; background: transparent; border: none; border-bottom: 3px solid #AD0303; font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #0A0A0A; cursor: pointer;">All <span style="color: #767676;">5</span></button>
+      <button type="button" style="height: 38px; padding: 0 14px; background: transparent; border: none; border-bottom: 3px solid transparent; font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #555555; cursor: pointer;">Pending <span style="color: #AD0303;">2</span></button>
+      <button type="button" style="height: 38px; padding: 0 14px; background: transparent; border: none; border-bottom: 3px solid transparent; font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #555555; cursor: pointer;">Reserved <span style="color: #767676;">1</span></button>
+      <button type="button" style="height: 38px; padding: 0 14px; background: transparent; border: none; border-bottom: 3px solid transparent; font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #555555; cursor: pointer;">Declined <span style="color: #767676;">1</span></button>
+      <button type="button" style="height: 38px; padding: 0 14px; background: transparent; border: none; border-bottom: 3px solid transparent; font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #555555; cursor: pointer;">Past <span style="color: #767676;">1</span></button>
+    </div>
+
+    <div style="background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 6px; overflow: hidden;">
+
+      <div style="display: flex; align-items: center; height: 40px; padding: 0 20px; background: #0A0A0A; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.13em; color: #A8A8A8;">
+        <div style="width: 300px;">DATE &amp; TIME</div>
+        <div style="width: 100px;">LENGTH</div>
+        <div style="width: 130px;">REQUESTED</div>
+        <div style="width: 150px;">STATUS</div>
+        <div style="flex-grow: 1;">DETAIL</div>
+        <div style="width: 140px; text-align: right;">ACTION</div>
+      </div>
+
+      <div style="display: flex; align-items: center; min-height: 68px; padding: 14px 20px; border-bottom: 1px solid #EEEEEE;">
+        <div style="width: 300px;">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 19px; font-weight: 700; text-transform: uppercase; line-height: 1;">Thu, Sep 24, 2026</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #555555; margin-top: 4px;">7:00 – 8:30 PM</div>
+        </div>
+        <div style="width: 100px; font-size: 13.5px; color: #333333;">1.5 hrs</div>
+        <div style="width: 130px; font-size: 13.5px; color: #555555;">Sep 18</div>
+        <div style="width: 150px;"><span style="display: inline-flex; align-items: center; padding: 5px 10px; background: #FFFFFF; border: 1.5px dashed #AD0303; border-radius: 3px; font-family: 'Barlow Condensed', sans-serif; font-size: 13.5px; font-weight: 700; letter-spacing: 0.09em; color: #8A0202;">PENDING</span></div>
+        <div style="flex-grow: 1; font-size: 13px; color: #555555;">Waiting on the facility approver</div>
+        <div style="width: 140px; text-align: right;"><button type="button" style="height: 34px; padding: 0 13px; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px; font-family: 'Barlow Condensed', sans-serif; font-size: 14.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #0A0A0A; cursor: pointer;">Withdraw</button></div>
+      </div>
+
+      <div style="display: flex; align-items: center; min-height: 68px; padding: 14px 20px; border-bottom: 1px solid #EEEEEE;">
+        <div style="width: 300px;">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 19px; font-weight: 700; text-transform: uppercase; line-height: 1;">Tue, Sep 22, 2026</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #555555; margin-top: 4px;">3:30 – 5:00 PM</div>
+        </div>
+        <div style="width: 100px; font-size: 13.5px; color: #333333;">1.5 hrs</div>
+        <div style="width: 130px; font-size: 13.5px; color: #555555;">Sep 15</div>
+        <div style="width: 150px;"><span style="display: inline-flex; align-items: center; padding: 5px 10px; background: #FFFFFF; border: 1.5px dashed #AD0303; border-radius: 3px; font-family: 'Barlow Condensed', sans-serif; font-size: 13.5px; font-weight: 700; letter-spacing: 0.09em; color: #8A0202;">PENDING</span></div>
+        <div style="flex-grow: 1; font-size: 13px; color: #555555;">Waiting on the facility approver</div>
+        <div style="width: 140px; text-align: right;"><button type="button" style="height: 34px; padding: 0 13px; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px; font-family: 'Barlow Condensed', sans-serif; font-size: 14.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #0A0A0A; cursor: pointer;">Withdraw</button></div>
+      </div>
+
+      <div style="display: flex; align-items: center; min-height: 68px; padding: 14px 20px; border-bottom: 1px solid #EEEEEE;">
+        <div style="width: 300px;">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 19px; font-weight: 700; text-transform: uppercase; line-height: 1;">Mon, Sep 21, 2026</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #555555; margin-top: 4px;">4:00 – 5:30 PM</div>
+        </div>
+        <div style="width: 100px; font-size: 13.5px; color: #333333;">1.5 hrs</div>
+        <div style="width: 130px; font-size: 13.5px; color: #555555;">Sep 12</div>
+        <div style="width: 150px;"><span style="display: inline-flex; align-items: center; padding: 5px 10px; background: #AD0303; border-radius: 3px; font-family: 'Barlow Condensed', sans-serif; font-size: 13.5px; font-weight: 700; letter-spacing: 0.09em; color: #FFFFFF;">RESERVED</span></div>
+        <div style="flex-grow: 1; font-size: 13px; color: #555555;">Approved by [APPROVER NAME] · Sep 13</div>
+        <div style="width: 140px; text-align: right;"><button type="button" style="height: 34px; padding: 0 13px; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px; font-family: 'Barlow Condensed', sans-serif; font-size: 14.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #0A0A0A; cursor: pointer;">Release slot</button></div>
+      </div>
+
+      <div style="display: flex; align-items: center; min-height: 68px; padding: 14px 20px; border-bottom: 1px solid #EEEEEE;">
+        <div style="width: 300px;">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 19px; font-weight: 700; text-transform: uppercase; line-height: 1;">Thu, Sep 17, 2026</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #555555; margin-top: 4px;">6:00 – 7:00 PM</div>
+        </div>
+        <div style="width: 100px; font-size: 13.5px; color: #333333;">1 hr</div>
+        <div style="width: 130px; font-size: 13.5px; color: #555555;">Sep 10</div>
+        <div style="width: 150px;"><span style="display: inline-flex; align-items: center; padding: 5px 10px; background: #0A0A0A; border-radius: 3px; font-family: 'Barlow Condensed', sans-serif; font-size: 13.5px; font-weight: 700; letter-spacing: 0.09em; color: #FFFFFF;">DECLINED</span></div>
+        <div style="flex-grow: 1; font-size: 13px; color: #555555;">“Cage nets being replaced that evening — try Friday.”</div>
+        <div style="width: 140px; text-align: right;"><a href="RequestBooking.dc.html" style="display: inline-flex; align-items: center; height: 34px; padding: 0 13px; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px; font-family: 'Barlow Condensed', sans-serif; font-size: 14.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #0A0A0A; text-decoration: none;">Request again</a></div>
+      </div>
+
+      <div style="display: flex; align-items: center; min-height: 68px; padding: 14px 20px;">
+        <div style="width: 300px;">
+          <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 19px; font-weight: 700; text-transform: uppercase; line-height: 1; color: #767676;">Wed, Sep 9, 2026</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #767676; margin-top: 4px;">5:00 – 6:30 PM</div>
+        </div>
+        <div style="width: 100px; font-size: 13.5px; color: #767676;">1.5 hrs</div>
+        <div style="width: 130px; font-size: 13.5px; color: #767676;">Sep 2</div>
+        <div style="width: 150px;"><span style="display: inline-flex; align-items: center; padding: 5px 10px; background: #EFEFEF; border: 1px solid #DDDDDD; border-radius: 3px; font-family: 'Barlow Condensed', sans-serif; font-size: 13.5px; font-weight: 700; letter-spacing: 0.09em; color: #555555;">COMPLETED</span></div>
+        <div style="flex-grow: 1; font-size: 13px; color: #767676;">—</div>
+        <div style="width: 140px;"></div>
+      </div>
+
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: #555555;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="#AD0303" stroke-width="1.7"/><path d="M12 11v5.5M12 7.8v.6" stroke="#AD0303" stroke-width="2" stroke-linecap="round"/></svg>
+      Releasing a reserved slot frees it for other teams right away and emails the approver.
+    </div>
+
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":760}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

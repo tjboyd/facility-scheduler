@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Request time — phone</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&amp;family=Barlow+Condensed:wght@600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Barlow,system-ui,sans-serif;background:#F5F5F5;color:#0A0A0A;-webkit-font-smoothing:antialiased}
+a{color:#AD0303}a:hover{color:#8A0202}
+</style>
+</helmet>
+
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F5F5F5;">
+
+  <div style="position: absolute; inset: 0; display: flex; flex-direction: column;">
+    <header style="height: 64px; flex-shrink: 0; background: #FFFFFF; border-bottom: 3px solid #AD0303; display: flex; align-items: center; gap: 10px; padding: 0 16px;">
+    <div style="flex-grow: 1;"><a href="CoachCalendar.dc.html" style="display: flex; align-items: center; flex-shrink: 0;" aria-label="Hamilton Jr Chargers — facility calendar"><img src="/_blob/276a6e8e1ad0852476b2eb89afb293e4" alt="Hamilton Jr Chargers" style="height: 40px; display: block;"></a></div>
+  </header>
+    <div style="padding: 16px;">
+      <h1 style="margin: 0 0 12px 0; font-family: 'Barlow Condensed', sans-serif; font-size: 23px; font-weight: 700; text-transform: uppercase;">Tuesday, Sep 22</h1>
+      <div style="height: 58px; background: #FFFFFF; border: 1.5px dashed #C4C4C4; border-radius: 4px; margin-bottom: 8px;"></div>
+      <div style="height: 86px; background: repeating-linear-gradient(135deg, #F7DADA 0 5px, #FFFFFF 5px 10px); border: 1.5px dashed #AD0303; border-radius: 4px; margin-bottom: 8px;"></div>
+      <div style="height: 58px; background: #FFFFFF; border: 1.5px dashed #C4C4C4; border-radius: 4px;"></div>
+    </div>
+  </div>
+
+  <div style="position: absolute; inset: 0; background: rgba(10, 10, 10, 0.55);"></div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 700px; background: #FFFFFF; border-radius: 12px 12px 0 0; display: flex; flex-direction: column; overflow: hidden;">
+
+    <div style="background: #0A0A0A; padding: 10px 18px 14px 18px;">
+      <div style="display: flex; justify-content: center; margin-bottom: 10px;">
+        <span style="width: 40px; height: 4px; border-radius: 999px; background: #3A3A3A;"></span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <h2 style="margin: 0; flex-grow: 1; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1; text-transform: uppercase; letter-spacing: 0.02em; color: #FFFFFF;">Request time</h2>
+        <a href="MobileCalendar.dc.html" aria-label="Close" style="width: 34px; height: 34px; border-radius: 3px; background: #262626; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <div style="flex-grow: 1; padding: 18px; display: flex; flex-direction: column; gap: 17px;">
+
+      <div style="display: flex; align-items: center; gap: 10px; padding: 11px 14px; background: #F5F5F5; border: 1px solid #DDDDDD; border-radius: 4px;">
+        <span style="width: 8px; height: 8px; background: #AD0303;"></span>
+        <span style="font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; text-transform: uppercase; line-height: 1; flex-grow: 1;">14U</span>
+        <span style="font-size: 11.5px; color: #767676;">your team</span>
+      </div>
+
+      <div>
+        <label for="m-date" style="display: block; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.11em; text-transform: uppercase; color: #555555; margin-bottom: 7px;">Date</label>
+        <input id="m-date" type="text" value="Tuesday, Sep 22, 2026" style="width: 100%; height: 48px; padding: 0 14px; font-family: Barlow, sans-serif; font-size: 14.5px; font-weight: 500; color: #0A0A0A; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px; outline: none;">
+      </div>
+
+      <div>
+        <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.11em; text-transform: uppercase; color: #555555; margin-bottom: 8px;">Start time</div>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;">
+          <button type="button" style="height: 46px; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #0A0A0A; cursor: pointer;">3:00 PM</button>
+          <button type="button" disabled style="height: 46px; background: #EFEFEF; border: 1px solid #E0E0E0; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #949494; text-decoration: line-through;">3:30 PM</button>
+          <button type="button" disabled style="height: 46px; background: #EFEFEF; border: 1px solid #E0E0E0; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #949494; text-decoration: line-through;">4:00 PM</button>
+          <button type="button" disabled style="height: 46px; background: #EFEFEF; border: 1px solid #E0E0E0; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #949494; text-decoration: line-through;">4:30 PM</button>
+          <button type="button" aria-pressed="true" style="height: 46px; background: #AD0303; border: 1px solid #AD0303; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; color: #FFFFFF; cursor: pointer;">5:00 PM</button>
+          <button type="button" style="height: 46px; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #0A0A0A; cursor: pointer;">5:30 PM</button>
+          <button type="button" disabled style="height: 46px; background: #EFEFEF; border: 1px solid #E0E0E0; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #949494; text-decoration: line-through;">6:00 PM</button>
+          <button type="button" disabled style="height: 46px; background: #EFEFEF; border: 1px solid #E0E0E0; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #949494; text-decoration: line-through;">6:30 PM</button>
+          <button type="button" style="height: 46px; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #0A0A0A; cursor: pointer;">7:30 PM</button>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.11em; text-transform: uppercase; color: #555555; margin-bottom: 8px;">Length</div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" style="flex-grow: 1; height: 46px; background: #FFFFFF; border: 1px solid #CCCCCC; border-radius: 4px; font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #0A0A0A; cursor: pointer;">30 min</button>
+          <button type="button" aria-pressed="true" style="flex-grow: 1; height: 46px; background: #AD0303; border: 1px solid #AD0303; border-radius: 4px; font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #FFFFFF; cursor: pointer;">1 hour</button>
+          <button type="button" disabled style="flex-grow: 1; height: 46px; background: #EFEFEF; border: 1px solid #E0E0E0; border-radius: 4px; font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #949494;">1.5 hours</button>
+        </div>
+        <p style="margin: 8px 0 0 0; font-size: 12px; color: #767676;">1.5 hours would run into 12U Black's block at 6:00 PM.</p>
+      </div>
+
+      <div style="background: #0A0A0A; border-radius: 4px; padding: 14px 16px;">
+        <div style="font-family: 'Barlow Condensed', sans-serif; font-size: 21px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; color: #FFFFFF; line-height: 1;">Tue, Sep 22 · 5:00 – 6:00 PM</div>
+        <div style="font-size: 12.5px; color: #B8B8B8; margin-top: 6px;">2 blocks of 30 minutes</div>
+      </div>
+
+    </div>
+
+    <div style="flex-shrink: 0; padding: 16px 18px 26px 18px; border-top: 1px solid #EEEEEE; background: #F5F5F5;">
+      <a href="MobileCalendar.dc.html" style="display: flex; align-items: center; justify-content: center; height: 54px; background: #AD0303; color: #FFFFFF; border-radius: 4px; font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; text-decoration: none;">Send request</a>
+      <p style="margin: 10px 0 0 0; text-align: center; font-size: 12px; color: #555555;">Goes to the facility approver. Shows as pending until reviewed.</p>
+    </div>
+
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
