@@ -61,12 +61,16 @@ once a block is approved. Approvers and super admins needn't have one.
 ## Getting started
 
 ```bash
+createdb facility_dev         # any local Postgres 14+
 npm install
 cp .env.example .env          # edit SEED_SUPER_ADMIN_EMAIL to your address
-npx prisma db push            # create the SQLite database
+npm run db:migrate            # apply the checked-in migrations
 npm run db:seed               # one super admin + the club's teams
 npm run dev
 ```
+
+Development runs on Postgres too, so the schema you work against is the one that
+runs in production.
 
 Open <http://localhost:3000>, enter the seeded address, and **read the sign-in
 link from the terminal** — in development nothing is emailed, the link is
@@ -80,6 +84,8 @@ printed to the server log.
 | `npm run build` / `npm start` | Production build and serve |
 | `npm test` | Unit tests for the domain rules |
 | `npm run typecheck` | `tsc --noEmit` |
+| `npm run db:migrate` | Create/apply migrations in development |
+| `npm run db:deploy` | Apply existing migrations — what the build runs |
 | `npm run db:seed` | Seed a super admin and the club's teams |
 | `node tools/smoke.mjs` | End-to-end browser check: sign-in and people (see below) |
 | `node tools/smoke-schedule.mjs` | End-to-end browser check: schedules, release, pick up |
@@ -112,10 +118,10 @@ end rather than calling the action directly.
   form's inline feedback — on the request screen the start time and the length
   are links rather than form controls, which is also what lets the server state
   the exact block before the coach sends it.
-- **Prisma** over **SQLite** in development. For production, point
-  `DATABASE_URL` at Postgres and change the provider in
-  `prisma/schema.prisma`. SQLite has no enums, so role and status are strings
-  validated in `src/lib/domain.ts`.
+- **Prisma** over **Postgres**, with migrations checked in under
+  `prisma/migrations`. Role, status and origin are strings rather than enums, so
+  adding a role is a code change in `src/lib/domain.ts` — where the allowed
+  values already live — rather than a migration.
 - **Tailwind v4** with the club's brand as tokens in `src/app/globals.css`;
   see [`docs/DESIGN.md`](docs/DESIGN.md) §9.
 
@@ -200,10 +206,98 @@ logged, and the visitor still gets the identical "check your inbox" answer,
 because whether an address is on the list is not something the form should
 reveal either way.
 
+## Deploying
+
+Runs anywhere that runs Next.js and can reach Postgres — there is no cron, no
+disk write and no custom server. What follows is **Vercel + Neon**, which is the
+path of least resistance.
+
+### 1. The database
+
+In the Vercel dashboard, **Storage → Create → Neon**. It provisions the database,
+bills through Vercel, and sets `DATABASE_URL` (pooled) and
+`DATABASE_URL_UNPOOLED` (direct) on the project for you.
+
+Add **one** more variable by hand:
+
+| Name | Value |
+| --- | --- |
+| `DIRECT_DATABASE_URL` | the same string as `DATABASE_URL_UNPOOLED` |
+
+Both are needed and they are not interchangeable. The app queries through the
+pooler, because on a serverless host every request may be a fresh instance and a
+few hundred of those would exhaust Postgres' connection limit. Migrations cannot
+go through a transaction pooler at all — they use session-level statements it
+does not support — so they take the direct connection.
+
+Append `?pgbouncer=true&connection_limit=1` to `DATABASE_URL` if it is not
+already there; Prisma needs to know it is talking to a transaction pooler.
+
+### 2. The rest of the environment
+
+Set these on the Vercel project, Production and Preview alike:
+
+```
+APP_URL                   https://your-app.vercel.app   (or the custom domain)
+ORG_NAME                  Hamilton Jr Chargers
+FACILITY_TIMEZONE         America/Chicago
+MAIL_TRANSPORT            postmark
+MAIL_FROM                 Jr Chargers Facility <no-reply@mail.yourdomain.org>
+MAIL_REPLY_TO             facility@yourdomain.org
+POSTMARK_SERVER_TOKEN     …
+POSTMARK_MESSAGE_STREAM   outbound
+```
+
+**`APP_URL` must match how people actually reach the app**, because every
+sign-in and approval link is built from it. Point it at the custom domain the
+day you add one, or links will keep arriving for the old address.
+
+### 3. Deploy
+
+Import the repository and deploy. `npm run build` runs `prisma migrate deploy`
+before `next build`, so the schema is applied as part of every deployment and
+there is no separate release step to remember.
+
+### 4. Create the first account
+
+Nothing can be done in the app until one super admin exists, and Vercel has no
+shell — so seed it once from your machine, pointed at the production database:
+
+```bash
+DATABASE_URL="<the unpooled Neon string>" \
+DIRECT_DATABASE_URL="<the same>" \
+SEED_SUPER_ADMIN_EMAIL="you@yourdomain.org" \
+npm run db:seed
+```
+
+It is safe to re-run: teams are upserted, hours and rules are only created if
+absent, and an existing admin is left alone. Everyone else is invited from
+**Admin → People & access** once you are in.
+
+### Preview deployments
+
+Neon's Vercel integration gives each preview its own database branch, so a
+preview build migrates its own copy rather than production. **If you wire the
+database up by hand instead, do not give previews the production
+`DIRECT_DATABASE_URL`** — every preview build would run migrations against live
+data.
+
+### Backups
+
+The booking history, the allowlist and the season's assigned schedules are the
+product; losing them mid-season is the failure that actually hurts. Neon keeps
+point-in-time restore on paid plans — check the retention window on whichever
+plan you are on, and take an independent dump somewhere you control:
+
+```bash
+pg_dump "<the unpooled Neon string>" > facility-$(date +%F).sql
+```
+
 ## Layout
 
 ```
 prisma/schema.prisma      data model
+prisma/migrations/        checked-in schema history
 src/lib/domain.ts         pure rules: roles, email parsing, the invariants
 src/lib/schedule.ts       pure rules: recurrence, overlap, release and pickup
 src/lib/rules.ts          pure rules: openings, lengths, request validation
