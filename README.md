@@ -175,24 +175,9 @@ APP_URL="https://…"              # sign-in links are built from this
 
 **Send from a subdomain** (`mail.yourdomain.org`). If the scheduler ever
 generates bounces, that keeps the reputation damage off the domain the club
-sends its ordinary mail from.
-
-Two DNS records, both shown by Postmark once you add the domain under
-*Sender Signatures → Domains*:
-
-| Type | Host | Value |
-| --- | --- | --- |
-| TXT | `<selector>._domainkey.mail.yourdomain.org` | the DKIM key Postmark generates |
-| CNAME | `pm-bounces.mail.yourdomain.org` | `pm.mtasv.net` |
-
-The CNAME is Postmark's custom Return-Path. It is what makes SPF *align* for
-DMARC, which is why you do **not** need to add Postmark to your main domain's
-SPF record. Worth adding a DMARC record too — start at `p=none` and tighten once
-you can see reports:
-
-| Type | Host | Value |
-| --- | --- | --- |
-| TXT | `_dmarc.yourdomain.org` | `v=DMARC1; p=none; rua=mailto:you@yourdomain.org` |
+sends its ordinary mail from. Two DNS records make that work, plus a DMARC
+record — they are in
+[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md#step-1--start-the-dns-records-first).
 
 Keep `POSTMARK_MESSAGE_STREAM` on a **transactional** stream. Sign-in links sent
 down a broadcast stream get filtered far harder, and an auth email in the spam
@@ -208,90 +193,27 @@ reveal either way.
 
 ## Deploying
 
-Runs anywhere that runs Next.js and can reach Postgres — there is no cron, no
-disk write and no custom server. What follows is **Vercel + Neon**, which is the
-path of least resistance.
+**[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) is the step-by-step guide** — Vercel
+for the app, Neon for Postgres, Postmark for email, with the DNS records, the
+first-admin seed and a troubleshooting table.
 
-### 1. The database
+The short version:
 
-In the Vercel dashboard, **Storage → Create → Neon**. It provisions the database,
-bills through Vercel, and sets `DATABASE_URL` (pooled) and
-`DATABASE_URL_UNPOOLED` (direct) on the project for you.
+- The build command is `prisma generate && prisma migrate deploy && next build`,
+  so **the schema is applied as part of every deployment** and there is no
+  separate release step.
+- **Two connection strings, not interchangeable.** `DATABASE_URL` is pooled and
+  is what the app queries through; `DIRECT_DATABASE_URL` is direct and is what
+  migrations use, because a transaction pooler cannot run them.
+- **`APP_URL` must match how people actually reach the app.** Every sign-in and
+  approval link is built from it.
+- **Seed one super admin** before anyone can sign in — the app is useless until
+  somebody can get in and invite the rest.
+- **Take a backup you control.** Neon's retention depends on the plan, and the
+  season's assigned schedules are not something to lose.
 
-Add **one** more variable by hand:
-
-| Name | Value |
-| --- | --- |
-| `DIRECT_DATABASE_URL` | the same string as `DATABASE_URL_UNPOOLED` |
-
-Both are needed and they are not interchangeable. The app queries through the
-pooler, because on a serverless host every request may be a fresh instance and a
-few hundred of those would exhaust Postgres' connection limit. Migrations cannot
-go through a transaction pooler at all — they use session-level statements it
-does not support — so they take the direct connection.
-
-Append `?pgbouncer=true&connection_limit=1` to `DATABASE_URL` if it is not
-already there; Prisma needs to know it is talking to a transaction pooler.
-
-### 2. The rest of the environment
-
-Set these on the Vercel project, Production and Preview alike:
-
-```
-APP_URL                   https://your-app.vercel.app   (or the custom domain)
-ORG_NAME                  Hamilton Jr Chargers
-FACILITY_TIMEZONE         America/Chicago
-MAIL_TRANSPORT            postmark
-MAIL_FROM                 Jr Chargers Facility <no-reply@mail.yourdomain.org>
-MAIL_REPLY_TO             facility@yourdomain.org
-POSTMARK_SERVER_TOKEN     …
-POSTMARK_MESSAGE_STREAM   outbound
-```
-
-**`APP_URL` must match how people actually reach the app**, because every
-sign-in and approval link is built from it. Point it at the custom domain the
-day you add one, or links will keep arriving for the old address.
-
-### 3. Deploy
-
-Import the repository and deploy. `npm run build` runs `prisma migrate deploy`
-before `next build`, so the schema is applied as part of every deployment and
-there is no separate release step to remember.
-
-### 4. Create the first account
-
-Nothing can be done in the app until one super admin exists, and Vercel has no
-shell — so seed it once from your machine, pointed at the production database:
-
-```bash
-DATABASE_URL="<the unpooled Neon string>" \
-DIRECT_DATABASE_URL="<the same>" \
-SEED_SUPER_ADMIN_EMAIL="you@yourdomain.org" \
-npm run db:seed
-```
-
-It is safe to re-run: teams are upserted, hours and rules are only created if
-absent, and an existing admin is left alone. Everyone else is invited from
-**Admin → People & access** once you are in.
-
-### Preview deployments
-
-Neon's Vercel integration gives each preview its own database branch, so a
-preview build migrates its own copy rather than production. **If you wire the
-database up by hand instead, do not give previews the production
-`DIRECT_DATABASE_URL`** — every preview build would run migrations against live
-data.
-
-### Backups
-
-The booking history, the allowlist and the season's assigned schedules are the
-product; losing them mid-season is the failure that actually hurts. Neon keeps
-point-in-time restore on paid plans — check the retention window on whichever
-plan you are on, and take an independent dump somewhere you control:
-
-```bash
-pg_dump "<the unpooled Neon string>" > facility-$(date +%F).sql
-```
+Nothing is Vercel-specific. `npm run build && npm start` runs the app anywhere
+that can reach Postgres — no cron, no disk writes, no custom server.
 
 ## Layout
 
