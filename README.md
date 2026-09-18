@@ -8,8 +8,12 @@ reserved with the team name visible.
 
 ## Status
 
-Design phase. Screen mockups and the product spec live on the
-`claude/vibrant-mccarthy-2sstux` branch under `docs/` — nothing is implemented yet.
+Design phase — nothing is implemented yet. On the
+`claude/vibrant-mccarthy-2sstux` branch under `docs/`:
+
+- `facility-scheduler-mockups.pdf` — every screen, one per page, for review
+- `DESIGN.md` — roles, rules, flows, and what is still open
+- `mockups/` — the artboard sources behind both
 
 ## Core rules
 

@@ -2,7 +2,11 @@
 
 Status: **for review, nothing implemented yet.**
 
-Interactive mockups: <https://claude.ai/artifact/QJmBR8jyCiP981pYTkXd6x>
+**PDF for review:** [`facility-scheduler-mockups.pdf`](./facility-scheduler-mockups.pdf)
+— one screen per landscape page, with a cover, contents and a caption on each.
+Rebuild it with `python3 tools/build_review_pdf.py`.
+
+**Clickable canvas:** <https://claude.ai/artifact/QJmBR8jyCiP981pYTkXd6x>
 (private — share from the page's Share menu before sending it to anyone else).
 Sources for those screens are in [`mockups/`](./mockups).
 
@@ -129,7 +133,7 @@ turned off. Approval/decline buttons in the email are deep links into the app.
 
 | Screen | Who | What it does |
 | --- | --- | --- |
-| Sign in | everyone | Email → one-time link. Says plainly that access is by invitation. |
+| Sign in | everyone | Email → one-time link, nothing else on the page. Says plainly that access is by invitation. |
 | Check your inbox | everyone | Confirmation, resend, and the "not on the list?" explanation. |
 | Week calendar | coach | The main screen. Seven day columns, 30-minute rows, status blocks, empty slots are click targets. |
 | Request time | coach | Modal: team (fixed), date, start-time pills with taken times struck out, length segmented control capped at 1.5 hrs, live summary, optional note. |
