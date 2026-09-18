@@ -31,3 +31,9 @@ export const POSTMARK_MESSAGE_STREAM =
   process.env.POSTMARK_MESSAGE_STREAM?.trim() || "outbound";
 
 export const POSTMARK_SERVER_TOKEN = process.env.POSTMARK_SERVER_TOKEN?.trim() || "";
+
+/**
+ * The facility's timezone. Everything is stored as a local calendar date plus
+ * minutes from midnight, so this is only used to work out what "today" is.
+ */
+export const FACILITY_TIMEZONE = process.env.FACILITY_TIMEZONE?.trim() || "America/Chicago";

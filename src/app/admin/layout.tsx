@@ -1,6 +1,5 @@
 import { requireSuperAdmin } from "@/lib/guards";
 import { AppHeader } from "@/components/AppHeader";
-import { AdminTabs } from "@/components/AdminTabs";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await requireSuperAdmin();
@@ -14,7 +13,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <h1 className="display text-[34px] mt-1 mb-1">Facility settings</h1>
           <p className="text-sm text-muted">Only super admins can change anything on these pages.</p>
         </div>
-        <AdminTabs />
         {children}
       </main>
     </div>

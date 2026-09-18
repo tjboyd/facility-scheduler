@@ -91,6 +91,48 @@ Changing hours does not retroactively cancel bookings that are already approved.
 Approved bookings that fall outside the new hours stay put and are flagged to the
 super admin — still open, see 10a.3.
 
+## 5a. Assigned schedules, releasing and picking up  ·  *built*
+
+Most of the facility's time is not requested — it is **assigned**. A super admin
+gives a team a repeating block: *U9 - White, Saturdays 8:00–9:30, from today
+through 30 April*. Assigned time needs no approval; the club has already decided.
+
+**Every date is written out as its own booking.** A series is stored as the rule
+*and* its occurrences, because each occurrence has a life of its own: it can be
+released, picked up by another team, or left alone. A rule evaluated on the fly
+could not carry that state.
+
+**Times are local wall clock, never instants.** A block is a calendar date plus
+minutes from midnight. A series running to the end of April crosses the March
+daylight-saving change, and 8:00 has to stay 8:00 on both sides of it — which it
+does not if you store an instant and add seven days.
+
+**Clashing dates are skipped, not fatal.** One busy Saturday in October should
+not stop the other thirty being assigned. The skipped dates are named back to
+the admin. Where *every* date clashes, nothing is created and it says so.
+
+**Assigned time is not held to the 1.5-hour cap.** That cap exists to stop one
+coach hogging the request queue; a club can assign a team a three-hour block if
+it wants to. It does still have to sit on the 30-minute grid.
+
+### Release and pick up
+
+| | |
+| --- | --- |
+| Who can release | The team holding the block, or a super admin on their behalf — clubs run on phone calls, and the admin is who gets them |
+| What it does | The block goes back to the club and shows as **Available** on the calendar, saying which team let it go |
+| Who can pick up | Any team with a head coach. **No approval** — it is time that would otherwise go empty |
+| Order | First come, first served |
+| Undo | None. Releasing is itself the undo; once released, the original team takes its chances like anyone else |
+
+Two coaches tapping *Pick it up* at the same moment is a real race, so the claim
+is a conditional update on the row still being released. Exactly one wins, and
+the other is told plainly that another team got there first.
+
+Ending a series removes its **upcoming** dates only. Past dates stay as history,
+and so does anything already released or picked up — those are somebody else's
+plans by the time you end the schedule.
+
 ## 6. Request lifecycle
 
 ```
@@ -249,7 +291,9 @@ rest are `#555555`.
 | Sign in by emailed link, allowlist enforced | built |
 | People & access: invite, role, team, remove, restore | built |
 | Teams: add, archive, restore | built |
-| Week calendar, requests, approvals | designed, not built |
+| Week calendar | built |
+| Assigned schedules, release, pick up | built |
+| Ad-hoc requests and approvals | designed, not built |
 | Facility hours, booking rules | designed, not built |
 | Notification emails for requests | designed, not built |
 
@@ -287,6 +331,16 @@ Two rules the built screens enforce that are worth knowing about:
    open slot of the same length?
 5. **One team** — 20 of the club's 21 SportsEngine teams are loaded; the row
    above `U10 - Red` was cut off in the screenshots and is still unknown.
+6. **Do picked-up blocks count against a team's weekly limit?** They are time
+   nobody else wanted, so probably not — but the limits aren't built yet, so it
+   costs nothing to decide later.
+7. **Should the releasing team hear who picked their slot up?** An email would
+   be easy and is probably wanted.
+8. **How late can a team release?** The booking rules screen has a cutoff
+   ("up to 12 hours before"); nothing enforces it yet.
+9. **Should assigned time have to sit inside facility hours?** It currently
+   doesn't — an admin can assign 8:00 Saturday whether or not the coach-bookable
+   window opens then, on the grounds that the admin knows best.
 
 ## 11. Not in scope yet
 

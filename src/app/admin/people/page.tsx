@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { requireSuperAdmin } from "@/lib/guards";
 import { isRole, isStatus, type Role, type Status } from "@/lib/domain";
+import { AdminTabs } from "@/components/AdminTabs";
 import { Flash } from "@/components/Flash";
 import { AddPeopleForm } from "./AddPeopleForm";
 import { PersonRow } from "./PersonRow";
@@ -55,6 +56,7 @@ export default async function PeoplePage({
 
   return (
     <div className="flex flex-col gap-4">
+      <AdminTabs active="people" />
       <Flash message={msg} kind={kind} />
 
       <div className="flex gap-[18px] items-start flex-wrap xl:flex-nowrap">

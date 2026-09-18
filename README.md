@@ -14,12 +14,20 @@ or declines; the calendar shows who has the facility and when.
   role and team, resend a link, remove access, restore it.
 - **Teams** (super admins): add, archive, restore. A team must be empty to be
   archived.
+- **Assigned schedules** (super admins): give a team a repeating block —
+  "U9 - White, Saturdays 8:00–9:30, from today through the end of April". Every
+  date is written out as its own booking. Assigned time needs no approval.
+- **Release and pick up**: a team gives back a block it won't use, and it
+  becomes first come, first served for any other team — no approval, because
+  it is time that would otherwise go empty.
+- **Week calendar**: the whole club's bookings, Sunday to Saturday.
 
 ## Not built yet
 
-The calendar, booking requests, the approval queue and the notification emails
-for requests. Facility hours and booking rules are designed but not wired up —
-their tabs are marked *Soon*. The design for all of it is in
+Ad-hoc booking requests and the approval queue — coaches can hold and trade
+assigned time, but cannot yet *request* a slot that nobody has. Facility hours
+and booking rules are designed but not wired up, so assigned time is not yet
+checked against opening hours or closure dates; their tabs are marked *Soon*. The design for all of it is in
 [`docs/DESIGN.md`](docs/DESIGN.md), with every screen in
 [`docs/facility-scheduler-mockups.pdf`](docs/facility-scheduler-mockups.pdf).
 
@@ -57,7 +65,8 @@ printed to the server log.
 | `npm test` | Unit tests for the domain rules |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run db:seed` | Seed a super admin and the club's teams |
-| `node tools/smoke.mjs` | End-to-end browser check (see below) |
+| `node tools/smoke.mjs` | End-to-end browser check: sign-in and people (see below) |
+| `node tools/smoke-schedule.mjs` | End-to-end browser check: schedules, release, pick up |
 | `npm run pdf` | Rebuild the mockup review PDF |
 
 ### End-to-end check
@@ -71,7 +80,10 @@ the way a person reads them out of an inbox:
 npm run build
 PORT=3000 npm start > server.log 2>&1 &
 node tools/smoke.mjs
+node tools/smoke-schedule.mjs
 ```
+
+Both clean up everything they create.
 
 ## How it is put together
 
@@ -84,6 +96,19 @@ node tools/smoke.mjs
   validated in `src/lib/domain.ts`.
 - **Tailwind v4** with the club's brand as tokens in `src/app/globals.css`;
   see [`docs/DESIGN.md`](docs/DESIGN.md) §9.
+
+### Time, and why none of it is stored as an instant
+
+A booking is a **local calendar date plus minutes from midnight** — `2027-04-24`
+and `480` for 8:00 AM — never a UTC timestamp.
+
+A series that runs "Saturdays through the end of April" crosses the March
+daylight-saving change. Stored as instants and advanced seven days at a time,
+every date after the change lands an hour out; stored as wall clock, 8:00 stays
+8:00 on both sides, which is what the club means. It also makes overlap
+detection integer comparison rather than timezone-aware date maths.
+
+`FACILITY_TIMEZONE` is used for exactly one thing: working out what "today" is.
 
 ### Authentication
 
@@ -163,9 +188,13 @@ reveal either way.
 ```
 prisma/schema.prisma      data model
 src/lib/domain.ts         pure rules: roles, email parsing, the invariants
+src/lib/schedule.ts       pure rules: recurrence, overlap, release and pickup
 src/lib/auth.ts           magic links and sessions
 src/lib/guards.ts         requireUser / requireSuperAdmin
 src/app/admin/people/     the people & access screen and its server actions
+src/app/admin/schedule/   assigned schedules
+src/app/calendar/         the week calendar
+src/app/booking/          one block: release it, or pick it up
 tests/                    unit tests for the domain rules
 tools/smoke.mjs           end-to-end browser check
 docs/                     design spec, mockups, review PDF

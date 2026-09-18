@@ -23,7 +23,10 @@ model Team {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 
-  members User[]
+  members  User[]
+  assigned AssignedSeries[]
+  bookings Booking[]        @relation("BookingTeam")
+  released Booking[]        @relation("BookingReleasedFrom")
 
   @@index([archivedAt])
 }
@@ -48,7 +51,7 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  sessions  Session[]
+  sessions     Session[]
   signInTokens SignInToken[]
 
   @@index([role])
@@ -74,14 +77,81 @@ model SignInToken {
 /// Server-side session. The cookie holds the secret; only its hash is stored,
 /// and deleting the row revokes the session immediately.
 model Session {
-  id        String   @id @default(cuid())
-  tokenHash String   @unique
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  expiresAt DateTime
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
   lastSeenAt DateTime @default(now())
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+/// A recurring block an admin assigns to a team, e.g. "U9 - White, Saturdays
+/// 8:00–9:30, from today through 30 April". Assigned time needs no approval.
+///
+/// Times are stored as a local calendar date plus minutes from midnight, never
+/// as an instant. A series that runs through spring crosses a daylight-saving
+/// change, and 8:00 must stay 8:00 on both sides of it.
+model AssignedSeries {
+  id           String  @id @default(cuid())
+  teamId       String
+  team         Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  /// 0 = Sunday … 6 = Saturday.
+  weekday      Int
+  startMinutes Int
+  endMinutes   Int
+  /// Inclusive "YYYY-MM-DD" bounds.
+  startsOn     String
+  endsOn       String
+  note         String?
+
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  occurrences Booking[]
+
+  @@index([teamId])
+  @@index([weekday])
+}
+
+/// One block of facility time on one day. Assigned occurrences, slots released
+/// back to the club, and slots picked up by another team are all this row —
+/// there is one row per physical block of time, whoever currently holds it.
+model Booking {
+  id           String @id @default(cuid())
+  /// Local calendar date, "YYYY-MM-DD". Sorts correctly as a string.
+  date         String
+  startMinutes Int
+  endMinutes   Int
+
+  /// Who holds it. Null while released and unclaimed.
+  teamId String?
+  team   Team?   @relation("BookingTeam", fields: [teamId], references: [id], onDelete: SetNull)
+
+  /// HELD | RELEASED
+  status String
+  /// ASSIGNED | PICKUP
+  origin String
+
+  seriesId String?
+  series   AssignedSeries? @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+
+  /// Kept when a slot is released, so the calendar can say who gave it up.
+  releasedFromTeamId String?
+  releasedFromTeam   Team?     @relation("BookingReleasedFrom", fields: [releasedFromTeamId], references: [id], onDelete: SetNull)
+  releasedAt         DateTime?
+  claimedAt          DateTime?
+
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([date])
+  @@index([status])
+  @@index([teamId])
+  @@index([seriesId])
 }
