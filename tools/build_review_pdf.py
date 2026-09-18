@@ -12,6 +12,8 @@ import base64, json, os, re, subprocess, sys, tempfile, urllib.request
 SRC = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs", "mockups")
 OUT = os.environ.get("OUT_DIR", os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs"))
 CHROME = os.environ.get("CHROME", "/opt/pw-browsers/chromium-1194/chrome-linux/chrome")
+LOGO_BLOB = "/_blob/276a6e8e1ad0852476b2eb89afb293e4"
+LOGO_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs", "brand", "jr-chargers-logo.png")
 UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 FONT_CSS = ("https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700"
             "&family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap")
@@ -61,9 +63,13 @@ def fetch_fonts():
     return "\n".join(kept)
 
 
-def board_markup(name):
+def logo_data_uri():
+    return "data:image/png;base64," + base64.b64encode(open(LOGO_FILE, "rb").read()).decode()
+
+
+def board_markup(name, logo):
     s = open(os.path.join(SRC, name)).read()
-    return s.split("</helmet>", 1)[1].split("</x-dc>", 1)[0].strip()
+    return s.split("</helmet>", 1)[1].split("</x-dc>", 1)[0].strip().replace(LOGO_BLOB, logo)
 
 
 def main():
@@ -73,6 +79,7 @@ def main():
 
     print("fetching fonts…", file=sys.stderr)
     fonts = fetch_fonts()
+    logo = logo_data_uri()
 
     pages = []
 
@@ -103,47 +110,43 @@ def main():
         '<span style="font-size:13px;color:#555555;">%s</span></div>' % (sw, k, v)
         for k, v, sw in legend)
 
-    pages.append("""
+    pages.append(("""
 <section class="page cover">
   <div class="coverbar">
-    <svg width="34" height="34" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="14.2" fill="#AD0303"/><path d="M7.4 6.6c3.4 4.6 3.4 14.2 0 18.8M24.6 6.6c-3.4 4.6-3.4 14.2 0 18.8" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round"/></svg>
-    <div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:21px;letter-spacing:0.05em;color:#FFFFFF;line-height:1;">JR CHARGERS BASEBALL</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:11px;letter-spacing:0.18em;color:#E05A5A;line-height:1;margin-top:5px;">INDOOR FACILITY</div>
-    </div>
+    <img src="__LOGO__" alt="Hamilton Jr Chargers" style="height:78px;display:block;">
   </div>
   <div class="coverbody">
     <div style="display:flex;gap:44px;">
       <div style="width:392px;flex-shrink:0;">
-        <h1 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:62px;line-height:0.95;text-transform:uppercase;letter-spacing:0.01em;">Facility<br>scheduler</h1>
-        <div style="width:64px;height:4px;background:#AD0303;margin:16px 0 16px 0;"></div>
-        <p style="margin:0 0 20px 0;font-size:14px;line-height:1.6;color:#333333;">Screen mockups for review. Nothing is built yet — this is the design and the user flows, laid out one screen per page.</p>
-
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.14em;color:#AD0303;margin-bottom:6px;">HOW A BLOCK READS</div>
+        <h1 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:54px;line-height:0.95;text-transform:uppercase;letter-spacing:0.01em;">Facility<br>scheduler</h1>
+        <div style="width:64px;height:4px;background:#AD0303;margin:14px 0;"></div>
+        <p style="margin:0 0 18px 0;font-size:13.5px;line-height:1.6;color:#333333;">Screen mockups for review. Nothing is built yet &mdash; this is the design and the user flows, one screen per page.</p>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.14em;color:#AD0303;margin-bottom:4px;">HOW A BLOCK READS</div>
         %s
-        <p style="margin:12px 0 0 0;font-size:12.5px;line-height:1.55;color:#555555;">Fill, outline and hatch rather than colour alone, so the three states hold up in greyscale.</p>
-
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.14em;color:#AD0303;margin:18px 0 6px 0;">THE LOOP</div>
-        <p style="margin:0;font-size:13px;line-height:1.6;color:#333333;">Coach picks an open slot and a length (30 / 60 / 90 min) &rarr; the request lands in the approver's inbox <em>and</em> in the Approvals queue &rarr; approve or decline &rarr; the coach gets an email and the calendar updates. Whoever gets there first decides it.</p>
+        <p style="margin:10px 0 0 0;font-size:12.5px;line-height:1.5;color:#555555;">Fill, outline and hatch rather than colour alone, so the three states hold up in greyscale.</p>
       </div>
       <div style="flex-grow:1;">
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.14em;color:#AD0303;margin-bottom:4px;">CONTENTS</div>
         %s
       </div>
     </div>
-    <div style="margin-top:30px;padding-top:18px;border-top:2px solid #0A0A0A;display:flex;gap:44px;">
-      <div style="width:392px;flex-shrink:0;">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.14em;color:#AD0303;margin-bottom:6px;">SETTLED</div>
-        <p style="margin:0;font-size:12.5px;line-height:1.6;color:#333333;">One location with a single bookable space &middot; pending blocks name the team holding them &middot; 30-minute blocks, 1.5 hours max &middot; club brand throughout.</p>
+    <div style="margin-top:26px;padding-top:16px;border-top:2px solid #0A0A0A;display:flex;gap:34px;">
+      <div style="flex:1;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.14em;color:#AD0303;margin-bottom:5px;">THE LOOP</div>
+        <p style="margin:0;font-size:12.5px;line-height:1.55;color:#333333;">Coach picks an open slot and a length &rarr; the request hits the approver's inbox <em>and</em> the Approvals queue &rarr; approve or decline &rarr; the coach gets an email and the calendar updates. Whoever gets there first decides it.</p>
       </div>
-      <div style="flex-grow:1;">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.14em;color:#AD0303;margin-bottom:6px;">STILL OPEN</div>
-        <p style="margin:0;font-size:12.5px;line-height:1.6;color:#333333;">The real logo file (the mark here is a placeholder) &middot; the actual team list (age groups shown are samples) &middot; Google sign-in or magic link only &middot; whether any coach runs two teams &middot; what happens to a reserved block when an admin later narrows that day's hours.</p>
+      <div style="flex:1;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.14em;color:#AD0303;margin-bottom:5px;">SETTLED</div>
+        <p style="margin:0;font-size:12.5px;line-height:1.55;color:#333333;">One location with a single bookable space &middot; pending blocks name the team holding them &middot; 30-minute blocks, 1.5 hours max &middot; club brand and logo throughout.</p>
+      </div>
+      <div style="flex:1;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.14em;color:#AD0303;margin-bottom:5px;">STILL OPEN</div>
+        <p style="margin:0;font-size:12.5px;line-height:1.55;color:#333333;">The real team list (age groups here are samples) &middot; Google sign-in or magic link only &middot; whether any coach runs two teams &middot; what happens to a reserved block if an admin later narrows that day's hours.</p>
       </div>
     </div>
   </div>
-  <div class="foot"><span>Jr Chargers Baseball &middot; Indoor facility scheduler</span><span>Design review &middot; Sep 2026</span></div>
-</section>""" % (legend_html, "".join(toc)))
+  <div class="foot"><span>Hamilton Jr Chargers &middot; Indoor facility scheduler</span><span>Design review &middot; Sep 2026</span></div>
+</section>""" % (legend_html, "".join(toc))).replace("__LOGO__", logo))
 
     # ---- one page per board ------------------------------------------------
     for i, name in enumerate(order, start=2):
@@ -163,9 +166,9 @@ def main():
   <div class="stage">
     <div class="board" style="width:%dpx;height:%dpx;transform:scale(%.4f);">%s</div>
   </div>
-  <div class="foot"><span>Jr Chargers Baseball · Indoor facility scheduler</span><span>%s</span></div>
+  <div class="foot"><span>Hamilton Jr Chargers · Indoor facility scheduler</span><span>%s</span></div>
 </section>""" % (SECTIONS[b["y"]], b.get("title", name), i, CAPTIONS.get(name, ""),
-                 w, h, scale, board_markup(name), "Screen %d of %d" % (i - 1, len(order))))
+                 w, h, scale, board_markup(name, logo), "Screen %d of %d" % (i - 1, len(order))))
 
     doc = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>Facility Scheduler — screen mockups</title>
@@ -192,8 +195,8 @@ a{color:#AD0303;text-decoration:none}
   font-family:'Barlow Condensed',sans-serif;font-size:11.5px;font-weight:600;letter-spacing:0.12em;
   text-transform:uppercase;color:#AAAAAA}
 .cover{padding:0}
-.coverbar{height:96px;background:#0A0A0A;display:flex;align-items:center;gap:13px;padding:0 %dpx}
-.coverbody{padding:36px %dpx 0 %dpx}
+.coverbar{height:124px;background:#FFFFFF;border-bottom:4px solid #AD0303;display:flex;align-items:center;padding:0 %dpx}
+.coverbody{padding:28px %dpx 0 %dpx}
 </style></head>
 <body>%s</body></html>""" % (fonts, PAGE_W, PAGE_H, PAGE_W, PAGE_H, PAD_T, PAD_X, PAD_B, PAD_X,
                              STAGE_H, STAGE_MT, PAD_X, PAD_X, PAD_X, PAD_X, PAD_X, "".join(pages))

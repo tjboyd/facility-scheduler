@@ -25,8 +25,11 @@ canvas runtime's `support.js`).
 
 Sample data throughout (team names, coach names, dates in the week of
 Sep 20–26 2026) is illustrative. `[YOUR NAME]` and `[APPROVER NAME]` are
-placeholders, as is the baseball mark beside the wordmark — swap in the real
-Jr Chargers logo file before build.
+placeholders.
+
+The artboards reference the club logo by the design canvas's asset URL
+(`/_blob/…`). The same image is checked in at `../brand/jr-chargers-logo.png`,
+and the PDF build inlines it from there so the PDF stands alone.
 
 Styling follows the Jr Chargers Baseball brand already used by the club's
 tryout, camp and registration generators: crimson `#AD0303`, black `#0A0A0A`,

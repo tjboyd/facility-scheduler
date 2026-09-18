@@ -199,12 +199,19 @@ side by side would be unreadable, so the hierarchy carries the meaning.
 
 Every status also carries a text label, never colour alone.
 
-### Wordmark
+### Logo and header
 
-Black bar, `JR CHARGERS BASEBALL` in white condensed caps, `INDOOR FACILITY` in
-crimson beneath it — the same lockup as the printed page headers. The mark beside
-it is a placeholder baseball, not the club logo; swap in the real logo file
-before build.
+The club logo (`brand/jr-chargers-logo.png`) sits top-left on every screen, and
+large above the card on sign-in.
+
+The header bar is **white with a 3px crimson rule beneath it**, not black. The
+logo's wordmark is black with a white keyline, so on a black bar the letterforms
+lose their fill and collapse into outlines — tested and rejected. Black stays as
+the accent it always was: table headers, the calendar's day-header row, the
+modal title bars.
+
+Nav on the white bar: the active item is a crimson block with white text, the
+rest are `#555555`.
 
 ## 10. Decisions made
 
@@ -213,7 +220,7 @@ before build.
   ever booked separately, that is a schema change, not a display change.
 - **Pending requests show the team name.** Confirmed. Other coaches see which
   team is holding a slot while it waits on the approver, not just that it's taken.
-- **Jr Chargers brand throughout.** See section 9.
+- **Hamilton Jr Chargers brand and logo throughout.** See section 9.
 
 ## 10a. Still open
 
@@ -226,8 +233,7 @@ before build.
    it, or auto-cancel and notify the coach? The spec currently says flag.
 4. **Decline without a free alternative** — should declining suggest the nearest
    open slot of the same length?
-5. **The real logo file** — needed to replace the placeholder mark.
-6. **Team list** — mockups use 8U / 10U / 12U Red / 12U Black / 13U / 14U as
+5. **Team list** — mockups use 8U / 10U / 12U Red / 12U Black / 13U / 14U as
    sample data. The real roster of teams needs confirming.
 
 ## 11. Not in scope yet
