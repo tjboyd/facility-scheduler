@@ -205,6 +205,18 @@ try {
   await coachPage.goto(`${BASE}/admin/people`, { waitUntil: "domcontentloaded" });
   check("a head coach is kept out of admin", new URL(coachPage.url()).pathname === "/calendar", coachPage.url());
   check("…and sees no Admin link", (await coachPage.locator('nav a:has-text("Admin")').count()) === 0);
+
+  // Assigning repeating time is the club's call, not a coach's.
+  await coachPage.goto(`${BASE}/admin/schedule`, { waitUntil: "domcontentloaded" });
+  check(
+    "a head coach cannot load assigned schedules",
+    new URL(coachPage.url()).pathname === "/calendar",
+    coachPage.url(),
+  );
+  check(
+    "…and has no way to set up anything repeating",
+    (await coachPage.locator("#weekday, #startsOn, #endsOn").count()) === 0,
+  );
   await coachContext.close();
 
   // -- teams ---------------------------------------------------------------

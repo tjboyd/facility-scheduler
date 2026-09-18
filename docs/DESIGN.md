@@ -97,15 +97,20 @@ Most of the facility's time is not requested — it is **assigned**. A super adm
 gives a team a repeating block: *U9 - White, Saturdays 8:00–9:30, from today
 through 30 April*. Assigned time needs no approval; the club has already decided.
 
+**Setting up repeating time is the club's call, not a coach's.** Only super
+admins can create or end a schedule — it is gated on the admin layout, on the
+page, and on both server actions, so there is no route to it from a coach's
+session. A coach's part of this is releasing dates their team won't use and
+picking up what other teams have let go.
+
 **Every date is written out as its own booking.** A series is stored as the rule
 *and* its occurrences, because each occurrence has a life of its own: it can be
 released, picked up by another team, or left alone. A rule evaluated on the fly
 could not carry that state.
 
-**Times are local wall clock, never instants.** A block is a calendar date plus
-minutes from midnight. A series running to the end of April crosses the March
-daylight-saving change, and 8:00 has to stay 8:00 on both sides of it — which it
-does not if you store an instant and add seven days.
+**8:00 AM Saturday is 8:00 AM all season**, before and after the daylight-saving
+change. A block is stored as a calendar date plus minutes from midnight rather
+than as an instant, which is what makes that hold.
 
 **Clashing dates are skipped, not fatal.** One busy Saturday in October should
 not stop the other thirty being assigned. The skipped dates are named back to

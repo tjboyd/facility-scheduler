@@ -14,7 +14,8 @@ or declines; the calendar shows who has the facility and when.
   role and team, resend a link, remove access, restore it.
 - **Teams** (super admins): add, archive, restore. A team must be empty to be
   archived.
-- **Assigned schedules** (super admins): give a team a repeating block —
+- **Assigned schedules** (**super admins only** — coaches cannot set up anything
+  repeating): give a team a repeating block —
   "U9 - White, Saturdays 8:00–9:30, from today through the end of April". Every
   date is written out as its own booking. Assigned time needs no approval.
 - **Release and pick up**: a team gives back a block it won't use, and it
@@ -97,18 +98,13 @@ Both clean up everything they create.
 - **Tailwind v4** with the club's brand as tokens in `src/app/globals.css`;
   see [`docs/DESIGN.md`](docs/DESIGN.md) §9.
 
-### Time, and why none of it is stored as an instant
+### Times
 
-A booking is a **local calendar date plus minutes from midnight** — `2027-04-24`
-and `480` for 8:00 AM — never a UTC timestamp.
-
-A series that runs "Saturdays through the end of April" crosses the March
-daylight-saving change. Stored as instants and advanced seven days at a time,
-every date after the change lands an hour out; stored as wall clock, 8:00 stays
-8:00 on both sides, which is what the club means. It also makes overlap
-detection integer comparison rather than timezone-aware date maths.
-
-`FACILITY_TIMEZONE` is used for exactly one thing: working out what "today" is.
+**8:00 AM Saturday is 8:00 AM all season, daylight saving or not.** A booking is
+stored as a local calendar date plus minutes from midnight (`2027-04-24`, `480`),
+never as a UTC timestamp, which is what makes that true — and it turns clash
+detection into integer comparison. `FACILITY_TIMEZONE` is used for one thing:
+working out what "today" is.
 
 ### Authentication
 
