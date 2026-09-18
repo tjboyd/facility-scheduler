@@ -61,12 +61,16 @@ once a block is approved. Approvers and super admins needn't have one.
 ## Getting started
 
 ```bash
+createdb facility_dev         # any local Postgres 14+
 npm install
 cp .env.example .env          # edit SEED_SUPER_ADMIN_EMAIL to your address
-npx prisma db push            # create the SQLite database
+npm run db:migrate            # apply the checked-in migrations
 npm run db:seed               # one super admin + the club's teams
 npm run dev
 ```
+
+Development runs on Postgres too, so the schema you work against is the one that
+runs in production.
 
 Open <http://localhost:3000>, enter the seeded address, and **read the sign-in
 link from the terminal** — in development nothing is emailed, the link is
@@ -80,6 +84,8 @@ printed to the server log.
 | `npm run build` / `npm start` | Production build and serve |
 | `npm test` | Unit tests for the domain rules |
 | `npm run typecheck` | `tsc --noEmit` |
+| `npm run db:migrate` | Create/apply migrations in development |
+| `npm run db:deploy` | Apply existing migrations — what the build runs |
 | `npm run db:seed` | Seed a super admin and the club's teams |
 | `node tools/smoke.mjs` | End-to-end browser check: sign-in and people (see below) |
 | `node tools/smoke-schedule.mjs` | End-to-end browser check: schedules, release, pick up |
@@ -112,10 +118,10 @@ end rather than calling the action directly.
   form's inline feedback — on the request screen the start time and the length
   are links rather than form controls, which is also what lets the server state
   the exact block before the coach sends it.
-- **Prisma** over **SQLite** in development. For production, point
-  `DATABASE_URL` at Postgres and change the provider in
-  `prisma/schema.prisma`. SQLite has no enums, so role and status are strings
-  validated in `src/lib/domain.ts`.
+- **Prisma** over **Postgres**, with migrations checked in under
+  `prisma/migrations`. Role, status and origin are strings rather than enums, so
+  adding a role is a code change in `src/lib/domain.ts` — where the allowed
+  values already live — rather than a migration.
 - **Tailwind v4** with the club's brand as tokens in `src/app/globals.css`;
   see [`docs/DESIGN.md`](docs/DESIGN.md) §9.
 
@@ -169,24 +175,9 @@ APP_URL="https://…"              # sign-in links are built from this
 
 **Send from a subdomain** (`mail.yourdomain.org`). If the scheduler ever
 generates bounces, that keeps the reputation damage off the domain the club
-sends its ordinary mail from.
-
-Two DNS records, both shown by Postmark once you add the domain under
-*Sender Signatures → Domains*:
-
-| Type | Host | Value |
-| --- | --- | --- |
-| TXT | `<selector>._domainkey.mail.yourdomain.org` | the DKIM key Postmark generates |
-| CNAME | `pm-bounces.mail.yourdomain.org` | `pm.mtasv.net` |
-
-The CNAME is Postmark's custom Return-Path. It is what makes SPF *align* for
-DMARC, which is why you do **not** need to add Postmark to your main domain's
-SPF record. Worth adding a DMARC record too — start at `p=none` and tighten once
-you can see reports:
-
-| Type | Host | Value |
-| --- | --- | --- |
-| TXT | `_dmarc.yourdomain.org` | `v=DMARC1; p=none; rua=mailto:you@yourdomain.org` |
+sends its ordinary mail from. Two DNS records make that work, plus a DMARC
+record — they are in
+[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md#step-1--start-the-dns-records-first).
 
 Keep `POSTMARK_MESSAGE_STREAM` on a **transactional** stream. Sign-in links sent
 down a broadcast stream get filtered far harder, and an auth email in the spam
@@ -200,10 +191,35 @@ logged, and the visitor still gets the identical "check your inbox" answer,
 because whether an address is on the list is not something the form should
 reveal either way.
 
+## Deploying
+
+**[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) is the step-by-step guide** — Vercel
+for the app, Neon for Postgres, Postmark for email, with the DNS records, the
+first-admin seed and a troubleshooting table.
+
+The short version:
+
+- The build command is `prisma generate && prisma migrate deploy && next build`,
+  so **the schema is applied as part of every deployment** and there is no
+  separate release step.
+- **Two connection strings, not interchangeable.** `DATABASE_URL` is pooled and
+  is what the app queries through; `DIRECT_DATABASE_URL` is direct and is what
+  migrations use, because a transaction pooler cannot run them.
+- **`APP_URL` must match how people actually reach the app.** Every sign-in and
+  approval link is built from it.
+- **Seed one super admin** before anyone can sign in — the app is useless until
+  somebody can get in and invite the rest.
+- **Take a backup you control.** Neon's retention depends on the plan, and the
+  season's assigned schedules are not something to lose.
+
+Nothing is Vercel-specific. `npm run build && npm start` runs the app anywhere
+that can reach Postgres — no cron, no disk writes, no custom server.
+
 ## Layout
 
 ```
 prisma/schema.prisma      data model
+prisma/migrations/        checked-in schema history
 src/lib/domain.ts         pure rules: roles, email parsing, the invariants
 src/lib/schedule.ts       pure rules: recurrence, overlap, release and pickup
 src/lib/rules.ts          pure rules: openings, lengths, request validation

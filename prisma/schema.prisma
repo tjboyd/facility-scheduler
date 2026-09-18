@@ -1,17 +1,27 @@
 // Facility scheduler — data model.
 //
-// SQLite for development; switch the provider to "postgresql" for production.
-// Prisma enums are not supported on SQLite, so role and status are stored as
-// strings and constrained in the application layer (src/lib/domain.ts), which
-// is also where the allowed values are defined and validated.
+// Postgres everywhere, development included: the schema this runs against in
+// production is the schema the tests run against, and migrations are checked in
+// rather than pushed by hand.
+//
+// Role, status and origin are stored as strings rather than Prisma enums. They
+// began that way because SQLite has no enums, and they stay that way because it
+// keeps adding a role a code change in src/lib/domain.ts — where the allowed
+// values are already defined and validated — instead of a schema migration.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
+  // Queries go through the pooler. On a serverless host every request may be a
+  // fresh instance, and a few hundred of those would exhaust Postgres'
+  // connection limit without one in front.
   url      = env("DATABASE_URL")
+  // Migrations need a direct connection: a transaction pooler cannot run the
+  // session-level statements they use. Locally the two are the same string.
+  directUrl = env("DIRECT_DATABASE_URL")
 }
 
 model Team {
