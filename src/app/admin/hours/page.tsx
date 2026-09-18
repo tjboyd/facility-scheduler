@@ -4,7 +4,7 @@ import { FACILITY_TIMEZONE } from "@/lib/env";
 import { requireSuperAdmin } from "@/lib/guards";
 import { AdminTabs } from "@/components/AdminTabs";
 import { Flash } from "@/components/Flash";
-import { formatDateShort, formatTimeOfDay, todayInZone, WEEKDAYS } from "@/lib/schedule";
+import { formatDateLong, formatTimeOfDay, todayInZone, WEEKDAYS } from "@/lib/schedule";
 import { addClosure, removeClosure, saveHours } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -162,8 +162,8 @@ export default async function HoursPage({
               data-closure={closure.id}
               className="inline-flex items-center gap-2.5 h-9 pl-3.5 pr-2 rounded-[3px] border border-line-soft bg-paper text-[13.5px]"
             >
-              {formatDateShort(closure.startDate)}
-              {closure.endDate !== closure.startDate && ` – ${formatDateShort(closure.endDate)}`}
+              {formatDateLong(closure.startDate)}
+              {closure.endDate !== closure.startDate && ` – ${formatDateLong(closure.endDate)}`}
               {closure.reason && <span className="text-muted">· {closure.reason}</span>}
               <form action={removeClosure}>
                 <input type="hidden" name="closureId" value={closure.id} />

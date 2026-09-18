@@ -7,8 +7,10 @@ import { Flash } from "@/components/Flash";
 import {
   addDays,
   BLOCK_MINUTES,
+  formatDateLong,
   formatDateShort,
   formatRange,
+  formatWeekdayShort,
   formatTimeOfDay,
   isDateString,
   startOfWeek,
@@ -146,7 +148,10 @@ export default async function CalendarPage({
                   date === today ? "text-white" : "text-[#A8A8A8]"
                 }`}
               >
-                {formatDateShort(date)}
+                <span>{formatWeekdayShort(date)}</span>
+                <span className={date === today ? "text-[#C8C8C8]" : "text-[#7C7C7C]"}>
+                  {formatDateShort(date)}
+                </span>
               </div>
             ))}
           </div>
@@ -282,7 +287,7 @@ export default async function CalendarPage({
                     className="flex items-center gap-3 rounded-[3px] border border-line-soft bg-paper px-3 h-10 no-underline text-ink"
                   >
                     <span className="font-[family-name:var(--font-display)] text-[17px] uppercase grow">
-                      {formatDateShort(booking.date)} · {formatRange(booking.startMinutes, booking.endMinutes)}
+                      {formatDateLong(booking.date)} · {formatRange(booking.startMinutes, booking.endMinutes)}
                     </span>
                     <span className={booking.status === "PENDING" ? "chip chip-crimson" : "chip chip-neutral"}>
                       {statusLabel(booking)}
@@ -309,7 +314,7 @@ export default async function CalendarPage({
                     className="flex items-center gap-3 rounded-[3px] border-[1.5px] border-dashed border-crimson px-3 h-10 no-underline text-ink"
                   >
                     <span className="font-[family-name:var(--font-display)] text-[17px] uppercase grow">
-                      {formatDateShort(booking.date)} · {formatRange(booking.startMinutes, booking.endMinutes)}
+                      {formatDateLong(booking.date)} · {formatRange(booking.startMinutes, booking.endMinutes)}
                     </span>
                     {booking.releasedFromTeam && (
                       <span className="text-[12px] text-muted">

@@ -86,7 +86,12 @@ export default async function RequestPage({
 
           <div className="flex gap-4 flex-wrap">
             <div className="grow min-w-[220px]">
-              <span className="field-label">Date</span>
+              <div className="flex items-baseline gap-2.5">
+                <span className="field-label">Date</span>
+                {/* The native picker shows 09/23/2026 and nothing else, so the
+                    day it lands on is spelled out beside it. */}
+                <span className="text-[11.5px] text-faint mb-2">{WEEKDAYS[weekdayOf(date)]}</span>
+              </div>
               <div className="flex gap-2">
                 <input
                   type="date"

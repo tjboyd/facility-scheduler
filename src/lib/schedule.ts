@@ -131,6 +131,15 @@ export function formatDateLong(date: string): string {
   }).format(toUtc(date));
 }
 
+/**
+ * "Sun" — the weekday on its own, for the calendar's column heads, where the
+ * date sits beside it. Taken from WEEKDAYS rather than Intl so it can never
+ * disagree with the day names used everywhere else.
+ */
+export function formatWeekdayShort(date: string): string {
+  return WEEKDAYS[weekdayOf(date)]!.slice(0, 3);
+}
+
 export function formatDateShort(date: string): string {
   return new Intl.DateTimeFormat("en-US", {
     timeZone: "UTC",

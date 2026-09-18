@@ -7,6 +7,7 @@ import {
   findClashes,
   formatRange,
   formatTimeOfDay,
+  formatWeekdayShort,
   isDateString,
   isOnBlockGrid,
   isPast,
@@ -88,6 +89,21 @@ describe("dates", () => {
     const instant = new Date("2026-11-09T02:30:00Z");
     expect(todayInZone("America/Chicago", instant)).toBe("2026-11-08");
     expect(todayInZone("UTC", instant)).toBe("2026-11-09");
+  });
+});
+
+describe("formatWeekdayShort", () => {
+  it("names the day a date falls on", () => {
+    expect(formatWeekdayShort("2026-09-20")).toBe("Sun");
+    expect(formatWeekdayShort("2026-09-23")).toBe("Wed");
+    expect(formatWeekdayShort("2026-09-26")).toBe("Sat");
+  });
+
+  it("still names it across a daylight-saving change", () => {
+    // 8 November 2026 is the autumn shift; the Saturday either side of it is
+    // a Saturday in both cases, because none of this converts timezones.
+    expect(formatWeekdayShort("2026-11-07")).toBe("Sat");
+    expect(formatWeekdayShort("2026-11-14")).toBe("Sat");
   });
 });
 
