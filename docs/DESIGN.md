@@ -45,7 +45,7 @@ cannot sign in, even with a valid sign-in link.
 - Sign-in is passwordless: enter your email, get a one-time link (15-minute
   expiry). Google sign-in is shown as a second option — still open, see 10a.1.
 
-## 4. Booking rules
+## 4. Booking rules  ·  *built*
 
 Defaults shown; every value is a super admin setting.
 
@@ -70,14 +70,19 @@ Invariants that are *not* settings:
   stops two coaches requesting the same time and both being told yes.
 - Requests must sit entirely inside that weekday's open hours and must not fall
   on a closure date.
-- Start times that can't fit the selected length are disabled in the picker
-  rather than rejected after submission.
+- The picker never offers a start that nothing fits into, and once a start is
+  chosen it offers only the lengths that fit before the next booking or closing
+  time. Nothing is rejected after submission that could have been prevented
+  before it — but the rules still run again on submit, because the picker is a
+  convenience and not the enforcement.
 
-## 5. Facility hours
+## 5. Facility hours  ·  *built*
 
 Per weekday (Sunday through Saturday): open/closed toggle plus an opening and
-closing time. A "copy to other days" action handles the common
-"Monday–Friday are all the same" case.
+closing time, with a bar showing the week at a glance. A "copy to other days"
+shortcut for the common "Monday–Friday are all the same" case was drawn but not
+built — seven pairs of dropdowns on one form, saved in one go, turned out to be
+quick enough that the shortcut earned nothing.
 
 Sample configuration used in the mockups:
 
@@ -141,7 +146,7 @@ Ending a series removes its **upcoming** dates only. Past dates stay as history,
 and so does anything already released or picked up — those are somebody else's
 plans by the time you end the schedule.
 
-## 6. Request lifecycle
+## 6. Request lifecycle  ·  *built*
 
 ```
                    withdraw (coach)
@@ -161,24 +166,25 @@ plans by the time you end the schedule.
   "reserved / blocked" state.
 - **declined** — the approver types a short reason; the coach sees it in email
   and in *My requests*, and the slot reopens immediately.
-- **released** — a coach giving back an approved slot; it reopens and the
-  approver is notified.
+- **released** — a coach giving back a slot they hold; it reopens as first come,
+  first served. **No email goes out**, for either the release or the pick-up:
+  the calendar is the record. See 10a.7.
 
 Approving from the email and approving from the Approvals queue do the same
 thing. Whoever gets there first decides it; the second person sees it already
 decided.
 
-## 7. Notifications
+## 7. Notifications  ·  *built*
 
 | Event | Goes to |
 | --- | --- |
 | New request | every address on the approver list |
 | Approved | the requesting coach |
 | Declined (with reason) | the requesting coach |
-| Slot released by a coach | the approver list |
+| Slot released by a coach | nobody — see 10a.7 |
 
-Options: one email per request or a daily digest; coach decision emails can be
-turned off.
+Coach decision emails can be turned off on *Booking rules*. The daily-digest
+option in the original spec is not built — see 10a.6.
 
 **Transport: Postmark**, on a transactional message stream, sending from a
 subdomain (`mail.<domain>`) so the scheduler's sending reputation is separate
@@ -215,9 +221,9 @@ will read. The button deep-links to that request with the reason box ready.
 | Sign in | everyone | Email → one-time link, nothing else on the page. Says plainly that access is by invitation. |
 | Check your inbox | everyone | Confirmation, resend, and the "not on the list?" explanation. |
 | Week calendar | coach | The main screen. Seven day columns, 30-minute rows, status blocks, empty slots are click targets. |
-| Request time | coach | Modal: team (fixed), date, start-time pills with taken times struck out, length segmented control capped at 1.5 hrs, live summary, optional note. |
+| Request time | coach | Page: team (fixed), date, start-time pills, length capped at 1.5 hrs, a summary naming the exact block, optional note. Built with the start and the length as *links* rather than form controls, so the server resolves the selection and can state the real end time — and so the screen works with JavaScript off. Times that are taken, or that can't fit any length, are simply not offered. |
 | My requests | coach | Every request the team has made with its status, the approver's reason when declined, and withdraw / release actions. |
-| Approvals | approver | Queue on the left, full detail on the right: who, when, the coach's note, an explicit no-conflicts check, and a strip of the rest of that day. Approve / Decline. |
+| Approvals | approver | One card per waiting request: team, when, the coach and their note, and an explicit clash check. Approve, or decline with a reason. Built as a single column rather than the drawn list-plus-detail — with a handful of requests at a time, the master/detail split was navigation for its own sake. |
 | Notification emails | — | The approver's request email and the coach's decision email. |
 | Phone day view | coach | The calendar as a list of slots for one day; open slots are tappable. |
 | Phone request sheet | coach | The same request flow as a bottom sheet, with lengths that don't fit disabled and explained. |
@@ -301,16 +307,36 @@ rest are `#555555`.
 | Teams: add, archive, restore | built |
 | Week calendar | built |
 | Assigned schedules, release, pick up | built |
-| Ad-hoc requests and approvals | designed, not built |
-| Facility hours, booking rules | designed, not built |
-| Notification emails for requests | designed, not built |
+| Ad-hoc requests and approvals | built |
+| One-click approve from the approver's email | built |
+| Facility hours and closures | built |
+| Booking rules | built |
+| Notification emails for requests and decisions | built |
+| Phone layouts (day view, request sheet) | designed, not built |
+| Per-approver email preferences | designed, not built |
 
-Two rules the built screens enforce that are worth knowing about:
+Rules the built screens enforce that are worth knowing about:
 
 - A head coach cannot be left without a team.
 - The last super admin cannot be demoted or removed, and nobody can remove their
   own access. Locking everyone out is the one mistake this screen could make
   that the app could not undo.
+- The request screen only offers starts and lengths that already pass every
+  rule, and the *same* rules run again on submit — the picker is a convenience,
+  never the enforcement.
+- Approving re-checks for a clash first, because the request may have sat in an
+  inbox while somebody else took the slot.
+- Both decision routes end in one `decide()` and a conditional update guarded on
+  `status = PENDING`, so two approvers arriving together produce one decision and
+  the loser is told so.
+
+### The one-click link, as built
+
+The link is a route handler, not a page: it decides, then redirects to a result
+screen. Two reasons. A page render is not allowed to have side effects — Next
+refuses `revalidatePath` from one, and React may render a page twice or throw
+the render away. And redirecting means the token never reaches the address bar,
+the browser history, or an outbound `Referer` header.
 
 ## 10. Decisions made
 
@@ -347,6 +373,14 @@ Two rules the built screens enforce that are worth knowing about:
    open slot of the same length?
 5. **Teams are complete** at 20. SportsEngine's 21st row is an admin chat
    group, not a team.
+6. **Digest instead of one email per request** — section 7 offered it; the built
+   version always sends one email per request to every approver. Worth adding
+   only if the volume turns out to be annoying.
+7. **Nobody is emailed when a block is released.** Emailing on *pick-up* was
+   offered and declined, on the grounds that the calendar is the record; the
+   same reasoning was applied to the release itself, so neither sends. If
+   released time is going unnoticed and unused, a release email to the approvers
+   is the smallest fix.
 
 ## 11. Not in scope yet
 

@@ -18,7 +18,24 @@ import {
 
 export const dynamic = "force-dynamic";
 
+/**
+ * How a block reads in the team's own list. Status comes first: a request
+ * still waiting on an approver is pending whatever it would become.
+ */
+function statusLabel(booking: { status: string; origin: string }): string {
+  if (booking.status === "PENDING") return "Pending";
+  if (booking.origin === "PICKUP") return "Picked up";
+  if (booking.origin === "REQUEST") return "Approved";
+  return "Assigned";
+}
+
 const ROW_PX = 34;
+/**
+ * A block has to be at least this tall before the chips fit under the team
+ * name and the time — 90 minutes, in practice. Below it the dashed border and
+ * the stripes still say pending on their own, which is what the legend reads.
+ */
+const CHIP_MIN_PX = 70;
 /** The window the grid shows unless a booking that week falls outside it. */
 const DEFAULT_START = 8 * 60;
 const DEFAULT_END = 21 * 60;
@@ -36,7 +53,7 @@ export default async function CalendarPage({
   const dates = weekDates(sunday);
 
   const bookings = await db.booking.findMany({
-    where: { date: { in: dates } },
+    where: { date: { in: dates }, status: { in: ["PENDING", "HELD", "RELEASED"] } },
     include: { team: true, releasedFromTeam: true },
     orderBy: [{ date: "asc" }, { startMinutes: "asc" }],
   });
@@ -90,6 +107,12 @@ export default async function CalendarPage({
             This week
           </Link>
 
+          {user.team && (
+            <Link href="/request" className="btn btn-primary btn-sm no-underline">
+              Request time
+            </Link>
+          )}
+
           <div className="grow" />
 
           <div className="flex items-center gap-4 text-[12.5px] text-ink-2">
@@ -104,7 +127,11 @@ export default async function CalendarPage({
                     "repeating-linear-gradient(135deg,#F7DADA 0 4px,#FFFFFF 4px 8px)",
                 }}
               />
-              Available — released
+              Pending
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span className="w-3.5 h-3.5 rounded-[2px] bg-white border-[1.5px] border-dashed border-ink" />
+              Available
             </span>
           </div>
         </div>
@@ -162,7 +189,15 @@ export default async function CalendarPage({
                   const height =
                     ((booking.endMinutes - booking.startMinutes) / BLOCK_MINUTES) * ROW_PX - 4;
                   const released = booking.status === "RELEASED";
-                  const isMine = booking.teamId === user.team?.id;
+                  const pending = booking.status === "PENDING";
+                  const isMine = Boolean(user.team) && booking.teamId === user.team?.id;
+                  const chipClass = [
+                    "inline-block rounded-[2px] px-1.5 py-0.5 border",
+                    "font-[family-name:var(--font-display)] text-[10px] font-bold tracking-[0.1em]",
+                    pending
+                      ? "bg-white border-crimson-line text-crimson-deep"
+                      : "border-white/55 text-white",
+                  ].join(" ");
 
                   return (
                     <Link
@@ -173,7 +208,7 @@ export default async function CalendarPage({
                       style={{
                         top: top + 2,
                         height: Math.max(height, 26),
-                        ...(released
+                        ...(pending
                           ? {
                               background:
                                 "repeating-linear-gradient(135deg,#F7DADA 0 5px,#FFFFFF 5px 10px)",
@@ -181,33 +216,40 @@ export default async function CalendarPage({
                           : {}),
                       }}
                       className={`absolute left-[5px] right-[5px] rounded-[3px] px-2 py-1.5 no-underline overflow-hidden ${
-                        released
+                        pending
                           ? "border-[1.5px] border-dashed border-crimson"
-                          : "bg-crimson border border-crimson-deep"
+                          : released
+                            ? "bg-white border-[1.5px] border-dashed border-ink"
+                            : "bg-crimson border border-crimson-deep"
                       }`}
                     >
                       <div
                         className={`font-[family-name:var(--font-display)] text-[15px] font-bold uppercase leading-none tracking-[0.03em] ${
-                          released ? "text-crimson-deep" : "text-white"
+                          pending ? "text-crimson-deep" : released ? "text-ink" : "text-white"
                         }`}
                       >
                         {released ? "Available" : (booking.team?.name ?? "—")}
                       </div>
                       <div
                         className={`font-[family-name:var(--font-mono)] text-[10.5px] mt-1 ${
-                          released ? "text-crimson" : "text-[#F2C9C9]"
+                          pending ? "text-crimson" : released ? "text-muted" : "text-[#F2C9C9]"
                         }`}
                       >
                         {formatRange(booking.startMinutes, booking.endMinutes)}
                       </div>
-                      {released && booking.releasedFromTeam && height > 50 && (
-                        <div className="mt-1 text-[10px] leading-tight text-crimson-deep">
-                          released by {booking.releasedFromTeam.name}
+                      {height > CHIP_MIN_PX && (pending || isMine) && (
+                        // One row, so a pending block of your own doesn't stack
+                        // two chips on top of each other. A reserved block is
+                        // solid crimson and takes white chips; a pending one is
+                        // pale and takes crimson ones.
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          {pending && <span className={chipClass}>PENDING</span>}
+                          {isMine && <span className={chipClass}>YOUR TEAM</span>}
                         </div>
                       )}
-                      {!released && isMine && height > 50 && (
-                        <div className="mt-1.5 inline-block border border-white/55 rounded-[2px] px-1.5 py-0.5 font-[family-name:var(--font-display)] text-[10px] font-bold tracking-[0.1em] text-white">
-                          YOUR TEAM
+                      {released && booking.releasedFromTeam && height > CHIP_MIN_PX && (
+                        <div className="mt-1 text-[10px] leading-tight text-muted">
+                          released by {booking.releasedFromTeam.name}
                         </div>
                       )}
                     </Link>
@@ -242,8 +284,8 @@ export default async function CalendarPage({
                     <span className="font-[family-name:var(--font-display)] text-[17px] uppercase grow">
                       {formatDateShort(booking.date)} · {formatRange(booking.startMinutes, booking.endMinutes)}
                     </span>
-                    <span className="chip chip-neutral">
-                      {booking.origin === "PICKUP" ? "Picked up" : "Assigned"}
+                    <span className={booking.status === "PENDING" ? "chip chip-crimson" : "chip chip-neutral"}>
+                      {statusLabel(booking)}
                     </span>
                   </Link>
                 </li>

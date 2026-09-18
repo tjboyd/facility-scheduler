@@ -21,15 +21,30 @@ or declines; the calendar shows who has the facility and when.
 - **Release and pick up**: a team gives back a block it won't use, and it
   becomes first come, first served for any other team — no approval, because
   it is time that would otherwise go empty.
-- **Week calendar**: the whole club's bookings, Sunday to Saturday.
+- **Week calendar**: the whole club's bookings, Sunday to Saturday. Reserved,
+  pending and available each read differently in black and white, not by colour
+  alone.
+- **Requesting time**: a coach picks a date, a start and a length from what is
+  actually free. The screen only ever offers slots that pass the rules, and the
+  same rules are re-checked on submit.
+- **Approvals**: a queue for approvers, with a clash check on each request, and
+  **one-click approve straight from the emailed link** — no sign-in. Declining
+  asks for a reason, which the coach is told. Whoever decides first wins; the
+  other route says so rather than deciding twice.
+- **Facility hours** (super admins): per-weekday opening times, and closure
+  dates that override them.
+- **Booking rules** (super admins): block size, the longest single request, how
+  far ahead coaches can book, the notice period, and per-team weekly caps.
 
 ## Not built yet
 
-Ad-hoc booking requests and the approval queue — coaches can hold and trade
-assigned time, but cannot yet *request* a slot that nobody has. Facility hours
-and booking rules are designed but not wired up, so assigned time is not yet
-checked against opening hours or closure dates; their tabs are marked *Soon*. The design for all of it is in
-[`docs/DESIGN.md`](docs/DESIGN.md), with every screen in
+- **Mobile layouts.** Every screen is drawn for a laptop. The mockups include
+  phone screens; they have no built equivalent yet.
+- **Per-approver email preferences.** A request emails everyone who can decide
+  it; there is no way for one approver to opt out.
+
+The design for all of it is in [`docs/DESIGN.md`](docs/DESIGN.md), with every
+screen in
 [`docs/facility-scheduler-mockups.pdf`](docs/facility-scheduler-mockups.pdf).
 
 ## Roles
@@ -68,6 +83,7 @@ printed to the server log.
 | `npm run db:seed` | Seed a super admin and the club's teams |
 | `node tools/smoke.mjs` | End-to-end browser check: sign-in and people (see below) |
 | `node tools/smoke-schedule.mjs` | End-to-end browser check: schedules, release, pick up |
+| `node tools/smoke-requests.mjs` | End-to-end browser check: hours, rules, request, approve |
 | `npm run pdf` | Rebuild the mockup review PDF |
 
 ### End-to-end check
@@ -82,15 +98,20 @@ npm run build
 PORT=3000 npm start > server.log 2>&1 &
 node tools/smoke.mjs
 node tools/smoke-schedule.mjs
+node tools/smoke-requests.mjs
 ```
 
-Both clean up everything they create.
+All three clean up everything they create. `smoke-requests.mjs` also reads the
+approver's one-click link out of the log, so it exercises the email path end to
+end rather than calling the action directly.
 
 ## How it is put together
 
 - **Next.js 15** (App Router) and **React 19**, server components with server
-  actions — the people screen works without client-side JavaScript except for
-  the invite form's inline feedback.
+  actions. Every screen works without client-side JavaScript except the invite
+  form's inline feedback — on the request screen the start time and the length
+  are links rather than form controls, which is also what lets the server state
+  the exact block before the coach sends it.
 - **Prisma** over **SQLite** in development. For production, point
   `DATABASE_URL` at Postgres and change the provider in
   `prisma/schema.prisma`. SQLite has no enums, so role and status are strings
@@ -185,13 +206,22 @@ reveal either way.
 prisma/schema.prisma      data model
 src/lib/domain.ts         pure rules: roles, email parsing, the invariants
 src/lib/schedule.ts       pure rules: recurrence, overlap, release and pickup
+src/lib/rules.ts          pure rules: openings, lengths, request validation
+src/lib/facility.ts       hours, closures and settings, with their defaults
+src/lib/requests.ts       request context, approval tokens, the emails
 src/lib/auth.ts           magic links and sessions
 src/lib/guards.ts         requireUser / requireSuperAdmin
 src/app/admin/people/     the people & access screen and its server actions
 src/app/admin/schedule/   assigned schedules
+src/app/admin/hours/      weekly opening hours and closures
+src/app/admin/rules/      block size, limits, notice period
 src/app/calendar/         the week calendar
 src/app/booking/          one block: release it, or pick it up
+src/app/request/          a coach asks for a slot
+src/app/requests/         what this team holds and has asked for
+src/app/approvals/        the approver's queue, and the shared decide()
+src/app/decide/           one-click approve from the emailed link
 tests/                    unit tests for the domain rules
-tools/smoke.mjs           end-to-end browser check
+tools/smoke*.mjs          end-to-end browser checks
 docs/                     design spec, mockups, review PDF
 ```

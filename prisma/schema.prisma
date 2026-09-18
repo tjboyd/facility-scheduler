@@ -53,6 +53,8 @@ model User {
 
   sessions     Session[]
   signInTokens SignInToken[]
+  requested    Booking[]     @relation("BookingRequestedBy")
+  decided      Booking[]     @relation("BookingDecidedBy")
 
   @@index([role])
   @@index([status])
@@ -132,9 +134,9 @@ model Booking {
   teamId String?
   team   Team?   @relation("BookingTeam", fields: [teamId], references: [id], onDelete: SetNull)
 
-  /// HELD | RELEASED
+  /// PENDING | HELD | RELEASED | DECLINED | WITHDRAWN
   status String
-  /// ASSIGNED | PICKUP
+  /// ASSIGNED | PICKUP | REQUEST
   origin String
 
   seriesId String?
@@ -146,6 +148,18 @@ model Booking {
   releasedAt         DateTime?
   claimedAt          DateTime?
 
+  /// Set for requested blocks: who asked, who decided, and why not.
+  requestedById String?
+  requestedBy   User?     @relation("BookingRequestedBy", fields: [requestedById], references: [id], onDelete: SetNull)
+  decidedById   String?
+  decidedBy     User?     @relation("BookingDecidedBy", fields: [decidedById], references: [id], onDelete: SetNull)
+  decidedAt     DateTime?
+  /// "APP" | "EMAIL" — how the decision was made, so it has a trail.
+  decidedVia    String?
+  declineReason String?
+
+  decisionTokens DecisionToken[]
+
   note      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -154,4 +168,56 @@ model Booking {
   @@index([status])
   @@index([teamId])
   @@index([seriesId])
+}
+
+/// When the facility is open to coach requests, one row per weekday.
+/// Admin-assigned time may sit outside these hours — the club opens the
+/// building when it needs to.
+model FacilityHours {
+  /// 0 = Sunday … 6 = Saturday.
+  weekday      Int      @id
+  isOpen       Boolean  @default(true)
+  openMinutes  Int
+  closeMinutes Int
+  updatedAt    DateTime @updatedAt
+}
+
+/// A dated override — holidays, tournaments, maintenance. Inclusive bounds.
+model Closure {
+  id        String   @id @default(cuid())
+  startDate String
+  endDate   String
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@index([startDate])
+}
+
+/// One row. The booking rules a super admin can change.
+model Settings {
+  id                    String   @id @default("singleton")
+  blockMinutes          Int      @default(30)
+  maxRequestMinutes     Int      @default(90)
+  weeksAhead            Int      @default(4)
+  minNoticeHours        Int      @default(24)
+  maxApprovedPerWeek    Int      @default(3)
+  maxOpenRequests       Int      @default(2)
+  notifyCoachOnDecision Boolean  @default(true)
+  updatedAt             DateTime @updatedAt
+}
+
+/// One-click approval from the approver's email. Bound to a single booking and
+/// a single decision, stored only as a hash, and dead once that booking is
+/// decided by any route.
+model DecisionToken {
+  id         String    @id @default(cuid())
+  tokenHash  String    @unique
+  bookingId  String
+  booking    Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  decision   String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([bookingId])
 }

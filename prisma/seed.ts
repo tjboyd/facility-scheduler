@@ -8,6 +8,7 @@
  * one on Admin → People & access if a season brings it back.
  */
 import { PrismaClient } from "@prisma/client";
+import { DEFAULT_HOURS } from "../src/lib/facility";
 
 const db = new PrismaClient();
 
@@ -79,6 +80,17 @@ async function main() {
     removed += 1;
   }
 
+  // Facility hours and booking rules start from the documented defaults; a
+  // super admin changes them on Admin → Hours and Booking rules.
+  for (const day of DEFAULT_HOURS) {
+    await db.facilityHours.upsert({
+      where: { weekday: day.weekday },
+      update: {},
+      create: day,
+    });
+  }
+  await db.settings.upsert({ where: { id: "singleton" }, update: {}, create: { id: "singleton" } });
+
   const admin = await db.user.upsert({
     where: { email },
     update: { role: "SUPER_ADMIN", status: "ACTIVE" },
@@ -88,6 +100,7 @@ async function main() {
   const active = TEAMS.filter((t) => !t.archived).length;
   console.info(`teams: ${active} active, ${TEAMS.length - active} archived`);
   if (removed) console.info(`removed ${removed} placeholder team(s)`);
+  console.info("facility hours and booking rules seeded at their defaults");
   console.info(`super admin: ${admin.email}`);
   console.info("sign in at /signin — the link is printed to this server log.");
 }
