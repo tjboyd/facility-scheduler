@@ -299,6 +299,20 @@ try {
   );
   await approverPage.context().close();
 
+  // Every redirect this app sends has to be relative. In production it runs
+  // behind a proxy, so an absolute one built from the request would point at
+  // the container's own address — which is exactly what the emailed approval
+  // link used to land on.
+  console.log("\nredirects survive a proxy");
+  for (const [name, path] of [
+    ["the one-click approval", "/decide?token=not-a-real-token"],
+    ["a spent sign-in link", "/auth/verify?token=not-a-real-token"],
+  ]) {
+    const res = await fetch(`${BASE}${path}`, { redirect: "manual" });
+    const location = res.headers.get("location");
+    check(`${name} redirects somewhere relative`, location?.startsWith("/") === true, location ?? "none");
+  }
+
   // -- the approvals screen ------------------------------------------------
   console.log("\nthe approvals screen");
   await admin.goto(`${BASE}/approvals`, { waitUntil: "domcontentloaded" });

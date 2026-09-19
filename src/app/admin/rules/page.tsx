@@ -113,7 +113,14 @@ export default async function RulesPage({
             <Row label="Coaches can request up to">
               <Num name="weeksAhead" value={settings.weeksAhead} unit="weeks out" />
             </Row>
-            <Row label="Requests must land at least">
+            <Row
+              label="Requests must land at least"
+              hint={
+                settings.minNoticeHours === 0
+                  ? "Zero: a coach can ask for a slot later today, right up to its start time."
+                  : `Zero would let a coach ask for a slot later today. At ${settings.minNoticeHours} nothing inside the next ${settings.minNoticeHours} hours is offered at all.`
+              }
+            >
               <Num name="minNoticeHours" value={settings.minNoticeHours} unit="hrs ahead" />
             </Row>
           </section>

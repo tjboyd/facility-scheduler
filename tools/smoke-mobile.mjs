@@ -243,6 +243,15 @@ try {
     check(`${name} clears the bottom bar`, hidden === null, hidden ?? "");
   }
 
+  // A long message, because the flash is a row of three things and the message
+  // is the one that has to wrap rather than push the X off the screen.
+  const long = "The facility is closed that day — Thanksgiving weekend, the whole building.";
+  await admin.goto(`${BASE}/calendar?msg=${encodeURIComponent(long)}&kind=error`, {
+    waitUntil: "networkidle",
+  });
+  check("a long message fits the screen", (await overflowOf(admin)) === 0);
+  check("…and its dismiss button is reachable", await admin.locator("[data-dismiss-flash]").isVisible());
+
   console.log("\nthe laptop layout is untouched");
   const wide = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const widePage = await wide.newPage();

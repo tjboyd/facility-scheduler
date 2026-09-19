@@ -65,7 +65,7 @@ export function PersonRow({
       <form id={editId} action={updatePerson} className="contents">
         <input type="hidden" name="userId" value={person.id} />
 
-        <div className="w-[230px] pr-3 flex items-center gap-2 min-w-0">
+        <div className="grow min-w-[180px] pr-3 flex items-center gap-2">
           <span
             title={person.email}
             className={`truncate text-[13.5px] font-medium ${gone ? "text-disabled line-through" : ""}`}
@@ -119,16 +119,19 @@ export function PersonRow({
           </select>
         </div>
 
-        <div className="grow pr-3 min-w-[130px]">
+        <div className="w-[180px] pr-3">
           <StatusCell person={person} />
         </div>
       </form>
 
       {/* Pinned to the right edge of the horizontal scroller: on a laptop this
           column used to fall outside it, so the Save that a changed dropdown
-          needs was invisible. Its own background, or the row would show through. */}
+          needs was invisible. It is only as wide as its buttons, so on a window
+          with room to spare they sit beside the status rather than across a gap
+          from it — and it carries the row's own background, or content would
+          scroll through it. */}
       <div
-        className={`w-[230px] flex items-center justify-end gap-2 sticky right-0 pl-3 shadow-[-7px_0_7px_-7px_rgba(0,0,0,0.16)] ${
+        className={`shrink-0 flex items-center justify-end gap-2 sticky right-0 pl-4 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.13)] ${
           gone ? "bg-[#FAFAFA]" : "bg-white"
         }`}
       >

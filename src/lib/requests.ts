@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { db } from "@/lib/db";
 import { APP_URL, FACILITY_TIMEZONE, ORG_NAME } from "@/lib/env";
+import { renderEmail } from "@/lib/email";
 import { sendMail } from "@/lib/mail";
 import { loadClosures, loadHours, loadSettings } from "@/lib/facility";
 import { countsTowardWeeklyLimit, OCCUPYING, type RequestContext } from "@/lib/rules";
@@ -148,26 +149,49 @@ export async function emailApprovers(request: RequestSummary): Promise<void> {
 
   for (const approver of approvers) {
     const token = await issueApprovalToken(request.id);
+    const { html, text } = renderEmail({
+      eyebrow: "Time request",
+      title: `${request.teamName} — ${when(request)}`,
+      preheader: `${request.coachName} asked for ${when(request)}. Approve it in one click.`,
+      blocks: [
+        { kind: "text", text: `${request.coachName} asked for facility time.` },
+        {
+          kind: "facts",
+          facts: [
+            { label: "Team", value: request.teamName },
+            { label: "When", value: when(request) },
+            { label: "Coach", value: request.coachEmail },
+          ],
+        },
+        ...(request.note
+          ? [{ kind: "quote" as const, text: request.note }]
+          : []),
+        {
+          kind: "button",
+          label: "Approve this request",
+          url: `${APP_URL}/decide?token=${encodeURIComponent(token)}`,
+        },
+        {
+          kind: "link",
+          label: "Or open the queue to decline it, which asks for a reason the coach will see",
+          url: `${APP_URL}/approvals`,
+        },
+        {
+          kind: "text",
+          text: "Until it is decided the slot shows as pending, and no other team can take it.",
+        },
+      ],
+      footer: [
+        `You get this because you can approve requests for the ${ORG_NAME} indoor facility.`,
+        "Turn these off for yourself on Admin → Booking rules.",
+      ],
+    });
+
     await sendMail({
       to: approver.email,
       subject: `Time request: ${request.teamName} — ${when(request)}`,
-      text: [
-        `${request.coachName} asked for facility time.`,
-        "",
-        `Team:   ${request.teamName}`,
-        `When:   ${when(request)}`,
-        `Coach:  ${request.coachEmail}`,
-        ...(request.note ? ["", `Note:   "${request.note}"`] : []),
-        "",
-        "Approve it in one click:",
-        `${APP_URL}/decide?token=${encodeURIComponent(token)}`,
-        "",
-        "Or open it to decline, which asks for a reason the coach will see:",
-        `${APP_URL}/approvals`,
-        "",
-        "Until it is decided the slot shows as pending and no other team can take it.",
-        `You get this because you can approve requests for the ${ORG_NAME} indoor facility.`,
-      ].join("\n"),
+      text,
+      html,
     });
   }
 }
@@ -181,27 +205,62 @@ export async function emailCoachDecision(
   const settings = await loadSettings();
   if (!settings.notifyCoachOnDecision) return;
 
+  const approved = decision === "APPROVED";
+  const { html, text } = renderEmail(
+    approved
+      ? {
+          eyebrow: "Approved",
+          title: `${request.teamName} has the facility`,
+          preheader: `${when(request)} — approved by ${decidedBy}.`,
+          blocks: [
+            { kind: "text", text: "Your request is approved. The block is yours." },
+            {
+              kind: "facts",
+              facts: [
+                { label: "Team", value: request.teamName },
+                { label: "When", value: when(request) },
+                { label: "Approved by", value: decidedBy },
+              ],
+            },
+            { kind: "button", label: "See it on the calendar", url: `${APP_URL}/calendar` },
+            {
+              kind: "text",
+              text:
+                "If it turns out you can't use it, release it from the calendar and another " +
+                "team can pick it up.",
+            },
+          ],
+          footer: [`${ORG_NAME} indoor facility scheduler.`],
+        }
+      : {
+          eyebrow: "Declined",
+          title: `${request.teamName} — ${when(request)}`,
+          preheader: reason ? `Declined — ${reason}` : "Your request was declined.",
+          blocks: [
+            { kind: "text", text: `Your request was declined by ${decidedBy}.` },
+            {
+              kind: "facts",
+              facts: [
+                { label: "Team", value: request.teamName },
+                { label: "When", value: when(request) },
+              ],
+            },
+            ...(reason ? [{ kind: "quote" as const, text: reason }] : []),
+            {
+              kind: "text",
+              text: "The slot is open again, so another time may work.",
+            },
+            { kind: "button", label: "Ask for another time", url: `${APP_URL}/request` },
+          ],
+          footer: [`${ORG_NAME} indoor facility scheduler.`],
+        },
+  );
+
   await sendMail({
     to: request.coachEmail,
-    subject: `${decision === "APPROVED" ? "Approved" : "Declined"}: ${request.teamName} — ${when(request)}`,
-    text:
-      decision === "APPROVED"
-        ? [
-            `Your request is approved — ${request.teamName} has the facility.`,
-            "",
-            when(request),
-            `Approved by ${decidedBy}.`,
-            "",
-            `See it on the calendar: ${APP_URL}/calendar`,
-          ].join("\n")
-        : [
-            `Your request was declined.`,
-            "",
-            when(request),
-            ...(reason ? ["", `Reason: ${reason}`] : []),
-            "",
-            `The slot is open again, so another time may work: ${APP_URL}/request`,
-          ].join("\n"),
+    subject: `${approved ? "Approved" : "Declined"}: ${request.teamName} — ${when(request)}`,
+    text,
+    html,
   });
 }
 
@@ -231,22 +290,32 @@ export async function emailReleaseNotice(released: {
     released.endMinutes,
   )}`;
 
-  await sendMail({
-    to,
-    subject: `Released: ${released.teamName} — ${when}`,
-    text: [
-      `${released.teamName} has given back facility time.`,
-      "",
-      `When:     ${when}`,
-      `Released by: ${released.releasedBy}`,
-      "",
-      "It is on the calendar as available now, first come first served, and any",
-      "team can pick it up without approval.",
-      "",
-      `${APP_URL}/calendar`,
-      "",
-      `You get this because you are set as the scheduler for the ${ORG_NAME} indoor`,
-      "facility. Clear that address on Admin → Booking rules to stop these.",
-    ].join("\n"),
+  const { html, text } = renderEmail({
+    eyebrow: "Released",
+    title: `${released.teamName} gave back ${when}`,
+    preheader: `${released.teamName} has given back facility time — it is up for grabs.`,
+    blocks: [
+      { kind: "text", text: `${released.teamName} has given back facility time.` },
+      {
+        kind: "facts",
+        facts: [
+          { label: "When", value: when },
+          { label: "Released by", value: released.releasedBy },
+        ],
+      },
+      {
+        kind: "text",
+        text:
+          "It is on the calendar as available now — first come, first served, and any team can " +
+          "pick it up without approval.",
+      },
+      { kind: "button", label: "See the calendar", url: `${APP_URL}/calendar` },
+    ],
+    footer: [
+      `You get this because you are set as the scheduler for the ${ORG_NAME} indoor facility.`,
+      "Clear that address on Admin → Booking rules to stop these.",
+    ],
   });
+
+  await sendMail({ to, subject: `Released: ${released.teamName} — ${when}`, text, html });
 }

@@ -164,6 +164,16 @@ try {
   flash = await act(page, `[data-save="${coach}"]`);
   check("a head coach with a team saves cleanly", flash.includes("Updated"), flash);
 
+  // The message is dismissible: the X is a link back to the same page without
+  // it, so it works with JavaScript off and leaves a clean URL behind.
+  await page.click("[data-dismiss-flash]");
+  await page.waitForTimeout(400);
+  check(
+    "the message can be dismissed",
+    (await page.locator("[data-flash]").count()) === 0 && !page.url().includes("msg="),
+    page.url(),
+  );
+
   console.log("\nself-protection");
   check("you cannot remove your own access", await page.locator(`[data-remove="${ADMIN}"]`).isDisabled());
   const adminRole = page.locator(`[data-row="${ADMIN}"] select[name="role"]`);
