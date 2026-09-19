@@ -41,14 +41,15 @@ or declines; the calendar shows who has the facility and when.
   day, and a bottom tab bar. Every admin screen works at 390px too.
 - **Email preferences**: an approver can stop new requests emailing them, from
   the approvals screen; a super admin manages the whole roster on Booking rules.
-  Muting is about email, not access — they still see the queue.
+  Muting is about email, not access — they still see the queue. Booking rules
+  also carries an optional scheduler address, told when a team gives a block
+  back so it can be filled rather than sitting unnoticed. Empty sends nothing.
 
 ## Not built yet
 
-Nothing from the reviewed design is outstanding. Ideas that were raised and
-deliberately left are in [`docs/DESIGN.md`](docs/DESIGN.md) §10a — whether
-declining should suggest another slot, and whether releasing a block should
-email anyone.
+Nothing. Every question raised during the review has been answered, and what
+was deliberately put out of scope — payments, waitlists, a public calendar, ICS
+feeds — is listed in [`docs/DESIGN.md`](docs/DESIGN.md) §11.
 
 The design for all of it is in [`docs/DESIGN.md`](docs/DESIGN.md), with every
 screen in

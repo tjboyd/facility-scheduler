@@ -167,6 +167,25 @@ export default async function RulesPage({
                 className="w-4 h-4 accent-[#AD0303] shrink-0"
               />
             </Row>
+
+            <div className="py-2.5 border-t border-line-faint">
+              <label htmlFor="releaseNotifyEmail" className="text-[13.5px]">
+                Tell somebody when a block is released
+              </label>
+              <p className="text-xs text-faint mt-0.5 mb-2">
+                Released time is first come, first served, so it helps if one person
+                knows it is going spare. <strong>Leave empty to send nothing.</strong>{" "}
+                Picking a block up never emails anyone.
+              </p>
+              <input
+                id="releaseNotifyEmail"
+                name="releaseNotifyEmail"
+                type="email"
+                defaultValue={settings.releaseNotifyEmail ?? ""}
+                placeholder="scheduler@jrchargersbaseball.com"
+                className="input h-[38px] text-[13.5px]"
+              />
+            </div>
           </section>
         </div>
       </form>

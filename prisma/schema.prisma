@@ -218,6 +218,12 @@ model Settings {
   maxApprovedPerWeek    Int      @default(3)
   maxOpenRequests       Int      @default(2)
   notifyCoachOnDecision Boolean  @default(true)
+  /// Where to tell somebody that a team has given a block back, so it can be
+  /// filled rather than sitting on the calendar unnoticed. Empty means send
+  /// nothing, which is the default — the calendar is the record either way.
+  /// A setting rather than an env var so it survives the volunteer who holds
+  /// the job changing, without a redeploy.
+  releaseNotifyEmail    String?
   updatedAt             DateTime @updatedAt
 }
 

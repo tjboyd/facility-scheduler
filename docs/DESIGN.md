@@ -167,8 +167,8 @@ plans by the time you end the schedule.
 - **declined** — the approver types a short reason; the coach sees it in email
   and in *My requests*, and the slot reopens immediately.
 - **released** — a coach giving back a slot they hold; it reopens as first come,
-  first served. **No email goes out**, for either the release or the pick-up:
-  the calendar is the record. See 10a.2.
+  first served. One optional email goes out, to the scheduler address on
+  *Booking rules*; picking a block up sends nothing at all. See section 10.
 
 Approving from the email and approving from the Approvals queue do the same
 thing. Whoever gets there first decides it; the second person sees it already
@@ -181,7 +181,7 @@ decided.
 | New request | every address on the approver list |
 | Approved | the requesting coach |
 | Declined (with reason) | the requesting coach |
-| Slot released by a coach | nobody — see 10a.2 |
+| Slot released by a coach | the scheduler address, if one is set — see section 10 |
 
 Each approver chooses whether new requests email them, on the approvals screen
 or, for the whole roster, on *Booking rules*. Muting is about email and not
@@ -410,6 +410,18 @@ the browser history, or an outbound `Referer` header.
 - **One email per request, no daily digest.** Section 7 offered a digest; at
   club volume it would add a delay for no relief. An approver who finds the
   emails too much turns them off for themselves, which is built.
+- **Declining suggests nothing.** The coach is told why and left to pick
+  another slot themselves. The calendar already shows what is free, and a
+  suggestion that is stale by the time it is read is worse than none.
+- **One optional email when a block is released.** *Booking rules* carries a
+  scheduler address; released time is first come, first served, so it helps if
+  one person knows it is going spare rather than leaving it to sit unnoticed.
+  **Empty means send nothing**, and that is the default. Picking a block up
+  still emails nobody — that one was offered and declined, and the calendar is
+  the record.
+
+  It is a setting rather than an environment variable so it survives the
+  volunteer who holds the job changing, without a redeploy.
 - **No Google sign-in.** The mockup offered it beside the email link and it was
   declined: the emailed link already works for any address, and adding an OAuth
   provider would mean a second way in to keep secure for no coach who could not
@@ -418,16 +430,8 @@ the browser history, or an outbound `Referer` header.
 
 ## 10a. Still open
 
-Two, neither blocking:
-
-1. **Decline without a free alternative** — should declining suggest the nearest
-   open slot of the same length? Today the coach is told why and left to look
-   themselves.
-2. **Nobody is emailed when a block is released.** Emailing on *pick-up* was
-   offered and declined, on the grounds that the calendar is the record; the
-   same reasoning was applied to the release itself, so neither sends. If
-   released time turns out to go unnoticed and unused, a release email to the
-   approvers is the smallest fix.
+Nothing. Every question raised during the review has been answered and recorded
+in section 10 above; what was deliberately left out is in section 11.
 
 ## 11. Not in scope yet
 

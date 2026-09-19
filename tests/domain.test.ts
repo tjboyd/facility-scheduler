@@ -11,6 +11,7 @@ import {
   normalizeEmail,
   parseEmailList,
   requiresTeam,
+  parseOptionalEmail,
   wouldRemoveLastSuperAdmin,
   wouldSilenceAllApprovers,
 } from "@/lib/domain";
@@ -187,5 +188,25 @@ describe("wouldSilenceAllApprovers", () => {
     // There is no approver to email either way; the rules screen says so
     // separately rather than blocking a save on it.
     expect(wouldSilenceAllApprovers({ deciderIds: [], nextNotifiedIds: [] })).toBe(false);
+  });
+});
+
+describe("parseOptionalEmail", () => {
+  it("treats blank as a real answer, not a mistake", () => {
+    // Empty means tell nobody, which is the default for the release notice.
+    expect(parseOptionalEmail("")).toEqual({ ok: true, value: null });
+    expect(parseOptionalEmail("   ")).toEqual({ ok: true, value: null });
+  });
+
+  it("normalizes what it accepts", () => {
+    expect(parseOptionalEmail("  Scheduler@JrChargersBaseball.com ")).toEqual({
+      ok: true,
+      value: "scheduler@jrchargersbaseball.com",
+    });
+  });
+
+  it("refuses something that is not an address, and says what it was given", () => {
+    expect(parseOptionalEmail("not-an-address")).toEqual({ ok: false, raw: "not-an-address" });
+    expect(parseOptionalEmail("two@@at.com")).toEqual({ ok: false, raw: "two@@at.com" });
   });
 });
