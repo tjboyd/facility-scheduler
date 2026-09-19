@@ -137,6 +137,11 @@ export async function emailApprovers(request: RequestSummary): Promise<void> {
     where: {
       role: { in: ["APPROVER", "SUPER_ADMIN"] },
       status: { in: ["ACTIVE", "INVITED"] },
+      // Somebody who has turned these off still sees the request in the queue;
+      // they have just said they would rather not be emailed about it. The
+      // people screen will not let the last one opt out, so this is never empty
+      // while anyone can decide at all.
+      notifyOnRequests: true,
     },
     select: { email: true },
   });

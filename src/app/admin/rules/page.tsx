@@ -121,21 +121,33 @@ export default async function RulesPage({
           <section className="card p-5">
             <h2 className="display text-[23px] mb-0.5">Approvals and email</h2>
             <p className="text-[13px] text-muted mb-3">
-              Requests go to everyone who can decide them. Change who that is on{" "}
-              <span className="font-semibold">People &amp; access</span>.
+              Everyone below can decide requests — untick somebody to stop emailing
+              them about new ones. They still see the queue. Who can decide at all is
+              set on <span className="font-semibold">People &amp; access</span>.
             </p>
 
-            <div className="flex flex-wrap gap-2 mb-1">
+            <div className="flex flex-col mb-1">
               {deciders.map((person) => (
-                <span
+                <label
                   key={person.id}
-                  className="inline-flex items-center gap-2 h-8 px-3 rounded-[3px] border border-line-soft bg-paper text-[13px]"
+                  data-decider={person.id}
+                  className="flex items-center gap-3 py-2 border-t border-line-faint cursor-pointer"
                 >
-                  {person.email}
-                  <span className="text-faint">
-                    {ROLE_LABELS[person.role as "APPROVER" | "SUPER_ADMIN"]}
+                  <span className="grow min-w-0">
+                    <span className="block text-[13.5px] truncate">{person.email}</span>
+                    <span className="block text-xs text-faint mt-0.5">
+                      {ROLE_LABELS[person.role as "APPROVER" | "SUPER_ADMIN"]}
+                      {person.notifyOnRequests ? " · emailed on every request" : " · not emailed"}
+                    </span>
                   </span>
-                </span>
+                  <input
+                    type="checkbox"
+                    name={`notify-${person.id}`}
+                    defaultChecked={person.notifyOnRequests}
+                    aria-label={`Email ${person.email} when a request comes in`}
+                    className="w-4 h-4 accent-[#AD0303] shrink-0"
+                  />
+                </label>
               ))}
               {deciders.length === 0 && (
                 <p className="text-[13px] text-crimson-deep m-0">

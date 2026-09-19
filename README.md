@@ -36,12 +36,19 @@ or declines; the calendar shows who has the facility and when.
 - **Booking rules** (super admins): block size, the longest single request, how
   far ahead coaches can book, the notice period, and per-team weekly caps.
 
+- **On a phone**: the week grid becomes one day as a list, with free time merged
+  into runs you can tap to request ("Open · 1 hour"), a week strip to change
+  day, and a bottom tab bar. Every admin screen works at 390px too.
+- **Email preferences**: an approver can stop new requests emailing them, from
+  the approvals screen; a super admin manages the whole roster on Booking rules.
+  Muting is about email, not access — they still see the queue.
+
 ## Not built yet
 
-- **Mobile layouts.** Every screen is drawn for a laptop. The mockups include
-  phone screens; they have no built equivalent yet.
-- **Per-approver email preferences.** A request emails everyone who can decide
-  it; there is no way for one approver to opt out.
+Nothing from the reviewed design is outstanding. Ideas that were raised and
+deliberately left are in [`docs/DESIGN.md`](docs/DESIGN.md) §10a — Google
+sign-in, a digest instead of one email per request, and whether a coach can run
+two teams.
 
 The design for all of it is in [`docs/DESIGN.md`](docs/DESIGN.md), with every
 screen in
@@ -90,6 +97,7 @@ printed to the server log.
 | `node tools/smoke.mjs` | End-to-end browser check: sign-in and people (see below) |
 | `node tools/smoke-schedule.mjs` | End-to-end browser check: schedules, release, pick up |
 | `node tools/smoke-requests.mjs` | End-to-end browser check: hours, rules, request, approve |
+| `node tools/smoke-mobile.mjs` | End-to-end browser check: every screen at 390px |
 | `npm run pdf` | Rebuild the mockup review PDF |
 
 ### End-to-end check
@@ -105,11 +113,14 @@ PORT=3000 npm start > server.log 2>&1 &
 node tools/smoke.mjs
 node tools/smoke-schedule.mjs
 node tools/smoke-requests.mjs
+node tools/smoke-mobile.mjs
 ```
 
-All three clean up everything they create. `smoke-requests.mjs` also reads the
+All four clean up everything they create. `smoke-requests.mjs` also reads the
 approver's one-click link out of the log, so it exercises the email path end to
-end rather than calling the action directly.
+end rather than calling the action directly. `smoke-mobile.mjs` drives a 390px
+viewport and *measures* two things rather than eyeballing them: that no page
+scrolls sideways, and that nothing visible ends up behind the bottom bar.
 
 ## How it is put together
 
@@ -237,7 +248,7 @@ src/app/admin/people/     the people & access screen and its server actions
 src/app/admin/schedule/   assigned schedules
 src/app/admin/hours/      weekly opening hours and closures
 src/app/admin/rules/      block size, limits, notice period
-src/app/calendar/         the week calendar
+src/app/calendar/         the week calendar, and the phone's day list
 src/app/booking/          one block: release it, or pick it up
 src/app/request/          a coach asks for a slot
 src/app/requests/         what this team holds and has asked for

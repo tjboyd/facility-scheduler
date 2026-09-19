@@ -20,6 +20,7 @@ const TIMEOUT = 20_000;
 const STAMP = Date.now();
 const COACH = `req.coach.${STAMP}@example.org`;
 const COACH2 = `req.coach2.${STAMP}@example.org`;
+const APPROVER = `req.approver.${STAMP}@example.org`;
 const TEAM = "U11 - Black";
 const TEAM2 = "U13 - Red";
 
@@ -145,6 +146,14 @@ try {
     await admin.waitForSelector(`[data-row="${email}"]`);
   }
   check("two coaches on two teams", true);
+
+  // A second approver, so the "somebody has to stay listening" rule has room
+  // to let the first one opt out.
+  await admin.fill("#emails", APPROVER);
+  await admin.selectOption("#role", "APPROVER");
+  await admin.click('button:has-text("Send invitations")');
+  await admin.waitForSelector(`[data-row="${APPROVER}"]`);
+  check("a second approver exists", true);
 
   // -- hours ---------------------------------------------------------------
   console.log("\nfacility hours");
@@ -316,6 +325,48 @@ try {
   flash = await act(coach2, `[data-withdraw="${withdrawId}"]`);
   check("a coach can withdraw their own request", flash.includes("withdrawn"), flash);
 
+  // -- who gets emailed about new requests ---------------------------------
+  console.log("\nemail preferences");
+  const approver = await signIn(browser, APPROVER);
+  await approver.goto(`${BASE}/approvals`, { waitUntil: "domcontentloaded" });
+  check(
+    "an approver is emailed by default",
+    (await approver.locator("text=Email me when a request comes in").count()) > 0 &&
+      (await approver.locator("[data-notify-toggle]").textContent())?.includes("Turn off"),
+  );
+
+  const muteFlash = await act(approver, "[data-notify-toggle]");
+  check(
+    "and can mute themselves",
+    muteFlash.includes("won't be emailed") &&
+      Boolean((await approver.locator("[data-notify-toggle]").textContent())?.includes("Turn on")),
+    muteFlash,
+  );
+
+  // A fresh request should now reach the admin but not the muted approver.
+  const mutedBefore = emailsTo(APPROVER).length;
+  const adminBefore = emailsTo(ADMIN).length;
+  const quiet = addDays(today, 9);
+  await coach.goto(`${BASE}/request?date=${quiet}`, { waitUntil: "domcontentloaded" });
+  const quietStart = await coach.locator("[data-start]").first().getAttribute("data-start");
+  await coach.goto(`${BASE}/request?date=${quiet}&start=${quietStart}`, {
+    waitUntil: "domcontentloaded",
+  });
+  await Promise.all([
+    coach.waitForURL("**/requests**", { timeout: TIMEOUT }),
+    coach.click('button:has-text("Send request")'),
+  ]);
+  check(
+    "a muted approver is not emailed",
+    Boolean(await waitFor(() => emailsTo(ADMIN).length > adminBefore)) &&
+      emailsTo(APPROVER).length === mutedBefore,
+    `admin +${emailsTo(ADMIN).length - adminBefore}, approver +${emailsTo(APPROVER).length - mutedBefore}`,
+  );
+
+  // Muting is about email, not access — it is still in their queue.
+  await approver.goto(`${BASE}/approvals`, { waitUntil: "domcontentloaded" });
+  check("but still sees it in the queue", (await approver.locator("[data-pending]").count()) >= 1);
+
   // -- a coach is not an approver -----------------------------------------
   console.log("\nthe approver gate");
   await coach.goto(`${BASE}/approvals`, { waitUntil: "domcontentloaded" });
@@ -334,13 +385,13 @@ async function tidyUp() {
     const { PrismaClient } = await import("@prisma/client");
     const db = new PrismaClient();
     const users = await db.user.findMany({
-      where: { email: { startsWith: "req.coach" } },
+      where: { email: { startsWith: "req." } },
       select: { id: true, teamId: true },
     });
     const teamIds = users.map((u) => u.teamId).filter(Boolean);
     await db.booking.deleteMany({ where: { teamId: { in: teamIds } } });
     await db.closure.deleteMany({ where: { reason: "Smoke closure" } });
-    const removed = await db.user.deleteMany({ where: { email: { startsWith: "req.coach" } } });
+    const removed = await db.user.deleteMany({ where: { email: { startsWith: "req." } } });
     await db.$disconnect();
     console.log(`\ncleaned up ${removed.count} test user(s) and their bookings`);
   } catch (error) {

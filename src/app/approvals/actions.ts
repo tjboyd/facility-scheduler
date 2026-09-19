@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { canDecideRequests, displayName } from "@/lib/domain";
+import { canDecideRequests, displayName, wouldSilenceAllApprovers } from "@/lib/domain";
 import { burnTokensFor, emailCoachDecision } from "@/lib/requests";
 import { overlaps } from "@/lib/schedule";
 
@@ -150,4 +150,39 @@ export async function declineRequest(formData: FormData): Promise<void> {
     reason,
   );
   back(result.message, result.ok ? "ok" : "error");
+}
+
+/**
+ * An approver muting or unmuting their own request emails, without needing a
+ * super admin. The same rule applies as on the rules screen: somebody has to
+ * stay listening, or requests pile up with nobody told.
+ */
+export async function setMyNotifications(formData: FormData): Promise<void> {
+  const user = await getSessionUser();
+  if (!user) redirect("/signin");
+  if (!canDecideRequests(user.role)) back("You can't decide requests.", "error");
+
+  const next = formData.get("notify") === "on";
+  const deciders = await db.user.findMany({
+    where: { role: { in: ["APPROVER", "SUPER_ADMIN"] }, status: { in: ["ACTIVE", "INVITED"] } },
+    select: { id: true, notifyOnRequests: true },
+  });
+  const nextNotifiedIds = deciders
+    .filter((d) => (d.id === user.id ? next : d.notifyOnRequests))
+    .map((d) => d.id);
+
+  if (wouldSilenceAllApprovers({ deciderIds: deciders.map((d) => d.id), nextNotifiedIds })) {
+    back(
+      "You're the only one being emailed about new requests. Ask a super admin to turn " +
+        "somebody else on first, or they would arrive with nobody told.",
+      "error",
+    );
+  }
+
+  await db.user.update({ where: { id: user.id }, data: { notifyOnRequests: next } });
+  revalidatePath("/approvals");
+  back(
+    next ? "You'll be emailed about new requests." : "You won't be emailed about new requests.",
+    "ok",
+  );
 }

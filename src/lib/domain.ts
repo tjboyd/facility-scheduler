@@ -132,6 +132,26 @@ export function wouldRemoveLastSuperAdmin(input: SuperAdminGuardInput): boolean 
   return currentSuperAdminIds.length <= 1;
 }
 
+export type NotifyGuardInput = {
+  /** Everyone who can decide requests at all. */
+  deciderIds: readonly string[];
+  /** Who would still be emailed once this save lands. */
+  nextNotifiedIds: readonly string[];
+};
+
+/**
+ * True when a save would leave a request with nobody to email, while somebody
+ * can still decide it. The queue would keep filling up, but silently — and a
+ * coach waiting has no way to tell "not looked at yet" from "nobody was told".
+ *
+ * Stated over the *resulting* set rather than per person on purpose: two
+ * approvers turned off in one save are each harmless on their own and fatal
+ * together, which a per-change check would wave through.
+ */
+export function wouldSilenceAllApprovers(input: NotifyGuardInput): boolean {
+  return input.deciderIds.length > 0 && input.nextNotifiedIds.length === 0;
+}
+
 /** "Coach Rivera" from "rivera@jrchargersbaseball.com" is wrong more often than
  *  it is right, so an invited person simply has no name until they sign in. */
 export function displayName(user: { name: string | null; email: string }): string {

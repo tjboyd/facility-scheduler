@@ -2,7 +2,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { FACILITY_TIMEZONE } from "@/lib/env";
 import { requireUser } from "@/lib/guards";
-import { AppHeader } from "@/components/AppHeader";
+import { AppHeader, MobileNav } from "@/components/AppHeader";
 import { Flash } from "@/components/Flash";
 import { describeLength } from "@/lib/rules";
 import { formatDateLong, formatRange, todayInZone } from "@/lib/schedule";
@@ -43,7 +43,7 @@ export default async function RequestsPage({
     <div className="min-h-dvh flex flex-col">
       <AppHeader user={user} active="requests" />
 
-      <main className="grow p-7 flex flex-col gap-4">
+      <main className="grow p-4 pb-24 md:p-7 md:pb-7 flex flex-col gap-4">
         <div className="flex items-end gap-4 flex-wrap">
           <div className="grow">
             <div className="eyebrow">{user.team ? user.team.name : "No team"}</div>
@@ -156,6 +156,7 @@ export default async function RequestsPage({
           </div>
         )}
       </main>
+      <MobileNav user={user} active="requests" />
     </div>
   );
 }

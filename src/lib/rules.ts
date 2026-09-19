@@ -215,3 +215,54 @@ export function countsTowardWeeklyLimit(booking: {
 }
 
 export { BLOCK_MINUTES, weekdayOf };
+
+// ── the phone's day view ───────────────────────────────────────────────────
+
+export type AgendaEntry<T> =
+  | { kind: "free"; startMinutes: number; endMinutes: number }
+  | { kind: "booked"; booking: T };
+
+/**
+ * One day as a top-to-bottom list: what is booked, and the gaps between.
+ *
+ * The week grid works on a laptop because seven columns fit side by side. On a
+ * phone they do not, so a day becomes a list — which means free time has to be
+ * spelled out rather than left as empty space, and consecutive free blocks read
+ * far better merged ("Open · 1 hour") than as a column of half-hours.
+ *
+ * Free time is only ever reported inside the day's open hours, since that is
+ * all a coach could request. Bookings are listed wherever they fall: assigned
+ * time may sit outside those hours, and a day closed to requests can still have
+ * the club's own sessions on it.
+ */
+export function dayAgenda<T extends Span>(
+  hours: DayHours,
+  bookings: readonly T[],
+): AgendaEntry<T>[] {
+  const sorted = [...bookings].sort(
+    (a, b) => a.startMinutes - b.startMinutes || a.endMinutes - b.endMinutes,
+  );
+
+  const openStart = hours.isOpen && hours.closeMinutes > hours.openMinutes ? hours.openMinutes : null;
+  const openEnd = openStart === null ? null : hours.closeMinutes;
+
+  const entries: AgendaEntry<T>[] = [];
+  const pushFree = (from: number, to: number) => {
+    if (openStart === null || openEnd === null) return;
+    const start = Math.max(from, openStart);
+    const end = Math.min(to, openEnd);
+    if (end > start) entries.push({ kind: "free", startMinutes: start, endMinutes: end });
+  };
+
+  // Where the last thing emitted ended. Infinity on a closed day, so nothing is
+  // ever reported as free.
+  let position = openStart ?? Number.POSITIVE_INFINITY;
+  for (const booking of sorted) {
+    pushFree(position, booking.startMinutes);
+    entries.push({ kind: "booked", booking });
+    position = Math.max(position, booking.endMinutes);
+  }
+  if (openEnd !== null) pushFree(position, openEnd);
+
+  return entries;
+}

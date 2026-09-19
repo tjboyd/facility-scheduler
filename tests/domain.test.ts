@@ -12,6 +12,7 @@ import {
   parseEmailList,
   requiresTeam,
   wouldRemoveLastSuperAdmin,
+  wouldSilenceAllApprovers,
 } from "@/lib/domain";
 
 describe("normalizeEmail", () => {
@@ -158,5 +159,33 @@ describe("displayName", () => {
     expect(displayName({ name: "Coach Rivera", email: "r@x.com" })).toBe("Coach Rivera");
     expect(displayName({ name: null, email: "r@x.com" })).toBe("r@x.com");
     expect(displayName({ name: "   ", email: "r@x.com" })).toBe("r@x.com");
+  });
+});
+
+describe("wouldSilenceAllApprovers", () => {
+  it("blocks the last person who would be emailed", () => {
+    expect(
+      wouldSilenceAllApprovers({ deciderIds: ["a", "b"], nextNotifiedIds: [] }),
+    ).toBe(true);
+  });
+
+  it("blocks two approvers turned off in the same save", () => {
+    // Each is harmless alone and fatal together, which is why the rule is
+    // stated over the resulting set rather than per change.
+    expect(
+      wouldSilenceAllApprovers({ deciderIds: ["a", "b"], nextNotifiedIds: [] }),
+    ).toBe(true);
+  });
+
+  it("allows it while somebody else is still listening", () => {
+    expect(
+      wouldSilenceAllApprovers({ deciderIds: ["a", "b"], nextNotifiedIds: ["b"] }),
+    ).toBe(false);
+  });
+
+  it("says nothing when nobody can decide at all", () => {
+    // There is no approver to email either way; the rules screen says so
+    // separately rather than blocking a save on it.
+    expect(wouldSilenceAllApprovers({ deciderIds: [], nextNotifiedIds: [] })).toBe(false);
   });
 });

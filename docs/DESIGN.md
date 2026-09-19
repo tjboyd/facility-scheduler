@@ -183,6 +183,13 @@ decided.
 | Declined (with reason) | the requesting coach |
 | Slot released by a coach | nobody — see 10a.7 |
 
+Each approver chooses whether new requests email them, on the approvals screen
+or, for the whole roster, on *Booking rules*. Muting is about email and not
+access: a muted approver still sees every request in the queue. Somebody has to
+stay listening, and the rule is checked against the state a save would produce
+rather than per person changed — two approvers turned off in one save are each
+harmless alone and fatal together.
+
 Coach decision emails can be turned off on *Booking rules*. The daily-digest
 option in the original spec is not built — see 10a.6.
 
@@ -225,8 +232,8 @@ will read. The button deep-links to that request with the reason box ready.
 | My requests | coach | Every request the team has made with its status, the approver's reason when declined, and withdraw / release actions. |
 | Approvals | approver | One card per waiting request: team, when, the coach and their note, and an explicit clash check. Approve, or decline with a reason. Built as a single column rather than the drawn list-plus-detail — with a handful of requests at a time, the master/detail split was navigation for its own sake. |
 | Notification emails | — | The approver's request email and the coach's decision email. |
-| Phone day view | coach | The calendar as a list of slots for one day; open slots are tappable. |
-| Phone request sheet | coach | The same request flow as a bottom sheet, with lengths that don't fit disabled and explained. |
+| Phone day view | coach | The calendar as a list of slots for one day; open slots are tappable. **Built** as a responsive branch of the week calendar rather than a separate screen — same URL, same data, one rendering per width. |
+| Phone request | coach | **Built** as the same request screen, stacked. It was drawn as a bottom sheet; a sheet needs JavaScript to open and this flow works without any, so it stays a page. The mockup's explanation of why a length does not fit was worth having and is now on both widths. |
 | People & access | super admin | The allowlist: email, name, team, role, status, plus a bulk add panel. |
 | Hours | super admin | Per-day open/closed and times with a visual week-at-a-glance bar, plus closures. |
 | Booking rules | super admin | Block size, max length, timing limits, per-team limits, approver list, email options. |
@@ -312,8 +319,8 @@ rest are `#555555`.
 | Facility hours and closures | built |
 | Booking rules | built |
 | Notification emails for requests and decisions | built |
-| Phone layouts (day view, request sheet) | designed, not built |
-| Per-approver email preferences | designed, not built |
+| Phone layouts (day view, tab bar) | built |
+| Per-approver email preferences | built |
 
 Rules the built screens enforce that are worth knowing about:
 
@@ -329,6 +336,26 @@ Rules the built screens enforce that are worth knowing about:
 - Both decision routes end in one `decide()` and a conditional update guarded on
   `status = PENDING`, so two approvers arriving together produce one decision and
   the loser is told so.
+
+### Phones, as built
+
+The week grid is seven columns side by side, which is right on a laptop and
+impossible at 390px. Rather than a second set of screens to keep in step, each
+page carries one layout per width:
+
+- **The calendar** becomes a single day as a list, with a week strip above it to
+  change day. Free time is merged into runs — "Open · 1 hour" reads far better
+  than a column of half-hours, and each run is a tap straight into the request
+  screen with the day and start already filled in.
+- **Navigation** moves to a fixed bottom bar, which is where a thumb reaches.
+  Two tabs for a coach, four for a super admin.
+- **The dense admin tables** — people and assigned schedules — keep their shape
+  and scroll sideways inside their own card. Six columns that only mean anything
+  together are worse torn into stacked cards, and this is the screen a volunteer
+  opens once a season rather than at the field.
+
+Both rules are measured by `tools/smoke-mobile.mjs` rather than eyeballed: no
+page may scroll sideways, and nothing visible may end up behind the bottom bar.
 
 ### The one-click link, as built
 

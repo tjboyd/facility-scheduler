@@ -54,7 +54,7 @@ export default async function SchedulePage({
       <Flash message={msg} kind={kind} />
 
       <div className="flex gap-[18px] items-start flex-wrap xl:flex-nowrap">
-        <section className="grow min-w-[560px] flex flex-col gap-3">
+        <section className="grow min-w-0 xl:min-w-[560px] flex flex-col gap-3">
           <div className="flex items-baseline gap-3">
             <h2 className="display text-2xl">Assigned schedules</h2>
             <p className="text-[13px] text-muted">
@@ -62,7 +62,8 @@ export default async function SchedulePage({
             </p>
           </div>
 
-          <div className="card overflow-hidden">
+          <div className="card overflow-x-auto">
+            <div className="min-w-[860px]">
             <div className="thead flex items-center h-10 px-[18px]">
               <div className="w-[150px]">Team</div>
               <div className="w-[120px]">Day</div>
@@ -132,6 +133,7 @@ export default async function SchedulePage({
                 </div>
               );
             })}
+            </div>
           </div>
 
           <p className="text-[12.5px] leading-snug text-muted">
@@ -141,7 +143,7 @@ export default async function SchedulePage({
           </p>
         </section>
 
-        <aside className="w-[340px] shrink-0">
+        <aside className="w-full xl:w-[340px] shrink-0">
           <section className="card p-5 flex flex-col gap-3.5">
             <div>
               <h2 className="display text-2xl">Assign a schedule</h2>
