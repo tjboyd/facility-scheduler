@@ -183,14 +183,28 @@ Do **not** set `PORT`. Railway sets it and `next start` already honours it.
 This deploy will:
 
 1. **Build** — `prisma generate && next build`
-2. **Pre-deploy** — `prisma migrate deploy`, creating every table
-3. **Start** — `npm start`
+2. **Start** — `prisma migrate deploy && next start`, creating every table on
+   the way up
 
-Migrations run as a pre-deploy step rather than inside the build on purpose.
-Railway's private network is only available at runtime, so a build-time
-migration could not reach `postgres.railway.internal` at all. Running it
-pre-deploy also means a failed migration stops the release instead of shipping
-an app whose schema is wrong.
+Migrations run at startup rather than during the build because Railway's
+private network only exists at runtime — a build-time migration could not reach
+`postgres.railway.internal` at all. `railway.json` also names a *pre-deploy*
+command, which is the tidier place for them: if the host honours it the
+migration runs there and the one at startup finds nothing to do. Putting it in
+`npm start` as well means the app can never come up against a database with no
+tables, whichever way the host reads its config.
+
+`prisma migrate deploy` takes an advisory lock, so it is safe even if more than
+one instance starts at once, and it is a no-op once the schema is current.
+
+**If you see `The table "public.Session" does not exist`**, the migration has
+not run. Apply it by hand against the public connection string and restart:
+
+```bash
+DATABASE_URL="<DATABASE_PUBLIC_URL>" \
+DIRECT_DATABASE_URL="<DATABASE_PUBLIC_URL>" \
+npm run db:deploy
+```
 
 When it goes green, open the URL. You should get the sign-in screen. You cannot
 sign in yet — nobody exists.
@@ -306,6 +320,7 @@ psql "<DATABASE_PUBLIC_URL>" < facility-2027-03-01.sql
 | --- | --- |
 | Deploy fails: `Environment variable not found: DIRECT_DATABASE_URL` | Step 3 is incomplete. Both variables are needed even though they hold the same value. |
 | Pre-deploy fails: `Can't reach database server at postgres.railway.internal` | The Postgres service is not running, or the reference variable names a service that does not exist — check the spelling inside `${{...}}`. |
+| `The table "public.Session" does not exist` (P2021) | The migration never ran. Apply it by hand as in step 5, then redeploy — `npm start` runs it from now on. |
 | Pre-deploy fails: `prisma: not found` | The `prisma` CLI must be a production dependency, since the pre-deploy step runs after install. It is in `dependencies` in this repo; check nothing moved it. |
 | Deploy fails: `P3009 migrate found failed migrations` | A previous deploy died partway. Connect with `psql` and inspect `_prisma_migrations`; do not simply retry. |
 | Healthcheck fails but the app looks fine | The healthcheck hits `/signin`, which does not touch the database — so if it fails, the Node process itself is not serving. Check the logs for a crash on boot. |
