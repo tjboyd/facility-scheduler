@@ -46,9 +46,8 @@ or declines; the calendar shows who has the facility and when.
 ## Not built yet
 
 Nothing from the reviewed design is outstanding. Ideas that were raised and
-deliberately left are in [`docs/DESIGN.md`](docs/DESIGN.md) §10a — Google
-sign-in, a digest instead of one email per request, and whether a coach can run
-two teams.
+deliberately left are in [`docs/DESIGN.md`](docs/DESIGN.md) §10a — a digest
+instead of one email per request, and whether a coach can run two teams.
 
 The design for all of it is in [`docs/DESIGN.md`](docs/DESIGN.md), with every
 screen in
