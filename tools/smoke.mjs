@@ -223,14 +223,35 @@ try {
   console.log("\nteams");
   const teamName = `Smoke ${Date.now() % 100000}`;
   await page.goto(`${BASE}/admin/people`, { waitUntil: "domcontentloaded" });
-  await page.fill('input[name="name"]', teamName);
-  flash = await act(page, 'form:has(input[name="name"]) button:has-text("Add")');
-  check("a new team can be added", flash.includes(teamName), flash);
-  flash = await act(page, `button[aria-label="Archive ${teamName}"]`);
-  check("an empty team can be archived", flash.includes("Archived"), flash);
+  // A team that has somebody on it: read here, where the invite form lists them.
+  const occupied = (await page.locator("#teamId option").nth(1).textContent()).trim();
 
-  const occupied = await page.locator("#teamId option").nth(1).textContent();
-  flash = await act(page, `button[aria-label="Archive ${occupied.trim()}"]`);
+  await page.goto(`${BASE}/admin/teams`, { waitUntil: "domcontentloaded" });
+  await page.fill("#new-team", teamName);
+  flash = await act(page, 'form:has(#new-team) button:has-text("Add team")');
+  check("a new team can be added", flash.includes(teamName), flash);
+
+  const renamed = `${teamName} B`;
+  const teamRow = `[data-team]:has(input[value="${teamName}"])`;
+  await page.fill(`${teamRow} input[name="name"]`, renamed);
+  flash = await act(page, `${teamRow} button:has-text("Rename")`);
+  check("a team can be renamed", flash.includes(renamed), flash);
+
+  await page.fill(`[data-team]:has(input[value="${renamed}"]) input[name="name"]`, occupied);
+  flash = await act(page, `[data-team]:has(input[value="${renamed}"]) button:has-text("Rename")`);
+  check("a rename onto an existing name is refused", flash.includes("already a team"), flash);
+
+  flash = await act(page, `button[aria-label="Archive ${renamed}"]`);
+  check("an empty team can be archived", flash.includes("Archived"), flash);
+  check(
+    "…and it leaves the invite form's list",
+    (await page.locator(`[data-team]:has(input[value="${renamed}"])`).count()) === 0,
+  );
+
+  flash = await act(page, `[data-team]:has-text("${renamed}") button:has-text("Restore")`);
+  check("an archived team can be restored", flash.includes("Restored"), flash);
+
+  flash = await act(page, `button[aria-label="Archive ${occupied}"]`);
   check("a team with people on it cannot be archived", flash.includes("move them first"), flash);
 } finally {
   await browser.close();

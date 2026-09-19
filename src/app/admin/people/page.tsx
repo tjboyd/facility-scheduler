@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { db } from "@/lib/db";
 import { requireSuperAdmin } from "@/lib/guards";
 import { isRole, isStatus, type Role, type Status } from "@/lib/domain";
@@ -5,7 +7,6 @@ import { AdminTabs } from "@/components/AdminTabs";
 import { Flash } from "@/components/Flash";
 import { AddPeopleForm } from "./AddPeopleForm";
 import { PersonRow } from "./PersonRow";
-import { TeamsCard } from "./TeamsCard";
 
 export const dynamic = "force-dynamic";
 
@@ -23,8 +24,9 @@ export default async function PeoplePage({
   const [rawUsers, teams] = await Promise.all([
     db.user.findMany({ include: { team: true }, orderBy: { email: "asc" } }),
     db.team.findMany({
-      include: { _count: { select: { members: true } } },
-      orderBy: [{ archivedAt: "asc" }, { name: "asc" }],
+      where: { archivedAt: null },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
     }),
   ]);
 
@@ -47,9 +49,7 @@ export default async function PeoplePage({
       return a.email.localeCompare(b.email);
     });
 
-  const assignableTeams = teams
-    .filter((t) => !t.archivedAt)
-    .map((t) => ({ id: t.id, name: t.name }));
+  const assignableTeams = teams.map((t) => ({ id: t.id, name: t.name }));
 
   const withAccess = people.filter((p) => p.status !== "DISABLED").length;
   const pendingInvites = people.filter((p) => p.status === "INVITED").length;
@@ -109,14 +109,13 @@ export default async function PeoplePage({
 
         <aside className="w-full xl:w-[340px] shrink-0 flex flex-col gap-[18px]">
           <AddPeopleForm teams={assignableTeams} />
-          <TeamsCard
-            teams={teams.map((t) => ({
-              id: t.id,
-              name: t.name,
-              archived: t.archivedAt !== null,
-              members: t._count.members,
-            }))}
-          />
+          <p className="text-[12.5px] leading-snug text-muted">
+            Teams themselves — adding, renaming, archiving — live on the{" "}
+            <Link href="/admin/teams" className="text-crimson-deep">
+              Teams tab
+            </Link>
+            .
+          </p>
         </aside>
       </div>
     </div>

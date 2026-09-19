@@ -250,11 +250,13 @@ try {
   for (const [name, path, caption] of [
     ["12-people", "/admin/people",
       "The allowlist is the access control. Paste in a list of addresses, set each person's role and team, remove or restore access. The last super admin cannot be demoted or removed — locking everyone out is the one mistake this screen could make that the app could not undo."],
-    ["13-schedule", "/admin/schedule",
+    ["13-teams", "/admin/teams",
+      "The club's teams, mirroring SportsEngine down to the naming. Renaming one is by id, so every booking and assigned schedule follows it — safe to fix a name mid-season. Archiving keeps a team's history but takes it off the calendar, and a team has to be empty first."],
+    ["14-schedule", "/admin/schedule",
       "Standing practice time: give a team a repeating block and every date is written out as its own booking, so each can be released or picked up on its own. Only super admins set up anything repeating — coaches release and pick up, they never define a schedule."],
-    ["14-hours", "/admin/hours",
+    ["15-hours", "/admin/hours",
       "When coaches may request time, per weekday, with closures for holidays and maintenance. Assigned time may sit outside these hours: the club opens the building when it needs to."],
-    ["15-rules", "/admin/rules",
+    ["16-rules", "/admin/rules",
       "Block size and the longest single request, how far ahead and how late coaches can ask, per-team weekly limits, who is emailed about new requests, and the optional address told when a block is released."],
   ]) {
     await admin.goto(BASE + path, { waitUntil: "networkidle" });

@@ -12,8 +12,9 @@ or declines; the calendar shows who has the facility and when.
   sign in, even with a valid link.
 - **People & access** (super admins): invite by email in bulk, set each person's
   role and team, resend a link, remove access, restore it.
-- **Teams** (super admins): add, archive, restore. A team must be empty to be
-  archived.
+- **Teams** (super admins, their own admin tab): add, rename, archive, restore.
+  Renaming carries every booking and assigned schedule with it; a team must be
+  empty before it can be archived.
 - **Assigned schedules** (**super admins only** — coaches cannot set up anything
   repeating): give a team a repeating block —
   "U9 - White, Saturdays 8:00–9:30, from today through the end of April". Every
@@ -251,6 +252,7 @@ src/lib/requests.ts       request context, approval tokens, the emails
 src/lib/auth.ts           magic links and sessions
 src/lib/guards.ts         requireUser / requireSuperAdmin
 src/app/admin/people/     the people & access screen and its server actions
+src/app/admin/teams/      the club's teams: add, rename, archive, restore
 src/app/admin/schedule/   assigned schedules
 src/app/admin/hours/      weekly opening hours and closures
 src/app/admin/rules/      block size, limits, notice period

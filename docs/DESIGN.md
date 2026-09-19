@@ -312,7 +312,7 @@ rest are `#555555`.
 | --- | --- |
 | Sign in by emailed link, allowlist enforced | built |
 | People & access: invite, role, team, remove, restore | built |
-| Teams: add, archive, restore | built |
+| Teams: add, rename, archive, restore | built |
 | Week calendar | built |
 | Assigned schedules, release, pick up | built |
 | Ad-hoc requests and approvals | built |

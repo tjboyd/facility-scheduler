@@ -40,9 +40,10 @@ TITLES = {
     "10-phone-calendar": "The week, on a phone",
     "11-phone-request": "Asking, on a phone",
     "12-people": "People and access",
-    "13-schedule": "Assigned schedules",
-    "14-hours": "Facility hours",
-    "15-rules": "Booking rules",
+    "13-teams": "The club's teams",
+    "14-schedule": "Assigned schedules",
+    "15-hours": "Facility hours",
+    "16-rules": "Booking rules",
 }
 
 
