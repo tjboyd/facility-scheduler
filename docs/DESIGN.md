@@ -389,12 +389,19 @@ the browser history, or an outbound `Referer` header.
 - **No release cutoff, and no email when a released block is picked up.** Both
   were offered and both declined: the calendar is the record.
 - **Picked-up blocks don't count against a team's weekly limit.**
-- **One coach per team, one team per coach.** No coach runs two teams and no
-  team has two head coaches both booking. The data model already matches the
-  second half — a person carries a single team — so nothing changed. Note that
-  the app does not *stop* a super admin putting two head coaches on one team;
-  it is simply not a case the club has. Weekly limits are per team rather than
-  per coach, so two would share one allowance rather than get two.
+- **One team per coach; a team may have more than one head coach.** No coach
+  runs two teams, which the data model already enforces — a person carries a
+  single team. Two head coaches on one team is fine and supported.
+
+  It works because **the team holds the time, not the person**. Every check is
+  on `booking.teamId`, so either coach can request, withdraw, release or pick up
+  for the team, and both see all of it in *My requests*. They share the team's
+  weekly allowance and its open-request limit rather than getting one each,
+  which is the point: the limits exist to stop one team taking the week.
+
+  One asymmetry to know about: the approve/decline email goes to whoever made
+  the request. The other coach is not emailed, though the decision is on the
+  calendar and in *My requests* for both.
 - **Hours changed under an approved booking: flag it, leave it.** A booking that
   falls outside the new hours stays as it is and is shown to the super admin,
   rather than being cancelled automatically. A block already in somebody's

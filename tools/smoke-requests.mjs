@@ -21,6 +21,8 @@ const STAMP = Date.now();
 const COACH = `req.coach.${STAMP}@example.org`;
 const COACH2 = `req.coach2.${STAMP}@example.org`;
 const APPROVER = `req.approver.${STAMP}@example.org`;
+/** A second head coach on the *same* team as COACH — a supported setup. */
+const COCOACH = `req.coach3.${STAMP}@example.org`;
 const TEAM = "U11 - Black";
 const TEAM2 = "U13 - Red";
 
@@ -154,6 +156,15 @@ try {
   await admin.click('button:has-text("Send invitations")');
   await admin.waitForSelector(`[data-row="${APPROVER}"]`);
   check("a second approver exists", true);
+
+  // A second head coach on the same team as COACH. The club has teams run by
+  // two coaches, and the app is built for it: every check is on the team.
+  await admin.fill("#emails", COCOACH);
+  await admin.selectOption("#role", "HEAD_COACH");
+  await admin.selectOption("#teamId", { label: TEAM });
+  await admin.click('button:has-text("Send invitations")');
+  await admin.waitForSelector(`[data-row="${COCOACH}"]`);
+  check("two head coaches share one team", true);
 
   // -- hours ---------------------------------------------------------------
   console.log("\nfacility hours");
@@ -366,6 +377,32 @@ try {
   // Muting is about email, not access — it is still in their queue.
   await approver.goto(`${BASE}/approvals`, { waitUntil: "domcontentloaded" });
   check("but still sees it in the queue", (await approver.locator("[data-pending]").count()) >= 1);
+
+  // -- two head coaches on one team ---------------------------------------
+  // The team holds the time, not the person, so the co-coach can see and act on
+  // a request their teammate made.
+  console.log("\ntwo coaches on one team");
+  const shared = addDays(today, 11);
+  await coach.goto(`${BASE}/request?date=${shared}`, { waitUntil: "domcontentloaded" });
+  const sharedStart = await coach.locator("[data-start]").first().getAttribute("data-start");
+  await coach.goto(`${BASE}/request?date=${shared}&start=${sharedStart}`, {
+    waitUntil: "domcontentloaded",
+  });
+  await Promise.all([
+    coach.waitForURL("**/requests**", { timeout: TIMEOUT }),
+    coach.click('button:has-text("Send request")'),
+  ]);
+
+  const cocoach = await signIn(browser, COCOACH);
+  await cocoach.goto(`${BASE}/requests`, { waitUntil: "domcontentloaded" });
+  check(
+    "a co-coach sees their teammate's request",
+    (await cocoach.locator("[data-withdraw]").count()) >= 1,
+  );
+
+  const sharedId = await cocoach.locator("[data-withdraw]").first().getAttribute("data-withdraw");
+  const sharedFlash = await act(cocoach, `[data-withdraw="${sharedId}"]`);
+  check("and can withdraw it", sharedFlash.includes("withdrawn"), sharedFlash);
 
   // -- a coach is not an approver -----------------------------------------
   console.log("\nthe approver gate");
