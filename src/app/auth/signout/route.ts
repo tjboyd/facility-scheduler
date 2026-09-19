@@ -1,7 +1,8 @@
-import { NextResponse, type NextRequest } from "next/server";
 import { endSession } from "@/lib/auth";
+import { redirectTo } from "@/lib/http";
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   await endSession();
-  return NextResponse.redirect(new URL("/signin", request.url), { status: 303 });
+  // 303, so the browser follows it with a GET rather than re-posting.
+  return redirectTo("/signin", 303);
 }

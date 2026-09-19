@@ -1,5 +1,6 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 import { getSessionUser } from "@/lib/auth";
+import { pathWithQuery, redirectTo } from "@/lib/http";
 import { displayName } from "@/lib/domain";
 import { lookupApprovalToken } from "@/lib/requests";
 import { decide } from "@/app/approvals/actions";
@@ -21,12 +22,8 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get("token");
-  const done = (state: string, bookingId?: string) => {
-    const url = new URL("/decide/done", request.nextUrl);
-    url.searchParams.set("state", state);
-    if (bookingId) url.searchParams.set("b", bookingId);
-    return NextResponse.redirect(url);
-  };
+  const done = (state: string, bookingId?: string) =>
+    redirectTo(pathWithQuery("/decide/done", { state, b: bookingId }));
 
   if (!token) return done("incomplete");
 
