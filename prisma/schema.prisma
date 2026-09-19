@@ -56,6 +56,11 @@ model User {
   teamId String?
   team   Team?   @relation(fields: [teamId], references: [id], onDelete: SetNull)
 
+  /// Whether new requests email this person. Only meaningful for those who can
+  /// decide them; a head coach's value is simply never read. Defaults on, so
+  /// somebody promoted to approver starts out hearing about requests.
+  notifyOnRequests Boolean @default(true)
+
   invitedAt    DateTime  @default(now())
   lastSignInAt DateTime?
   createdAt    DateTime  @default(now())

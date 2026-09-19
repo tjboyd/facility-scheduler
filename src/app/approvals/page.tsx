@@ -8,7 +8,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { Flash } from "@/components/Flash";
 import { describeLength } from "@/lib/rules";
 import { formatDateLong, formatRange, overlaps, todayInZone } from "@/lib/schedule";
-import { approveRequest, declineRequest } from "./actions";
+import { approveRequest, declineRequest, setMyNotifications } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +27,11 @@ export default async function ApprovalsPage({
     where: { status: "PENDING", date: { gte: today } },
     include: { team: true, requestedBy: true },
     orderBy: [{ createdAt: "asc" }],
+  });
+
+  const me = await db.user.findUnique({
+    where: { id: user.id },
+    select: { notifyOnRequests: true },
   });
 
   const decided = await db.booking.count({
@@ -172,6 +177,28 @@ export default async function ApprovalsPage({
             </section>
           );
         })}
+
+        <form
+          action={setMyNotifications}
+          className="card flex flex-wrap items-center gap-x-3 gap-y-2 p-4"
+        >
+          <div className="grow min-w-[240px]">
+            <div className="text-[13.5px]">Email me when a request comes in</div>
+            <div className="text-xs text-faint mt-0.5">
+              {me?.notifyOnRequests
+                ? "On. Each request also carries a link that approves it in one click."
+                : "Off. Requests still appear here — you just aren't emailed about them."}
+            </div>
+          </div>
+          <input
+            type="hidden"
+            name="notify"
+            value={me?.notifyOnRequests ? "off" : "on"}
+          />
+          <button type="submit" data-notify-toggle className="btn btn-secondary btn-sm">
+            {me?.notifyOnRequests ? "Turn off" : "Turn on"}
+          </button>
+        </form>
 
         <p className="text-[12.5px] text-muted">
           Approving from the email does exactly this. Whoever gets there first decides it — the

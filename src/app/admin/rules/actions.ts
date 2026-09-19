@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { assertSuperAdmin } from "@/lib/guards";
+import { wouldSilenceAllApprovers } from "@/lib/domain";
 
 const PATH = "/admin/rules";
 
@@ -67,6 +68,34 @@ export async function saveRules(formData: FormData): Promise<void> {
       notifyCoachOnDecision,
     },
   });
+
+  // Who hears about a new request. An unticked checkbox sends nothing at all,
+  // so "on" is read as presence rather than by value.
+  const deciders = await db.user.findMany({
+    where: { role: { in: ["APPROVER", "SUPER_ADMIN"] }, status: { in: ["ACTIVE", "INVITED"] } },
+    select: { id: true, notifyOnRequests: true },
+  });
+  const nextNotified = deciders.filter((d) => formData.get(`notify-${d.id}`) === "on");
+
+  if (
+    wouldSilenceAllApprovers({
+      deciderIds: deciders.map((d) => d.id),
+      nextNotifiedIds: nextNotified.map((d) => d.id),
+    })
+  ) {
+    backWith(
+      "Somebody has to be emailed when a request comes in, or requests would sit in " +
+        "the queue with nobody told. Leave at least one approver ticked.",
+      "error",
+    );
+  }
+
+  const notifiedIds = new Set(nextNotified.map((d) => d.id));
+  for (const person of deciders) {
+    const next = notifiedIds.has(person.id);
+    if (next === person.notifyOnRequests) continue;
+    await db.user.update({ where: { id: person.id }, data: { notifyOnRequests: next } });
+  }
 
   revalidatePath(PATH);
   revalidatePath("/calendar");
