@@ -25,7 +25,7 @@ Budget about an hour, most of which is waiting for DNS. You can stop after step
 | **Railway account** | Sign in with GitHub. Expect roughly $5–10/month for the app and database together at this traffic — check current pricing, it changes. |
 | **Postmark account** | For sign-in and approval emails. Free trial covers setup; the smallest paid plan is about $15/month, though this app sends very little. |
 | **DNS access** | GoDaddy, for `jrchargersbaseball.com` — two records to add. |
-| **Node 20+ locally** | Only for the one-off seed in step 6. |
+| **Node 20+ locally** | Optional. The first account is created on first boot; this is only for seeding by hand. |
 
 ---
 
@@ -154,6 +154,15 @@ Still in the app service's **Variables**, add:
 | `MAIL_REPLY_TO` | `facility@jrchargersbaseball.com` — an address somebody reads |
 | `POSTMARK_SERVER_TOKEN` | the token from step 1 |
 | `POSTMARK_MESSAGE_STREAM` | `outbound` |
+| `SEED_SUPER_ADMIN_EMAIL` | your address — the first account, created on first boot |
+| `SEED_SUPER_ADMIN_NAME` | your name (optional) |
+
+**`SEED_SUPER_ADMIN_EMAIL` is how you get in.** On its very first boot — and
+only when the database has no people in it at all — the app creates that super
+admin, the club's 20 teams and the facility defaults. Every boot after that it
+finds people and does nothing, so it can never re-promote somebody you later
+demote or bring back a team you archived. Without it the app deploys fine and
+nobody can sign in.
 
 **`MAIL_FROM` must be on the domain Postmark verified** — `jrchargersbaseball.com`. Send from anything else and Postmark rejects the message rather than delivering it.
 
@@ -211,47 +220,39 @@ sign in yet — nobody exists.
 
 ---
 
-## Step 6 — Create the first account
+## Step 6 — Sign in
 
-Nothing can happen in the app until one super admin exists. Run the seed once
-from your own machine, pointed at the production database.
+There is nothing to run. The first boot already created your super admin from
+`SEED_SUPER_ADMIN_EMAIL`, along with the club's teams and the facility
+defaults. The deploy log says so:
 
-You need the database's **public** URL, because `postgres.railway.internal` only
-resolves inside Railway. Open the **Postgres** service → **Variables** and copy
-`DATABASE_PUBLIC_URL`.
+```
+[bootstrap] first run: created 20 teams, the facility defaults, and the super
+admin you@jrchargersbaseball.com. Sign in with that address to invite everyone else.
+```
 
-Then, in a clone of the repo:
+If instead it says the variable is not set, set it and redeploy.
+
+**Seeding by hand**, against a database the app is not running against yet, or
+for local development:
 
 ```bash
-npm install
-
 DATABASE_URL="<DATABASE_PUBLIC_URL>" \
 DIRECT_DATABASE_URL="<DATABASE_PUBLIC_URL>" \
 SEED_SUPER_ADMIN_EMAIL="you@jrchargersbaseball.com" \
-SEED_SUPER_ADMIN_NAME="Your Name" \
 npm run db:seed
 ```
 
-This creates your super admin account and the club's 20 teams (15 active, 5
-archived to match SportsEngine), and sets the facility hours and booking rules
-to their defaults.
-
-**Pass the variables inline as shown; do not edit your `.env` to point at
-production.** Inline variables take precedence, and this way there is no chance
-of leaving your local setup aimed at the live database and later running
-something destructive against it.
-
-The seed is safe to run again: teams are upserted, hours and rules are only
-created if absent, and an existing admin is left alone.
+It is the same code the server runs, with the same guard: it does nothing to a
+database that already has people in it.
 
 ---
 
-## Step 7 — Sign in and add everyone
+## Step 7 — Add everyone and set the place up
 
-1. Open the app and enter the address you seeded.
-2. Check your inbox and follow the link. It is good for 15 minutes and works
-   once.
-3. Go to **Admin → People & access** and add the other coaches — paste a whole
+1. Open the app and enter your address. Check your inbox and follow the link —
+   it is good for 15 minutes and works once.
+2. Go to **Admin → People & access** and add the other coaches — paste a whole
    list of addresses at once, then set each person's role and team.
 
 | Role | Can do |
@@ -327,6 +328,7 @@ psql "<DATABASE_PUBLIC_URL>" < facility-2027-03-01.sql
 | No email arrives | Check Postmark's **Activity** tab. Nothing there means the app never sent — check `MAIL_TRANSPORT` is `postmark` and the token is right, then read the Railway logs. Something there, bounced or suppressed, means the address is the problem. |
 | Emails send but the links 404 or hit the wrong site | `APP_URL` is wrong, or was never updated after you generated the domain. |
 | "That sign-in link is no longer valid" | They expire after 15 minutes and work once. Clicking the same link twice does this. Request a new one. |
+| The sign-in email never arrives and the logs show nothing | Sign-in answers identically whether or not an address is on the list, so an unknown address sends nothing and logs nothing. That address is not in the database — check **Admin → People & access**, or the first-boot log line above. |
 | A coach says the app rejects them | They are not on the allowlist, or their access was removed. Check **Admin → People & access**. An address that is not on the list cannot sign in even with a valid link — that is the access control working. |
 | A coach has no **Request time** button | Head coaches must be on a team. Assign one in **People & access**. |
 | `psql` from your laptop hangs or refuses | You are using `DATABASE_URL` (internal). Use `DATABASE_PUBLIC_URL`. |
