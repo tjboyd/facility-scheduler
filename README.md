@@ -182,7 +182,7 @@ different sending domain is an `.env` change plus DNS, with no code edits.
 
 ```bash
 MAIL_TRANSPORT="postmark"
-MAIL_FROM="Jr Chargers Facility <no-reply@mail.yourdomain.org>"
+MAIL_FROM="Jr Chargers Facility <no-reply@yourdomain.org>"
 MAIL_REPLY_TO="facility@yourdomain.org"
 POSTMARK_SERVER_TOKEN="…"        # Postmark → Servers → API Tokens
 POSTMARK_MESSAGE_STREAM="outbound"
@@ -190,11 +190,11 @@ ORG_NAME="Hamilton Jr Chargers"
 APP_URL="https://…"              # sign-in links are built from this
 ```
 
-**Send from a subdomain** (`mail.yourdomain.org`). If the scheduler ever
-generates bounces, that keeps the reputation damage off the domain the club
-sends its ordinary mail from. Two DNS records make that work, plus a DMARC
-record — they are in
-[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md#step-1--start-the-dns-records-first).
+**`MAIL_FROM` has to be on a domain verified in Postmark**, or the send is
+rejected rather than delivered. Two DNS records do the verifying — a DKIM key
+and a Return-Path CNAME. The Return-Path is what makes SPF *align* for DMARC,
+which is why Postmark never goes in your own SPF record. The club's exact setup
+is in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md#step-1--postmark-and-dns).
 
 Keep `POSTMARK_MESSAGE_STREAM` on a **transactional** stream. Sign-in links sent
 down a broadcast stream get filtered far harder, and an auth email in the spam

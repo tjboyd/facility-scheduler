@@ -24,61 +24,78 @@ Budget about an hour, most of which is waiting for DNS. You can stop after step
 | **GitHub** | Access to `tjboyd/facility-scheduler`. |
 | **Railway account** | Sign in with GitHub. Expect roughly $5–10/month for the app and database together at this traffic — check current pricing, it changes. |
 | **Postmark account** | For sign-in and approval emails. Free trial covers setup; the smallest paid plan is about $15/month, though this app sends very little. |
-| **DNS access** | Wherever the club's domain is managed — you will add two or three records. |
+| **DNS access** | GoDaddy, for `jrchargersbaseball.com` — two records to add. |
 | **Node 20+ locally** | Only for the one-off seed in step 6. |
 
 ---
 
-## Step 1 — Start the DNS records first
+## Step 1 — Postmark and DNS
 
-Do this before anything else, because DNS can take from ten minutes to a few
-hours to propagate and you want it finished by the time you need it.
+Do this first, because DNS takes from ten minutes to a few hours to propagate
+and you want it finished by the time you need it.
 
-**Send from a subdomain**, not the club's main domain — `mail.jrchargersbaseball.com`.
-If the scheduler ever generates bounces, that keeps the damage away from the
-domain the club sends its ordinary mail from.
+**The club sends from `jrchargersbaseball.com` itself**, the root domain. That
+is what is set up and verified. Postmark's own records sit alongside the
+existing ones rather than replacing anything.
 
-This also means you touch nothing that is already working. The records below all
-sit under `mail.`, so the root domain's existing MX, SPF and any Google or
-Microsoft verification records are left exactly as they are. Check what is there
-before you start, so you know what you are adding to:
+Two records make it work:
+
+| Type | Host | Value |
+| --- | --- | --- |
+| TXT | `<selector>._domainkey` | the DKIM key Postmark shows you |
+| CNAME | `pm-bounces` | `pm.mtasv.net` |
+
+At GoDaddy the **Host** column is relative to the domain, so enter
+`pm-bounces` — not the full `pm-bounces.jrchargersbaseball.com`, which GoDaddy
+would turn into `pm-bounces.jrchargersbaseball.com.jrchargersbaseball.com`.
+
+Check them from a terminal:
 
 ```bash
-dig +short MX jrchargersbaseball.com
-dig +short TXT jrchargersbaseball.com
+dig +short CNAME pm-bounces.jrchargersbaseball.com     # → pm.mtasv.net.
 dig +short TXT _dmarc.jrchargersbaseball.com
+dig +short TXT jrchargersbaseball.com
 ```
 
-If `_dmarc` already returns a policy, leave it alone — step 3 below is only for
-a domain that has none.
+### Do not touch the SPF record
 
-1. In Postmark: **Sender Signatures → Add Domain**, enter `mail.jrchargersbaseball.com`.
-2. Postmark shows the records to add. Add them at your DNS host:
+The root already publishes:
 
-| Type | Host | Value |
-| --- | --- | --- |
-| TXT | `<selector>._domainkey.mail.jrchargersbaseball.com` | the DKIM key Postmark shows you |
-| CNAME | `pm-bounces.mail.jrchargersbaseball.com` | `pm.mtasv.net` |
+```
+v=spf1 include:spf.protection.outlook.com a:smtp.ngin.com -all
+```
 
-   The CNAME is Postmark's custom Return-Path. It is what makes SPF *align* for
-   DMARC, and it is why you do **not** need to add Postmark to your main
-   domain's SPF record.
+That is Microsoft 365 and SportsEngine, and it ends in `-all`, a hard fail.
+**Postmark does not belong in it**, and adding it would be a mistake worth
+avoiding: the `pm-bounces` CNAME makes Postmark the *Return-Path* domain, and
+SPF is checked against the Return-Path rather than the From address. Postmark
+publishes its own SPF there, so the check passes and still *aligns* with
+`jrchargersbaseball.com` for DMARC. Editing a working SPF record risks the
+club's real mail for no gain.
 
-3. While you are in DNS, add a DMARC record **if the domain has none** — the
-   `dig` above tells you. Start permissive and tighten once you can see reports;
-   going straight to `p=reject` on a domain whose other senders you have not
-   audited will bounce real club mail:
+### DMARC is already set
 
-| Type | Host | Value |
-| --- | --- | --- |
-| TXT | `_dmarc.jrchargersbaseball.com` | `v=DMARC1; p=none; rua=mailto:admin@jrchargersbaseball.com` |
+`_dmarc.jrchargersbaseball.com` publishes `p=none` with reports going to
+`dmarc@jrchargersbaseball.com`. Leave it alone — a second DMARC record on one
+name is invalid and would break the first. `p=none` is the right setting while
+a new sender beds in; tighten it later once the reports look clean.
 
-4. Back in Postmark, click **Verify**. Come back later if it has not propagated.
+### Then
 
-Then get your server token from **Servers → (your server) → API Tokens** and
-keep it for step 4. Use a **transactional** message stream — `outbound` is the
-default Postmark creates. Never point this at a broadcast stream: sign-in links
-are not marketing, and they get filtered far harder on one.
+1. In Postmark, **Sender Signatures → jrchargersbaseball.com** should show
+   **Verified** for both DKIM and Return-Path. If DKIM is still pending, the
+   TXT record has not propagated — wait and press Verify again.
+2. Copy the server token from **Servers → (your server) → API Tokens**.
+3. Use a **transactional** message stream — `outbound` is the default Postmark
+   creates. Never a broadcast stream: sign-in links are not marketing and get
+   filtered far harder on one.
+
+> **Sending from a subdomain instead.** `mail.jrchargersbaseball.com` would keep
+> any bounce reputation off the domain the club's real mail uses, which is the
+> safer arrangement for a high-volume sender. At this volume — a handful of
+> transactional emails to addresses the club already has — the difference is
+> small, and the root is what is set up. If you ever want to move, it is the
+> same two records under `mail.` and a change to `MAIL_FROM`.
 
 ---
 
@@ -133,10 +150,12 @@ Still in the app service's **Variables**, add:
 | `ORG_NAME` | `Hamilton Jr Chargers` |
 | `FACILITY_TIMEZONE` | `America/Chicago` |
 | `MAIL_TRANSPORT` | `postmark` |
-| `MAIL_FROM` | `Jr Chargers Facility <no-reply@mail.jrchargersbaseball.com>` |
+| `MAIL_FROM` | `Jr Chargers Facility <no-reply@jrchargersbaseball.com>` |
 | `MAIL_REPLY_TO` | `facility@jrchargersbaseball.com` — an address somebody reads |
 | `POSTMARK_SERVER_TOKEN` | the token from step 1 |
 | `POSTMARK_MESSAGE_STREAM` | `outbound` |
+
+**`MAIL_FROM` must be on the domain Postmark verified** — `jrchargersbaseball.com`. Send from anything else and Postmark rejects the message rather than delivering it.
 
 **`APP_URL` is the one to get right.** Every sign-in link and every one-click
 approval link is built from it. If it is wrong, emails go out with links that do
