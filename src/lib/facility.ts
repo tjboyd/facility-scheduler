@@ -24,6 +24,7 @@ export async function loadSettings(): Promise<Settings> {
     maxApprovedPerWeek: row.maxApprovedPerWeek,
     maxOpenRequests: row.maxOpenRequests,
     notifyCoachOnDecision: row.notifyCoachOnDecision,
+    releaseNotifyEmail: row.releaseNotifyEmail,
   };
 }
 

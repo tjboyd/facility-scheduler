@@ -152,6 +152,27 @@ export function wouldSilenceAllApprovers(input: NotifyGuardInput): boolean {
   return input.deciderIds.length > 0 && input.nextNotifiedIds.length === 0;
 }
 
+export type OptionalEmail =
+  | { ok: true; value: string | null }
+  | { ok: false; raw: string };
+
+/**
+ * An address field where blank is a real answer rather than a mistake — the
+ * release notice, where empty means tell nobody.
+ *
+ * The form marks it type="email" so a browser catches a typo without a round
+ * trip, which means this rarely fires. It still has to exist: that check is
+ * absent with JavaScript off, and absent entirely for anything posting
+ * directly.
+ */
+export function parseOptionalEmail(raw: string): OptionalEmail {
+  const trimmed = raw.trim();
+  if (!trimmed) return { ok: true, value: null };
+  const normalized = normalizeEmail(trimmed);
+  if (!isValidEmail(normalized)) return { ok: false, raw: trimmed };
+  return { ok: true, value: normalized };
+}
+
 /** "Coach Rivera" from "rivera@jrchargersbaseball.com" is wrong more often than
  *  it is right, so an invited person simply has no name until they sign in. */
 export function displayName(user: { name: string | null; email: string }): string {

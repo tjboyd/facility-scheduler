@@ -13,6 +13,8 @@ import { chromium } from "playwright";
 
 const BASE = (process.env.BASE_URL || "http://localhost:3000").replace(/\/+$/, "");
 const MAIL_LOG = process.env.MAIL_LOG || "server.log";
+/** Where release notices go while the suite runs. */
+const SCHEDULER = `sched.master.${Date.now()}@example.org`;
 const EXECUTABLE = process.env.CHROME || "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
 const ADMIN = process.env.SEED_SUPER_ADMIN_EMAIL || "you@jrchargersbaseball.com";
 const TIMEOUT = 20_000;
@@ -36,12 +38,30 @@ function check(name, condition, detail = "") {
   }
 }
 
+function emailsTo(email) {
+  return readFileSync(MAIL_LOG, "utf8")
+    .split("── email ─")
+    .slice(1)
+    .filter((b) => b.includes(`to:   ${email}`));
+}
+
 function linkFor(email) {
   const log = readFileSync(MAIL_LOG, "utf8");
   for (const block of log.split("── email ─").slice(1).reverse()) {
     if (!block.includes(`to:   ${email}`)) continue;
     const match = block.match(/(http\S*\/auth\/verify\?token=\S+)/);
     if (match) return match[1];
+  }
+  return null;
+}
+
+/** Polls until fn returns something truthy, or the deadline passes. */
+async function waitFor(fn, timeoutMs = 12_000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const value = fn();
+    if (value) return value;
+    await new Promise((r) => setTimeout(r, 200));
   }
   return null;
 }
@@ -163,6 +183,15 @@ try {
   const blocks = await admin.locator("[data-block]").count();
   check("assigned blocks appear on the calendar", blocks >= 2, `${blocks} block(s)`);
 
+  // -- a release can tell the club's scheduler ---------------------------
+  // The field is type="email", so a browser blocks a typo before it is ever
+  // posted — parseOptionalEmail covers the server side in the unit tests.
+  console.log("\nthe release notice");
+  await admin.goto(`${BASE}/admin/rules`, { waitUntil: "domcontentloaded" });
+  await admin.fill("#releaseNotifyEmail", SCHEDULER);
+  let rulesFlash = await act(admin, 'button:has-text("Save booking rules")');
+  check("a scheduler address can be set", rulesFlash.includes("saved"), rulesFlash);
+
   // -- the holding team releases one --------------------------------------
   console.log("\nreleasing");
   const { page: coachA } = await signIn(browser, COACH_A);
@@ -173,6 +202,11 @@ try {
   flash = await act(coachA, `[data-release="${blockId}"]`);
   check("releasing says so", flash.includes("Released"), flash);
   check("and it cannot be released twice", (await coachA.locator(`[data-release="${blockId}"]`).count()) === 0);
+  check(
+    "the scheduler was told",
+    Boolean(await waitFor(() => emailsTo(SCHEDULER).length > 0)),
+    `${emailsTo(SCHEDULER).length} email(s)`,
+  );
 
   await coachA.goto(`${BASE}/calendar?week=${firstSaturday}`, { waitUntil: "domcontentloaded" });
   check(
@@ -197,6 +231,45 @@ try {
     "it is held again on the calendar",
     (await coachB.locator(`[data-block="${blockId}"][data-status="HELD"]`).count()) === 1,
   );
+
+  // Clearing the address is how you turn these off — the point of the feature
+  // is that empty means send nothing.
+  console.log("\nturning the release notice off");
+  await admin.goto(`${BASE}/admin/rules`, { waitUntil: "domcontentloaded" });
+  await admin.fill("#releaseNotifyEmail", "");
+  rulesFlash = await act(admin, 'button:has-text("Save booking rules")');
+  check("the scheduler address can be cleared", rulesFlash.includes("saved"), rulesFlash);
+
+  const quietBefore = emailsTo(SCHEDULER).length;
+  // Next week, because this coach's block in the first one has already been
+  // released and picked up. The series repeats weekly for eight weeks.
+  const nextSaturday = addDays(firstSaturday, 7);
+  await coachA.goto(`${BASE}/calendar?week=${nextSaturday}`, { waitUntil: "domcontentloaded" });
+  // The calendar shows every team's blocks, so pick one this coach can actually
+  // give back rather than assuming the first held block is theirs.
+  const heldIds = await coachA
+    .locator('[data-block][data-status="HELD"]')
+    .evaluateAll((nodes) => nodes.map((n) => n.getAttribute("data-block")));
+  let secondBlock = null;
+  for (const id of heldIds) {
+    await coachA.goto(`${BASE}/booking/${id}`, { waitUntil: "domcontentloaded" });
+    if ((await coachA.locator(`[data-release="${id}"]`).count()) === 1) {
+      secondBlock = id;
+      break;
+    }
+  }
+  if (secondBlock) {
+    const quietFlash = await act(coachA, `[data-release="${secondBlock}"]`);
+    // Give a send the same chance to appear as the one we asserted above.
+    await coachA.waitForTimeout(1200);
+    check(
+      "no email goes out once it is empty",
+      quietFlash.includes("Released") && emailsTo(SCHEDULER).length === quietBefore,
+      `${emailsTo(SCHEDULER).length - quietBefore} new email(s)`,
+    );
+  } else {
+    check("no email goes out once it is empty", false, "no second block left to release");
+  }
 
   // -- first come, first served -------------------------------------------
   console.log("\nfirst come, first served");
@@ -242,6 +315,7 @@ async function tidyUp() {
     await db.booking.deleteMany({ where: { seriesId: { in: ids } } });
     const users = await db.user.deleteMany({ where: { email: { startsWith: "sched." } } });
     await db.$disconnect();
+    await db.settings.updateMany({ data: { releaseNotifyEmail: null } });
     console.log(`\ncleaned up ${ids.length} series and ${users.count} test user(s)`);
   } catch (error) {
     console.log(`\ncould not clean up test data: ${error.message}`);

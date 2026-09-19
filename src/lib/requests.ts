@@ -206,3 +206,47 @@ export async function emailCoachDecision(
 }
 
 export type { RequestSummary };
+
+/**
+ * Tells the club's scheduler that a team has given a block back, so somebody
+ * can chase it rather than leaving it to sit on the calendar unnoticed.
+ *
+ * Off unless an address is set: the calendar is the record, and a club that
+ * does not want the traffic simply leaves the field empty. Picking a block up
+ * deliberately sends nothing — that one was offered and declined.
+ */
+export async function emailReleaseNotice(released: {
+  date: string;
+  startMinutes: number;
+  endMinutes: number;
+  teamName: string;
+  releasedBy: string;
+}): Promise<void> {
+  const settings = await loadSettings();
+  const to = settings.releaseNotifyEmail?.trim();
+  if (!to) return;
+
+  const when = `${formatDateLong(released.date)}, ${released.date.slice(0, 4)} · ${formatRange(
+    released.startMinutes,
+    released.endMinutes,
+  )}`;
+
+  await sendMail({
+    to,
+    subject: `Released: ${released.teamName} — ${when}`,
+    text: [
+      `${released.teamName} has given back facility time.`,
+      "",
+      `When:     ${when}`,
+      `Released by: ${released.releasedBy}`,
+      "",
+      "It is on the calendar as available now, first come first served, and any",
+      "team can pick it up without approval.",
+      "",
+      `${APP_URL}/calendar`,
+      "",
+      `You get this because you are set as the scheduler for the ${ORG_NAME} indoor`,
+      "facility. Clear that address on Admin → Booking rules to stop these.",
+    ].join("\n"),
+  });
+}

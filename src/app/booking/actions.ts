@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { FACILITY_TIMEZONE } from "@/lib/env";
 import { getSessionUser } from "@/lib/auth";
+import { displayName } from "@/lib/domain";
+import { emailReleaseNotice } from "@/lib/requests";
 import {
   canClaim,
   canRelease,
@@ -66,6 +68,20 @@ export async function releaseBooking(formData: FormData): Promise<void> {
     },
   });
   if (updated.count === 0) backTo(id, "That block had already changed hands.", "error");
+
+  // Sends never undo writes: the block is released whatever the mail server
+  // does, and a failure is logged rather than thrown away.
+  try {
+    await emailReleaseNotice({
+      date: booking.date,
+      startMinutes: booking.startMinutes,
+      endMinutes: booking.endMinutes,
+      teamName: booking.team?.name ?? "A team",
+      releasedBy: displayName(user),
+    });
+  } catch (error) {
+    console.error(`[booking] could not email the release notice for ${id}:`, error);
+  }
 
   revalidatePath("/calendar");
   revalidatePath(`/booking/${id}`);

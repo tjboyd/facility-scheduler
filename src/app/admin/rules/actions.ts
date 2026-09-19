@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { assertSuperAdmin } from "@/lib/guards";
-import { wouldSilenceAllApprovers } from "@/lib/domain";
+import { parseOptionalEmail, wouldSilenceAllApprovers } from "@/lib/domain";
 
 const PATH = "/admin/rules";
 
@@ -28,6 +28,11 @@ export async function saveRules(formData: FormData): Promise<void> {
   const maxApprovedPerWeek = intField(formData, "maxApprovedPerWeek", 1, 50);
   const maxOpenRequests = intField(formData, "maxOpenRequests", 1, 50);
   const notifyCoachOnDecision = formData.get("notifyCoachOnDecision") === "on";
+
+  // Empty is a real answer here — it means tell nobody.
+  const release = parseOptionalEmail(String(formData.get("releaseNotifyEmail") ?? ""));
+  if (!release.ok) backWith(`"${release.raw}" doesn't look like an email address.`, "error");
+  const releaseNotifyEmail = release.value;
 
   if (
     blockMinutes === null ||
@@ -56,6 +61,7 @@ export async function saveRules(formData: FormData): Promise<void> {
       maxApprovedPerWeek,
       maxOpenRequests,
       notifyCoachOnDecision,
+      releaseNotifyEmail,
     },
     create: {
       id: "singleton",
@@ -66,6 +72,7 @@ export async function saveRules(formData: FormData): Promise<void> {
       maxApprovedPerWeek,
       maxOpenRequests,
       notifyCoachOnDecision,
+      releaseNotifyEmail,
     },
   });
 

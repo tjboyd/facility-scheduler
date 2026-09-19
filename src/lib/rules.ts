@@ -25,6 +25,8 @@ export type Settings = {
   maxApprovedPerWeek: number;
   maxOpenRequests: number;
   notifyCoachOnDecision: boolean;
+  /** Empty or null means nobody is told when a block is released. */
+  releaseNotifyEmail: string | null;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -35,6 +37,7 @@ export const DEFAULT_SETTINGS: Settings = {
   maxApprovedPerWeek: 3,
   maxOpenRequests: 2,
   notifyCoachOnDecision: true,
+  releaseNotifyEmail: null,
 };
 
 export type DayHours = {
