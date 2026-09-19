@@ -97,7 +97,7 @@ the facility regardless of the weekly hours.
 
 Changing hours does not retroactively cancel bookings that are already approved.
 Approved bookings that fall outside the new hours stay put and are flagged to the
-super admin — still open, see 10a.2.
+super admin — confirmed, see section 10.
 
 ## 5a. Assigned schedules, releasing and picking up  ·  *built*
 
@@ -168,7 +168,7 @@ plans by the time you end the schedule.
   and in *My requests*, and the slot reopens immediately.
 - **released** — a coach giving back a slot they hold; it reopens as first come,
   first served. **No email goes out**, for either the release or the pick-up:
-  the calendar is the record. See 10a.6.
+  the calendar is the record. See 10a.2.
 
 Approving from the email and approving from the Approvals queue do the same
 thing. Whoever gets there first decides it; the second person sees it already
@@ -181,7 +181,7 @@ decided.
 | New request | every address on the approver list |
 | Approved | the requesting coach |
 | Declined (with reason) | the requesting coach |
-| Slot released by a coach | nobody — see 10a.6 |
+| Slot released by a coach | nobody — see 10a.2 |
 
 Each approver chooses whether new requests email them, on the approvals screen
 or, for the whole roster, on *Booking rules*. Muting is about email and not
@@ -190,8 +190,9 @@ stay listening, and the rule is checked against the state a save would produce
 rather than per person changed — two approvers turned off in one save are each
 harmless alone and fatal together.
 
-Coach decision emails can be turned off on *Booking rules*. The daily-digest
-option in the original spec is not built — see 10a.5.
+Coach decision emails can be turned off on *Booking rules*, and each approver
+chooses whether new requests email them at all. The daily-digest option in the
+original spec was declined — see section 10.
 
 **Transport: Postmark**, on a transactional message stream, sending from a
 subdomain (`mail.<domain>`) so the scheduler's sending reputation is separate
@@ -373,6 +374,8 @@ the browser history, or an outbound `Referer` header.
 - **Pending requests show the team name.** Confirmed. Other coaches see which
   team is holding a slot while it waits on the approver, not just that it's taken.
 - **Hamilton Jr Chargers brand and logo throughout.** See section 9.
+- **The team list is complete at 20.** SportsEngine's 21st row is an admin chat
+  group, not a team.
 - **Teams mirror SportsEngine**, names and all (`U12 - Red`, not `12U Red`), so
   the two systems line up. A team SportsEngine has as Inactive is seeded
   archived here: it keeps its history but cannot be assigned or booked against.
@@ -386,6 +389,20 @@ the browser history, or an outbound `Referer` header.
 - **No release cutoff, and no email when a released block is picked up.** Both
   were offered and both declined: the calendar is the record.
 - **Picked-up blocks don't count against a team's weekly limit.**
+- **One coach per team, one team per coach.** No coach runs two teams and no
+  team has two head coaches both booking. The data model already matches the
+  second half — a person carries a single team — so nothing changed. Note that
+  the app does not *stop* a super admin putting two head coaches on one team;
+  it is simply not a case the club has. Weekly limits are per team rather than
+  per coach, so two would share one allowance rather than get two.
+- **Hours changed under an approved booking: flag it, leave it.** A booking that
+  falls outside the new hours stays as it is and is shown to the super admin,
+  rather than being cancelled automatically. A block already in somebody's
+  calendar is worth more than a tidy rule, and the admin can cancel the few that
+  genuinely have to go.
+- **One email per request, no daily digest.** Section 7 offered a digest; at
+  club volume it would add a delay for no relief. An approver who finds the
+  emails too much turns them off for themselves, which is built.
 - **No Google sign-in.** The mockup offered it beside the email link and it was
   declined: the emailed link already works for any address, and adding an OAuth
   provider would mean a second way in to keep secure for no coach who could not
@@ -394,22 +411,16 @@ the browser history, or an outbound `Referer` header.
 
 ## 10a. Still open
 
-1. **Teams** — a coach is currently tied to exactly one team. Does any coach run
-   two teams, or does a team ever have two head coaches who both book?
-2. **Hours changed under an approved booking** — flag it to the admin and leave
-   it, or auto-cancel and notify the coach? The spec currently says flag.
-3. **Decline without a free alternative** — should declining suggest the nearest
-   open slot of the same length?
-4. **Teams are complete** at 20. SportsEngine's 21st row is an admin chat
-   group, not a team.
-5. **Digest instead of one email per request** — section 7 offered it; the built
-   version always sends one email per request to every approver. Worth adding
-   only if the volume turns out to be annoying.
-6. **Nobody is emailed when a block is released.** Emailing on *pick-up* was
+Two, neither blocking:
+
+1. **Decline without a free alternative** — should declining suggest the nearest
+   open slot of the same length? Today the coach is told why and left to look
+   themselves.
+2. **Nobody is emailed when a block is released.** Emailing on *pick-up* was
    offered and declined, on the grounds that the calendar is the record; the
    same reasoning was applied to the release itself, so neither sends. If
-   released time is going unnoticed and unused, a release email to the approvers
-   is the smallest fix.
+   released time turns out to go unnoticed and unused, a release email to the
+   approvers is the smallest fix.
 
 ## 11. Not in scope yet
 
