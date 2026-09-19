@@ -184,6 +184,13 @@ through **Postmark**.
 Nothing about the club's name, domain or addresses is hardcoded — moving to a
 different sending domain is an `.env` change plus DNS, with no code edits.
 
+Every message goes out **branded HTML with a plain-text alternative**, both
+rendered from one spec in [`src/lib/email.ts`](src/lib/email.ts) — write the
+message once as blocks and get both bodies, rather than writing two that drift.
+The layout lives in this repo rather than in a Postmark template: the copy is
+next to the code that sends it, version controlled, and covered by the tests.
+Postmark is handed both bodies and the client picks.
+
 ```bash
 MAIL_TRANSPORT="postmark"
 MAIL_FROM="Jr Chargers Facility <no-reply@yourdomain.org>"
@@ -252,6 +259,7 @@ src/lib/schedule.ts       pure rules: recurrence, overlap, release and pickup
 src/lib/rules.ts          pure rules: openings, lengths, request validation
 src/lib/facility.ts       hours, closures and settings, with their defaults
 src/lib/requests.ts       request context, approval tokens, the emails
+src/lib/email.ts          one spec per message, rendered as HTML and as text
 src/lib/auth.ts           magic links and sessions
 src/lib/guards.ts         requireUser / requireSuperAdmin
 src/app/admin/people/     the people & access screen and its server actions

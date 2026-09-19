@@ -323,6 +323,7 @@ rest are `#555555`.
 | Notification emails for requests and decisions | built |
 | Phone layouts (day view, tab bar) | built |
 | Per-approver email preferences | built |
+| Branded HTML email, with a plain-text alternative | built |
 
 Rules the built screens enforce that are worth knowing about:
 
