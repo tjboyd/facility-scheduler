@@ -1,7 +1,7 @@
 # Facility Scheduler — design spec
 
-Status: **people & access is built; the calendar and booking are not.**
-See the README for what works today.
+Status: **everything in this spec is built**, phones included. See §9a for the
+screen-by-screen state and the README for how to run it.
 
 **PDF for review:** [`facility-scheduler-mockups.pdf`](./facility-scheduler-mockups.pdf)
 — one screen per landscape page, with a cover, contents and a caption on each.
@@ -43,7 +43,7 @@ cannot sign in, even with a valid sign-in link.
 - Each address moves through `invited → active`, and can be set to
   `access removed` without deleting its booking history.
 - Sign-in is passwordless: enter your email, get a one-time link (15-minute
-  expiry). Google sign-in is shown as a second option — still open, see 10a.1.
+  expiry). **That is the only way in** — see section 10.
 
 ## 4. Booking rules  ·  *built*
 
@@ -97,7 +97,7 @@ the facility regardless of the weekly hours.
 
 Changing hours does not retroactively cancel bookings that are already approved.
 Approved bookings that fall outside the new hours stay put and are flagged to the
-super admin — still open, see 10a.3.
+super admin — still open, see 10a.2.
 
 ## 5a. Assigned schedules, releasing and picking up  ·  *built*
 
@@ -168,7 +168,7 @@ plans by the time you end the schedule.
   and in *My requests*, and the slot reopens immediately.
 - **released** — a coach giving back a slot they hold; it reopens as first come,
   first served. **No email goes out**, for either the release or the pick-up:
-  the calendar is the record. See 10a.7.
+  the calendar is the record. See 10a.6.
 
 Approving from the email and approving from the Approvals queue do the same
 thing. Whoever gets there first decides it; the second person sees it already
@@ -181,7 +181,7 @@ decided.
 | New request | every address on the approver list |
 | Approved | the requesting coach |
 | Declined (with reason) | the requesting coach |
-| Slot released by a coach | nobody — see 10a.7 |
+| Slot released by a coach | nobody — see 10a.6 |
 
 Each approver chooses whether new requests email them, on the approvals screen
 or, for the whole roster, on *Booking rules*. Muting is about email and not
@@ -191,7 +191,7 @@ rather than per person changed — two approvers turned off in one save are each
 harmless alone and fatal together.
 
 Coach decision emails can be turned off on *Booking rules*. The daily-digest
-option in the original spec is not built — see 10a.6.
+option in the original spec is not built — see 10a.5.
 
 **Transport: Postmark**, on a transactional message stream, sending from a
 subdomain (`mail.<domain>`) so the scheduler's sending reputation is separate
@@ -386,24 +386,26 @@ the browser history, or an outbound `Referer` header.
 - **No release cutoff, and no email when a released block is picked up.** Both
   were offered and both declined: the calendar is the record.
 - **Picked-up blocks don't count against a team's weekly limit.**
+- **No Google sign-in.** The mockup offered it beside the email link and it was
+  declined: the emailed link already works for any address, and adding an OAuth
+  provider would mean a second way in to keep secure for no coach who could not
+  already sign in. The mockup has been updated to match. The allowlist stays the
+  only thing that decides who gets in.
 
 ## 10a. Still open
 
-1. **Google sign-in** — the mockup shows it next to the email link. Worth it, or
-   is the magic link enough? It only matters if coaches' club emails are Google
-   accounts.
-2. **Teams** — a coach is currently tied to exactly one team. Does any coach run
+1. **Teams** — a coach is currently tied to exactly one team. Does any coach run
    two teams, or does a team ever have two head coaches who both book?
-3. **Hours changed under an approved booking** — flag it to the admin and leave
+2. **Hours changed under an approved booking** — flag it to the admin and leave
    it, or auto-cancel and notify the coach? The spec currently says flag.
-4. **Decline without a free alternative** — should declining suggest the nearest
+3. **Decline without a free alternative** — should declining suggest the nearest
    open slot of the same length?
-5. **Teams are complete** at 20. SportsEngine's 21st row is an admin chat
+4. **Teams are complete** at 20. SportsEngine's 21st row is an admin chat
    group, not a team.
-6. **Digest instead of one email per request** — section 7 offered it; the built
+5. **Digest instead of one email per request** — section 7 offered it; the built
    version always sends one email per request to every approver. Worth adding
    only if the volume turns out to be annoying.
-7. **Nobody is emailed when a block is released.** Emailing on *pick-up* was
+6. **Nobody is emailed when a block is released.** Emailing on *pick-up* was
    offered and declined, on the grounds that the calendar is the record; the
    same reasoning was applied to the release itself, so neither sends. If
    released time is going unnoticed and unused, a release email to the approvers
