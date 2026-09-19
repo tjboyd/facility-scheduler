@@ -96,6 +96,51 @@ export function openingsFor(
   return openings;
 }
 
+/**
+ * The openings a coach could still act on right now. A start inside the notice
+ * period is real free time, but asking for it would be refused — so neither the
+ * picker nor the calendar offers it, rather than letting somebody pick it and
+ * find out on submit.
+ */
+export function withEnoughNotice(
+  openings: readonly Opening[],
+  ctx: { date: string; today: string; nowMinutes: number; minNoticeHours: number },
+): Opening[] {
+  const needed = ctx.minNoticeHours * 60;
+  return openings.filter(
+    (o) => minutesBetween(ctx.today, ctx.nowMinutes, ctx.date, o.startMinutes) >= needed,
+  );
+}
+
+export type Band = { fromMinutes: number; toMinutes: number };
+
+/**
+ * The parts of the displayed day a coach cannot ask for: before opening, after
+ * closing, or the whole window when the day is shut. The week grid shades these,
+ * because a column of identical white cells says "ask for any of this" and the
+ * facility only takes requests inside its hours.
+ *
+ * `closed` folds in a closure, which beats the weekly hours for that one date.
+ */
+export function closedBands(
+  hours: DayHours,
+  closed: boolean,
+  windowStart: number,
+  windowEnd: number,
+): Band[] {
+  if (windowEnd <= windowStart) return [];
+  if (closed || !hours.isOpen || hours.closeMinutes <= hours.openMinutes) {
+    return [{ fromMinutes: windowStart, toMinutes: windowEnd }];
+  }
+
+  const bands: Band[] = [];
+  const open = Math.min(Math.max(hours.openMinutes, windowStart), windowEnd);
+  const close = Math.max(Math.min(hours.closeMinutes, windowEnd), windowStart);
+  if (open > windowStart) bands.push({ fromMinutes: windowStart, toMinutes: open });
+  if (close < windowEnd) bands.push({ fromMinutes: close, toMinutes: windowEnd });
+  return bands;
+}
+
 /** The lengths a coach may choose from, given the room at that start. */
 export function lengthChoices(settings: Settings, maxMinutes: number): number[] {
   const choices: number[] = [];

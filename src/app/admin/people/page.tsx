@@ -70,14 +70,18 @@ export default async function PeoplePage({
           </div>
 
           <div className="card overflow-x-auto">
-            <div className="min-w-[1130px]">
+            {/* Save and Remove are pinned to the right edge of the scroller. They
+                used to sit past it on a laptop, which made a changed dropdown
+                look like it had saved itself — it had not, and the refresh put
+                it back. */}
+            <div className="min-w-[980px]">
             <div className="thead flex items-center h-10 px-[18px]">
-              <div className="w-[300px]">Email</div>
-              <div className="w-[150px]">Name</div>
-              <div className="w-[140px]">Team</div>
-              <div className="w-[170px]">Role</div>
-              <div className="grow">Status</div>
-              <div className="w-[230px] text-right">Actions</div>
+              <div className="w-[230px]">Email</div>
+              <div className="w-[110px]">Name</div>
+              <div className="w-[132px]">Team</div>
+              <div className="w-[150px]">Role</div>
+              <div className="grow min-w-[130px]">Status</div>
+              <div className="w-[230px] text-right sticky right-0 bg-ink pl-3 shadow-[-7px_0_7px_-7px_rgba(0,0,0,0.5)]">Actions</div>
             </div>
 
             {people.length === 0 && (

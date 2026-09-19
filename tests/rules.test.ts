@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  closedBands,
   closureFor,
   dayAgenda,
   countsTowardWeeklyLimit,
@@ -10,6 +11,7 @@ import {
   minutesBetween,
   openingsFor,
   validateRequest,
+  withEnoughNotice,
   type ClosureRange,
   type DayHours,
   type RequestContext,
@@ -74,6 +76,102 @@ describe("openingsFor", () => {
 
   it("offers nothing on a closed day", () => {
     expect(openingsFor({ ...thursday, isOpen: false }, [], settings)).toEqual([]);
+  });
+});
+
+describe("withEnoughNotice", () => {
+  const openings = [
+    { startMinutes: 900, maxMinutes: 90 },
+    { startMinutes: 1080, maxMinutes: 90 },
+  ];
+
+  it("drops starts the notice period rules out", () => {
+    // 9:00 AM today, 24 hours' notice: nothing later today qualifies.
+    expect(
+      withEnoughNotice(openings, {
+        date: "2026-09-17",
+        today: "2026-09-17",
+        nowMinutes: 540,
+        minNoticeHours: 24,
+      }),
+    ).toEqual([]);
+  });
+
+  it("keeps a start far enough out", () => {
+    expect(
+      withEnoughNotice(openings, {
+        date: "2026-09-19",
+        today: "2026-09-17",
+        nowMinutes: 540,
+        minNoticeHours: 24,
+      }),
+    ).toEqual(openings);
+  });
+
+  it("splits a day where the notice period lands mid-afternoon", () => {
+    // 4:00 PM the day before: 3:00 PM tomorrow is an hour short, 6:00 PM is not.
+    expect(
+      withEnoughNotice(openings, {
+        date: "2026-09-18",
+        today: "2026-09-17",
+        nowMinutes: 960,
+        minNoticeHours: 24,
+      }),
+    ).toEqual([{ startMinutes: 1080, maxMinutes: 90 }]);
+  });
+
+  it("keeps everything when the club asks for no notice at all", () => {
+    expect(
+      withEnoughNotice(openings, {
+        date: "2026-09-17",
+        today: "2026-09-17",
+        nowMinutes: 540,
+        minNoticeHours: 0,
+      }),
+    ).toEqual(openings);
+  });
+});
+
+describe("closedBands", () => {
+  // The grid shows 8:00 AM to 9:00 PM; Thursday takes requests 3:00–9:00 PM.
+  const WINDOW_START = 480;
+  const WINDOW_END = 1260;
+
+  it("shades the morning a weekday does not take requests in", () => {
+    expect(closedBands(thursday, false, WINDOW_START, WINDOW_END)).toEqual([
+      { fromMinutes: 480, toMinutes: 900 },
+    ]);
+  });
+
+  it("shades both ends when the day closes before the window does", () => {
+    const saturday: DayHours = { weekday: 6, isOpen: true, openMinutes: 540, closeMinutes: 1200 };
+    expect(closedBands(saturday, false, WINDOW_START, WINDOW_END)).toEqual([
+      { fromMinutes: 480, toMinutes: 540 },
+      { fromMinutes: 1200, toMinutes: 1260 },
+    ]);
+  });
+
+  it("shades nothing when the facility is open across the whole window", () => {
+    const allDay: DayHours = { weekday: 0, isOpen: true, openMinutes: 480, closeMinutes: 1260 };
+    expect(closedBands(allDay, false, WINDOW_START, WINDOW_END)).toEqual([]);
+  });
+
+  it("shades the whole window on a day that takes no requests", () => {
+    const shut: DayHours = { weekday: 1, isOpen: false, openMinutes: 900, closeMinutes: 1260 };
+    expect(closedBands(shut, false, WINDOW_START, WINDOW_END)).toEqual([
+      { fromMinutes: 480, toMinutes: 1260 },
+    ]);
+  });
+
+  it("shades the whole window on a closure, whatever the weekly hours say", () => {
+    expect(closedBands(thursday, true, WINDOW_START, WINDOW_END)).toEqual([
+      { fromMinutes: 480, toMinutes: 1260 },
+    ]);
+  });
+
+  it("never shades past the window, however wide the hours are", () => {
+    const wide: DayHours = { weekday: 3, isOpen: true, openMinutes: 0, closeMinutes: 1439 };
+    expect(closedBands(wide, false, WINDOW_START, WINDOW_END)).toEqual([]);
   });
 });
 
