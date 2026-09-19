@@ -14,7 +14,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset --force && npm run db:seed",
-    "pdf": "python3 tools/build_review_pdf.py"
+    "pdf": "python3 tools/build_review_pdf.py",
+    "pdf:app": "node tools/capture_screens.mjs /tmp/app-screens && python3 tools/build_app_pdf.py /tmp/app-screens"
   },
   "dependencies": {
     "@prisma/client": "6.19.3",

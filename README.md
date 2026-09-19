@@ -51,9 +51,13 @@ Nothing. Every question raised during the review has been answered, and what
 was deliberately put out of scope — payments, waitlists, a public calendar, ICS
 feeds — is listed in [`docs/DESIGN.md`](docs/DESIGN.md) §11.
 
-The design for all of it is in [`docs/DESIGN.md`](docs/DESIGN.md), with every
-screen in
-[`docs/facility-scheduler-mockups.pdf`](docs/facility-scheduler-mockups.pdf).
+Every screen of the built app is in
+[`docs/facility-scheduler-app.pdf`](docs/facility-scheduler-app.pdf) — photographs
+of the running app, in the order somebody meets them. The original design is in
+[`docs/DESIGN.md`](docs/DESIGN.md) and
+[`docs/facility-scheduler-mockups.pdf`](docs/facility-scheduler-mockups.pdf); it
+is kept as the record of what was reviewed, and the build has moved on from it
+in places.
 
 ## Roles
 
@@ -99,7 +103,8 @@ printed to the server log.
 | `node tools/smoke-schedule.mjs` | End-to-end browser check: schedules, release, pick up |
 | `node tools/smoke-requests.mjs` | End-to-end browser check: hours, rules, request, approve |
 | `node tools/smoke-mobile.mjs` | End-to-end browser check: every screen at 390px |
-| `npm run pdf` | Rebuild the mockup review PDF |
+| `npm run pdf` | Rebuild the mockup review PDF (the original design) |
+| `npm run pdf:app` | Rebuild the as-built PDF from screenshots of the running app |
 
 ### End-to-end check
 
