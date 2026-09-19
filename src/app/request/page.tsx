@@ -5,7 +5,14 @@ import { requireUser } from "@/lib/guards";
 import { AppHeader, MobileNav } from "@/components/AppHeader";
 import { Flash } from "@/components/Flash";
 import { requestContextFor } from "@/lib/requests";
-import { closureFor, describeLength, lengthChoices, OCCUPYING, openingsFor } from "@/lib/rules";
+import {
+  closureFor,
+  describeLength,
+  lengthChoices,
+  OCCUPYING,
+  openingsFor,
+  withEnoughNotice,
+} from "@/lib/rules";
 import { db } from "@/lib/db";
 import {
   addDays,
@@ -54,7 +61,16 @@ export default async function RequestPage({
   const { settings, hours, closures } = context;
 
   const closure = closureFor(date, closures);
-  const openings = closure ? [] : openingsFor(hours, context.taken, settings);
+  const free = closure ? [] : openingsFor(hours, context.taken, settings);
+  // Starts inside the notice period are dropped here rather than refused on
+  // submit, so every start the picker shows is one that can actually be sent.
+  const openings = withEnoughNotice(free, {
+    date,
+    today,
+    nowMinutes: context.nowMinutes,
+    minNoticeHours: settings.minNoticeHours,
+  });
+  const onlyTooSoon = free.length > 0 && openings.length === 0;
   const selectedStart = start ? Number(start) : (openings[0]?.startMinutes ?? null);
   const selected = openings.find((o) => o.startMinutes === selectedStart) ?? openings[0];
   const lengths = selected ? lengthChoices(settings, selected.maxMinutes) : [];
@@ -156,7 +172,9 @@ export default async function RequestPage({
 
             {openings.length === 0 ? (
               <p className="text-[13.5px] text-muted m-0">
-                Nothing free that day. Try another date.
+                {onlyTooSoon
+                  ? `That day still has room, but it is too close now — requests need at least ${settings.minNoticeHours} hours' notice. Try a later date.`
+                  : "Nothing free that day. Try another date."}
               </p>
             ) : (
               <div className="grid grid-cols-4 gap-2">

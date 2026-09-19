@@ -1,7 +1,16 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { loadHours } from "@/lib/facility";
-import { dayAgenda, describeLength } from "@/lib/rules";
+import { loadClosures, loadHours, loadSettings } from "@/lib/facility";
+import {
+  closedBands,
+  closureFor,
+  dayAgenda,
+  describeLength,
+  minutesBetween,
+  openingsFor,
+  withEnoughNotice,
+} from "@/lib/rules";
+import { nowMinutesInZone } from "@/lib/requests";
 import { FACILITY_TIMEZONE } from "@/lib/env";
 import { requireUser } from "@/lib/guards";
 import { AppHeader, MobileNav } from "@/components/AppHeader";
@@ -41,9 +50,16 @@ const ROW_PX = 34;
  * the stripes still say pending on their own, which is what the legend reads.
  */
 const CHIP_MIN_PX = 70;
-/** The window the grid shows unless a booking that week falls outside it. */
+/** The window the grid shows unless the hours or a booking fall outside it. */
 const DEFAULT_START = 8 * 60;
 const DEFAULT_END = 21 * 60;
+
+/**
+ * Time the facility does not take requests for. Grey with faint stripes rather
+ * than plain grey: a flat block reads as "something is here", and the stripes
+ * say the opposite at a glance.
+ */
+const CLOSED_WASH = "repeating-linear-gradient(135deg,#E6E6E6 0 5px,#F1F1F1 5px 10px)";
 
 export default async function CalendarPage({
   searchParams,
@@ -66,21 +82,77 @@ export default async function CalendarPage({
         ? today
         : dates[0]!;
 
-  const hours = await loadHours();
+  const [hours, closures, settings] = await Promise.all([
+    loadHours(),
+    loadClosures(),
+    loadSettings(),
+  ]);
   const bookings = await db.booking.findMany({
     where: { date: { in: dates }, status: { in: ["PENDING", "HELD", "RELEASED"] } },
     include: { team: true, releasedFromTeam: true },
     orderBy: [{ date: "asc" }, { startMinutes: "asc" }],
   });
 
-  // Widen the window if anything that week sits outside the usual hours.
-  const windowStart = Math.min(DEFAULT_START, ...bookings.map((b) => b.startMinutes));
-  const windowEnd = Math.max(DEFAULT_END, ...bookings.map((b) => b.endMinutes));
-  const rows = Math.max(1, (windowEnd - windowStart) / BLOCK_MINUTES);
-  const gridHeight = rows * ROW_PX;
-
   const byDate = new Map(dates.map((d) => [d, [] as typeof bookings]));
   for (const booking of bookings) byDate.get(booking.date)?.push(booking);
+
+  // A coach can only ask for time on a team's behalf, and only as far ahead as
+  // the rules allow. Anyone else gets the same calendar without the cells.
+  const lastRequestable = addDays(startOfWeek(today), settings.weeksAhead * 7 + 6);
+  const nowMinutes = nowMinutesInZone();
+
+  // Everything each column needs: when it is shut, and — for somebody who can
+  // ask — every half-hour they could start a request at. The openings come from
+  // the same openingsFor() the request screen uses, so a cell the grid offers is
+  // a cell that screen will accept.
+  const columns = dates.map((date) => {
+    const dayHours = hours[weekdayOf(date)]!;
+    const closure = closureFor(date, closures);
+    const dayBookings = byDate.get(date) ?? [];
+    const canAsk = Boolean(user.team) && date >= today && date <= lastRequestable && !closure;
+    const taken = dayBookings
+      .filter((b) => b.status === "PENDING" || b.status === "HELD")
+      .map((b) => ({ startMinutes: b.startMinutes, endMinutes: b.endMinutes }));
+    return {
+      date,
+      hours: dayHours,
+      closure,
+      bookings: dayBookings,
+      openings: canAsk
+        ? withEnoughNotice(openingsFor(dayHours, taken, settings), {
+            date,
+            today,
+            nowMinutes,
+            minNoticeHours: settings.minNoticeHours,
+          })
+        : [],
+    };
+  });
+
+  // Widen the window if the hours or anything booked that week sit outside it.
+  const openDays = columns.filter((c) => !c.closure && c.hours.isOpen).map((c) => c.hours);
+  const windowStart = Math.min(
+    DEFAULT_START,
+    ...bookings.map((b) => b.startMinutes),
+    ...openDays.map((h) => h.openMinutes),
+  );
+  const windowEnd = Math.max(
+    DEFAULT_END,
+    ...bookings.map((b) => b.endMinutes),
+    ...openDays.map((h) => h.closeMinutes),
+  );
+  const rows = Math.max(1, (windowEnd - windowStart) / BLOCK_MINUTES);
+  const gridHeight = rows * ROW_PX;
+  /** Minutes from midnight to a y offset in the grid. */
+  const yOf = (minutes: number) => ((minutes - windowStart) / BLOCK_MINUTES) * ROW_PX;
+
+  /** Whether a coach could still ask for a slot starting then — the same notice
+   *  rule the grid's cells and the request picker apply. */
+  const canAskFor = (date: string, startMinutes: number) =>
+    Boolean(user.team) &&
+    date <= lastRequestable &&
+    !closureFor(date, closures) &&
+    minutesBetween(today, nowMinutes, date, startMinutes) >= settings.minNoticeHours * 60;
 
   const selectedHours = hours[weekdayOf(selected)]!;
   const agenda = dayAgenda(selectedHours, byDate.get(selected) ?? []);
@@ -151,6 +223,13 @@ export default async function CalendarPage({
               <span className="w-3.5 h-3.5 rounded-[2px] bg-white border-[1.5px] border-dashed border-ink" />
               Available
             </span>
+            <span className="inline-flex items-center gap-2">
+              <span
+                className="w-3.5 h-3.5 rounded-[2px] border border-[#DCDCDC]"
+                style={{ background: CLOSED_WASH }}
+              />
+              Closed
+            </span>
           </div>
         </div>
 
@@ -196,7 +275,11 @@ export default async function CalendarPage({
               })}
             </div>
 
-            {dates.map((date) => (
+            {columns.map((column) => {
+              const { date } = column;
+              const shut = closedBands(column.hours, column.closure !== null, windowStart, windowEnd);
+              const allDayShut = shut.length === 1 && shut[0]!.toMinutes - shut[0]!.fromMinutes === windowEnd - windowStart;
+              return (
               <div
                 key={date}
                 className="flex-1 relative border-l border-[#E8E8E8] bg-white"
@@ -205,8 +288,51 @@ export default async function CalendarPage({
                     "repeating-linear-gradient(to bottom,#DCDCDC 0 1px,transparent 1px 68px),repeating-linear-gradient(to bottom,#F0F0F0 0 1px,transparent 1px 34px)",
                 }}
               >
-                {(byDate.get(date) ?? []).map((booking) => {
-                  const top = ((booking.startMinutes - windowStart) / BLOCK_MINUTES) * ROW_PX;
+                {/* Shut first, so a booking the club put outside the hours — and
+                    a request cell — both sit on top of it rather than under. */}
+                {shut.map((band) => (
+                  <div
+                    key={band.fromMinutes}
+                    data-closed={band.fromMinutes}
+                    aria-hidden="true"
+                    style={{
+                      top: yOf(band.fromMinutes),
+                      height: yOf(band.toMinutes) - yOf(band.fromMinutes),
+                      background: CLOSED_WASH,
+                    }}
+                    className="absolute left-0 right-0"
+                  />
+                ))}
+                {allDayShut && (
+                  <div className="absolute inset-x-0 top-2 text-center font-[family-name:var(--font-display)] text-[11px] font-semibold tracking-[0.12em] uppercase text-[#8A8A8A]">
+                    {column.closure ? (column.closure.reason ?? "Closed") : "Closed"}
+                  </div>
+                )}
+
+                {/* Half-hours this team could start a request at. Hovering one
+                    outlines it the way a calendar app does; clicking opens the
+                    request screen with the day and start already chosen. */}
+                {column.openings.map((opening) => (
+                  <Link
+                    key={opening.startMinutes}
+                    href={{
+                      pathname: "/request",
+                      query: { date, start: opening.startMinutes },
+                    }}
+                    data-request={opening.startMinutes}
+                    data-date={date}
+                    title={`Request ${formatTimeOfDay(opening.startMinutes)} on ${formatDateLong(date)}`}
+                    style={{ top: yOf(opening.startMinutes) + 1, height: ROW_PX - 2 }}
+                    className="group absolute left-[5px] right-[5px] rounded-[3px] flex items-center justify-center no-underline border-[1.5px] border-dashed border-transparent hover:border-crimson hover:bg-crimson-tint"
+                  >
+                    <span className="opacity-0 group-hover:opacity-100 font-[family-name:var(--font-display)] text-[11px] font-semibold tracking-[0.08em] uppercase text-crimson-deep">
+                      + {formatTimeOfDay(opening.startMinutes)}
+                    </span>
+                  </Link>
+                ))}
+
+                {column.bookings.map((booking) => {
+                  const top = yOf(booking.startMinutes);
                   const height =
                     ((booking.endMinutes - booking.startMinutes) / BLOCK_MINUTES) * ROW_PX - 4;
                   const released = booking.status === "RELEASED";
@@ -277,9 +403,16 @@ export default async function CalendarPage({
                   );
                 })}
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
+
+        <p className="hidden md:block text-[12.5px] text-muted -mt-1">
+          {user.team
+            ? "Click any open half-hour to ask for it — you pick the length on the next screen. Grey is outside the facility's hours."
+            : "You aren't on a team, so you can't request time — a club admin can put you on one. Grey is outside the facility's hours."}
+        </p>
 
         {/* The phone gets one day as a list — seven columns do not fit, and a
             column of empty half-hours reads far worse than "Open · 1 hour". */}
@@ -345,7 +478,7 @@ export default async function CalendarPage({
                     "flex items-center gap-3 min-h-[52px] px-3 py-2 rounded-[4px] border-[1.5px] border-dashed border-line no-underline text-ink";
                   return (
                     <li key={`free-${entry.startMinutes}`}>
-                      {user.team && selected >= today ? (
+                      {canAskFor(selected, entry.startMinutes) ? (
                         <Link
                           href={{
                             pathname: "/request",

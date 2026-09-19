@@ -243,22 +243,61 @@ try {
     (await coach.locator("[data-start]").count()) === 0 &&
       (await coach.locator("text=Closed").count()) > 0,
   );
+  // The notice rule is applied to the picker itself: a start it cannot accept
+  // is never offered, rather than offered and then refused on submit.
   await coach.goto(`${BASE}/request?date=${today}`, { waitUntil: "domcontentloaded" });
-  const todayStarts = await coach.locator("[data-start]").count();
-  if (todayStarts > 0) {
-    const s = await coach.locator("[data-start]").first().getAttribute("data-start");
-    await coach.goto(`${BASE}/request?date=${today}&start=${s}`, { waitUntil: "domcontentloaded" });
-    await Promise.all([
-      coach.waitForURL("**/request**", { timeout: TIMEOUT }),
-      coach.click('button:has-text("Send request")'),
-    ]);
-    check(
-      "same-day requests are refused for want of notice",
-      (await coach.locator("text=/notice/").count()) > 0,
-    );
-  } else {
-    check("same-day requests are refused for want of notice", true, "no slots left today");
-  }
+  check(
+    "same-day starts are not offered at all",
+    (await coach.locator("[data-start]").count()) === 0,
+  );
+  check(
+    "…and the screen says the notice rule is why",
+    (await coach.locator("text=/too close now/").count()) > 0 ||
+      (await coach.locator("text=/Nothing free that day/").count()) > 0,
+  );
+
+  // -- the week grid -------------------------------------------------------
+  console.log("\nthe week grid");
+  await coach.goto(`${BASE}/calendar?week=${target}`, { waitUntil: "networkidle" });
+  check("time outside the facility's hours is shaded", (await coach.locator("[data-closed]").count()) > 0);
+
+  const cells = coach.locator(`[data-request][data-date="${target}"]`);
+  const cellCount = await cells.count();
+  check("open half-hours are offered on the grid", cellCount > 0, `${cellCount} offered`);
+
+  const cellStart = await cells.first().getAttribute("data-request");
+  await Promise.all([coach.waitForURL("**/request**", { timeout: TIMEOUT }), cells.first().click()]);
+  const asked = new URL(coach.url());
+  check(
+    "clicking one opens the request screen on that day and start",
+    asked.searchParams.get("date") === target && asked.searchParams.get("start") === cellStart,
+    coach.url(),
+  );
+
+  const closureDate = addDays(today, 3);
+  await coach.goto(`${BASE}/calendar?week=${closureDate}`, { waitUntil: "networkidle" });
+  check(
+    "a closure day offers nothing to click",
+    (await coach.locator(`[data-request][data-date="${closureDate}"]`).count()) === 0,
+  );
+  check(
+    "…and yesterday offers nothing either",
+    (await coach.locator(`[data-request][data-date="${addDays(today, -1)}"]`).count()) === 0,
+  );
+
+  // Somebody with no team has nothing to request *for*, so the grid gives them
+  // the same calendar without the cells.
+  const approverPage = await signIn(browser, APPROVER);
+  await approverPage.goto(`${BASE}/calendar?week=${target}`, { waitUntil: "networkidle" });
+  check(
+    "somebody with no team gets no request cells",
+    (await approverPage.locator("[data-request]").count()) === 0,
+  );
+  check(
+    "…but still sees the hours shaded",
+    (await approverPage.locator("[data-closed]").count()) > 0,
+  );
+  await approverPage.context().close();
 
   // -- the approvals screen ------------------------------------------------
   console.log("\nthe approvals screen");

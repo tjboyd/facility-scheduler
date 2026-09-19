@@ -12,8 +12,9 @@ or declines; the calendar shows who has the facility and when.
   sign in, even with a valid link.
 - **People & access** (super admins): invite by email in bulk, set each person's
   role and team, resend a link, remove access, restore it.
-- **Teams** (super admins): add, archive, restore. A team must be empty to be
-  archived.
+- **Teams** (super admins, their own admin tab): add, rename, archive, restore.
+  Renaming carries every booking and assigned schedule with it; a team must be
+  empty before it can be archived.
 - **Assigned schedules** (**super admins only** — coaches cannot set up anything
   repeating): give a team a repeating block —
   "U9 - White, Saturdays 8:00–9:30, from today through the end of April". Every
@@ -23,10 +24,13 @@ or declines; the calendar shows who has the facility and when.
   it is time that would otherwise go empty.
 - **Week calendar**: the whole club's bookings, Sunday to Saturday. Reserved,
   pending and available each read differently in black and white, not by colour
-  alone.
-- **Requesting time**: a coach picks a date, a start and a length from what is
-  actually free. The screen only ever offers slots that pass the rules, and the
-  same rules are re-checked on submit.
+  alone, and time outside the facility's hours — or on a closure — is shaded
+  rather than left looking bookable.
+- **Requesting time**: hover any open half-hour on the calendar and click it to
+  start a request on that day and time, or pick a date, a start and a length on
+  the request screen. Either way the only starts offered are ones that pass the
+  rules — including the notice period — and the same rules are re-checked on
+  submit.
 - **Approvals**: a queue for approvers, with a clash check on each request, and
   **one-click approve straight from the emailed link** — no sign-in. Declining
   asks for a reason, which the coach is told. Whoever decides first wins; the
@@ -251,6 +255,7 @@ src/lib/requests.ts       request context, approval tokens, the emails
 src/lib/auth.ts           magic links and sessions
 src/lib/guards.ts         requireUser / requireSuperAdmin
 src/app/admin/people/     the people & access screen and its server actions
+src/app/admin/teams/      the club's teams: add, rename, archive, restore
 src/app/admin/schedule/   assigned schedules
 src/app/admin/hours/      weekly opening hours and closures
 src/app/admin/rules/      block size, limits, notice period

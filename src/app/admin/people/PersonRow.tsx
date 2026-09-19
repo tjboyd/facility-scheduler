@@ -65,7 +65,7 @@ export function PersonRow({
       <form id={editId} action={updatePerson} className="contents">
         <input type="hidden" name="userId" value={person.id} />
 
-        <div className="w-[300px] pr-3 flex items-center gap-2 min-w-0">
+        <div className="w-[230px] pr-3 flex items-center gap-2 min-w-0">
           <span
             title={person.email}
             className={`truncate text-[13.5px] font-medium ${gone ? "text-disabled line-through" : ""}`}
@@ -77,12 +77,12 @@ export function PersonRow({
 
         <div
           title={person.name ?? undefined}
-          className={`w-[150px] pr-3 truncate text-[13.5px] ${person.name ? "text-ink-2" : "text-faint"}`}
+          className={`w-[110px] pr-3 truncate text-[13.5px] ${person.name ? "text-ink-2" : "text-faint"}`}
         >
           {person.name ?? "Not signed in yet"}
         </div>
 
-        <div className="w-[140px] pr-3">
+        <div className="w-[132px] pr-3">
           <select
             name="teamId"
             defaultValue={person.team?.id ?? ""}
@@ -103,7 +103,7 @@ export function PersonRow({
           </select>
         </div>
 
-        <div className="w-[170px] pr-3">
+        <div className="w-[150px] pr-3">
           <select
             name="role"
             defaultValue={person.role}
@@ -124,7 +124,14 @@ export function PersonRow({
         </div>
       </form>
 
-      <div className="w-[230px] flex items-center justify-end gap-2">
+      {/* Pinned to the right edge of the horizontal scroller: on a laptop this
+          column used to fall outside it, so the Save that a changed dropdown
+          needs was invisible. Its own background, or the row would show through. */}
+      <div
+        className={`w-[230px] flex items-center justify-end gap-2 sticky right-0 pl-3 shadow-[-7px_0_7px_-7px_rgba(0,0,0,0.16)] ${
+          gone ? "bg-[#FAFAFA]" : "bg-white"
+        }`}
+      >
         {!gone && (
           <button
             type="submit"

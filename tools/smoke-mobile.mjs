@@ -231,6 +231,7 @@ try {
   for (const [name, path] of [
     ["approvals", "/approvals"],
     ["people", "/admin/people"],
+    ["teams", "/admin/teams"],
     ["hours", "/admin/hours"],
     ["booking rules", "/admin/rules"],
     ["assigned schedule", "/admin/schedule"],

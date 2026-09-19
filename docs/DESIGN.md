@@ -312,8 +312,9 @@ rest are `#555555`.
 | --- | --- |
 | Sign in by emailed link, allowlist enforced | built |
 | People & access: invite, role, team, remove, restore | built |
-| Teams: add, archive, restore | built |
-| Week calendar | built |
+| Teams: add, rename, archive, restore | built |
+| Week calendar, with closed hours shaded | built |
+| Click an open half-hour on the calendar to request it | built |
 | Assigned schedules, release, pick up | built |
 | Ad-hoc requests and approvals | built |
 | One-click approve from the approver's email | built |
