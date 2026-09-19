@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { FACILITY_TIMEZONE } from "@/lib/env";
 import { requireUser } from "@/lib/guards";
 import { canDecideRequests, displayName } from "@/lib/domain";
-import { AppHeader } from "@/components/AppHeader";
+import { AppHeader, MobileNav } from "@/components/AppHeader";
 import { Flash } from "@/components/Flash";
 import { describeLength } from "@/lib/rules";
 import { formatDateLong, formatRange, overlaps, todayInZone } from "@/lib/schedule";
@@ -51,7 +51,7 @@ export default async function ApprovalsPage({
     <div className="min-h-dvh flex flex-col">
       <AppHeader user={user} active="approvals" />
 
-      <main className="grow p-7 flex flex-col gap-4 max-w-[900px]">
+      <main className="grow p-4 pb-24 md:p-7 md:pb-7 flex flex-col gap-4 max-w-[900px]">
         <div>
           <div className="eyebrow">Facility office</div>
           <h1 className="display text-[34px] mt-1">Approvals</h1>
@@ -206,6 +206,7 @@ export default async function ApprovalsPage({
           <Link href="/calendar">See the calendar</Link>
         </p>
       </main>
+      <MobileNav user={user} active="approvals" />
     </div>
   );
 }

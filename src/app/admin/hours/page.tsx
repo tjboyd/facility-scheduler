@@ -46,7 +46,7 @@ export default async function HoursPage({
       <Flash message={msg} kind={kind} />
 
       <form action={saveHours} className="card p-6 flex flex-col gap-3">
-        <div className="flex items-end gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4">
           <div className="grow">
             <h2 className="display text-2xl mb-1">Weekly hours</h2>
             <p className="text-[13px] text-muted">
@@ -80,9 +80,9 @@ export default async function HoursPage({
             <div
               key={day.weekday}
               data-day={day.weekday}
-              className="flex items-center h-14 border-t border-line-faint"
+              className="flex flex-wrap items-center gap-y-1 py-2 md:py-0 md:h-14 border-t border-line-faint"
             >
-              <div className="w-[118px] font-[family-name:var(--font-display)] text-[21px] font-bold uppercase tracking-[0.02em]">
+              <div className="w-[104px] md:w-[118px] font-[family-name:var(--font-display)] text-[19px] md:text-[21px] font-bold uppercase tracking-[0.02em]">
                 {WEEKDAYS[day.weekday]}
               </div>
 
@@ -96,12 +96,12 @@ export default async function HoursPage({
                 Takes requests
               </label>
 
-              <div className="flex items-center gap-2.5">
+              <div className="basis-full md:basis-auto flex items-center gap-2 md:gap-2.5">
                 <select
                   name={`from-${day.weekday}`}
                   defaultValue={formatTimeOfDay(day.openMinutes)}
                   aria-label={`${WEEKDAYS[day.weekday]} opening time`}
-                  className="select w-[118px] h-9 px-2.5 text-[13.5px]"
+                  className="select grow md:grow-0 w-full md:w-[118px] h-9 px-2 md:px-2.5 text-[13.5px]"
                 >
                   {TIME_OPTIONS.map((m) => (
                     <option key={m}>{formatTimeOfDay(m)}</option>
@@ -112,7 +112,7 @@ export default async function HoursPage({
                   name={`to-${day.weekday}`}
                   defaultValue={formatTimeOfDay(day.closeMinutes)}
                   aria-label={`${WEEKDAYS[day.weekday]} closing time`}
-                  className="select w-[118px] h-9 px-2.5 text-[13.5px]"
+                  className="select grow md:grow-0 w-full md:w-[118px] h-9 px-2 md:px-2.5 text-[13.5px]"
                 >
                   {TIME_OPTIONS.map((m) => (
                     <option key={m}>{formatTimeOfDay(m)}</option>
@@ -185,7 +185,7 @@ export default async function HoursPage({
         </div>
 
         <form action={addClosure} className="flex items-end gap-2.5 flex-wrap">
-          <div>
+          <div className="grow sm:grow-0">
             <label htmlFor="startDate" className="field-label">
               First day
             </label>
@@ -195,10 +195,10 @@ export default async function HoursPage({
               type="date"
               required
               defaultValue={today}
-              className="input w-[170px] h-[42px] text-[13.5px]"
+              className="input w-full sm:w-[170px] h-[42px] text-[13.5px]"
             />
           </div>
-          <div>
+          <div className="grow sm:grow-0">
             <label htmlFor="endDate" className="field-label">
               Last day <span className="font-normal normal-case tracking-normal text-faint">(optional)</span>
             </label>
@@ -206,7 +206,7 @@ export default async function HoursPage({
               id="endDate"
               name="endDate"
               type="date"
-              className="input w-[170px] h-[42px] text-[13.5px]"
+              className="input w-full sm:w-[170px] h-[42px] text-[13.5px]"
             />
           </div>
           <div className="grow min-w-[200px]">

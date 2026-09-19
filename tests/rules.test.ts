@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   closureFor,
+  dayAgenda,
   countsTowardWeeklyLimit,
   daysBetween,
   DEFAULT_SETTINGS,
@@ -212,5 +213,69 @@ describe("countsTowardWeeklyLimit", () => {
   it("does not count what is still pending or already declined", () => {
     expect(countsTowardWeeklyLimit({ status: "PENDING", origin: "REQUEST" })).toBe(false);
     expect(countsTowardWeeklyLimit({ status: "DECLINED", origin: "REQUEST" })).toBe(false);
+  });
+});
+
+describe("dayAgenda", () => {
+  // Thursday, open 3:00–9:00 PM.
+  const open = thursday;
+  const at = (h: number, m = 0) => h * 60 + m;
+
+  it("is one free run when nothing is booked", () => {
+    expect(dayAgenda(open, [])).toEqual([
+      { kind: "free", startMinutes: at(15), endMinutes: at(21) },
+    ]);
+  });
+
+  it("merges consecutive free time rather than listing half-hours", () => {
+    // 5:00–6:00 PM booked: free 3:00–5:00, then 6:00–9:00. Two rows, not ten.
+    const agenda = dayAgenda(open, [{ startMinutes: at(17), endMinutes: at(18) }]);
+    expect(agenda).toEqual([
+      { kind: "free", startMinutes: at(15), endMinutes: at(17) },
+      { kind: "booked", booking: { startMinutes: at(17), endMinutes: at(18) } },
+      { kind: "free", startMinutes: at(18), endMinutes: at(21) },
+    ]);
+  });
+
+  it("reports no gap between back-to-back bookings", () => {
+    const agenda = dayAgenda(open, [
+      { startMinutes: at(15), endMinutes: at(16) },
+      { startMinutes: at(16), endMinutes: at(17) },
+    ]);
+    expect(agenda.filter((e) => e.kind === "free")).toEqual([
+      { kind: "free", startMinutes: at(17), endMinutes: at(21) },
+    ]);
+  });
+
+  it("orders by start time whatever order it is given", () => {
+    const agenda = dayAgenda(open, [
+      { startMinutes: at(19), endMinutes: at(20) },
+      { startMinutes: at(16), endMinutes: at(17) },
+    ]);
+    const booked = agenda.filter((e) => e.kind === "booked");
+    expect(booked.map((e) => (e.kind === "booked" ? e.booking.startMinutes : 0))).toEqual([
+      at(16),
+      at(19),
+    ]);
+  });
+
+  it("still lists assigned time that sits outside the open hours", () => {
+    // The club opens the building when it needs to; 8:00 AM is not requestable
+    // but it is certainly on the calendar.
+    const agenda = dayAgenda(open, [{ startMinutes: at(8), endMinutes: at(9, 30) }]);
+    expect(agenda[0]).toEqual({
+      kind: "booked",
+      booking: { startMinutes: at(8), endMinutes: at(9, 30) },
+    });
+    // and the whole open window is still free
+    expect(agenda[1]).toEqual({ kind: "free", startMinutes: at(15), endMinutes: at(21) });
+  });
+
+  it("offers no free time on a day closed to requests, but still shows bookings", () => {
+    const closed = { ...open, isOpen: false };
+    expect(dayAgenda(closed, [])).toEqual([]);
+    expect(dayAgenda(closed, [{ startMinutes: at(10), endMinutes: at(11) }])).toEqual([
+      { kind: "booked", booking: { startMinutes: at(10), endMinutes: at(11) } },
+    ]);
   });
 });

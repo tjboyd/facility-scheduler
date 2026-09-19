@@ -60,7 +60,7 @@ export default async function PeoplePage({
       <Flash message={msg} kind={kind} />
 
       <div className="flex gap-[18px] items-start flex-wrap xl:flex-nowrap">
-        <section className="grow min-w-[560px] flex flex-col gap-3">
+        <section className="grow min-w-0 xl:min-w-[560px] flex flex-col gap-3">
           <div className="flex items-baseline gap-3">
             <h2 className="display text-2xl">Approved people</h2>
             <p className="text-[13px] text-muted">
@@ -69,7 +69,8 @@ export default async function PeoplePage({
             </p>
           </div>
 
-          <div className="card overflow-hidden">
+          <div className="card overflow-x-auto">
+            <div className="min-w-[1130px]">
             <div className="thead flex items-center h-10 px-[18px]">
               <div className="w-[300px]">Email</div>
               <div className="w-[150px]">Name</div>
@@ -93,6 +94,7 @@ export default async function PeoplePage({
                 isSelf={person.id === actor.id}
               />
             ))}
+            </div>
           </div>
 
           <p className="flex items-center gap-2.5 text-[12.5px] text-muted">
@@ -105,7 +107,7 @@ export default async function PeoplePage({
           </p>
         </section>
 
-        <aside className="w-[340px] shrink-0 flex flex-col gap-[18px]">
+        <aside className="w-full xl:w-[340px] shrink-0 flex flex-col gap-[18px]">
           <AddPeopleForm teams={assignableTeams} />
           <TeamsCard
             teams={teams.map((t) => ({

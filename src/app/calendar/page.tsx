@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { loadHours } from "@/lib/facility";
+import { dayAgenda, describeLength } from "@/lib/rules";
 import { FACILITY_TIMEZONE } from "@/lib/env";
 import { requireUser } from "@/lib/guards";
-import { AppHeader } from "@/components/AppHeader";
+import { AppHeader, MobileNav } from "@/components/AppHeader";
 import { Flash } from "@/components/Flash";
 import {
   addDays,
@@ -16,6 +18,7 @@ import {
   startOfWeek,
   todayInZone,
   weekDates,
+  weekdayOf,
 } from "@/lib/schedule";
 
 export const dynamic = "force-dynamic";
@@ -45,15 +48,25 @@ const DEFAULT_END = 21 * 60;
 export default async function CalendarPage({
   searchParams,
 }: {
-  searchParams: Promise<{ week?: string; msg?: string; kind?: string }>;
+  searchParams: Promise<{ week?: string; day?: string; msg?: string; kind?: string }>;
 }) {
   const user = await requireUser();
-  const { week, msg, kind } = await searchParams;
+  const { week, day, msg, kind } = await searchParams;
 
   const today = todayInZone(FACILITY_TIMEZONE);
   const sunday = startOfWeek(week && isDateString(week) ? week : today);
   const dates = weekDates(sunday);
 
+  // Which day the phone's list is showing. Defaults to today when today is in
+  // the week being viewed, so the common case opens on the right day.
+  const selected =
+    day && isDateString(day) && dates.includes(day)
+      ? day
+      : dates.includes(today)
+        ? today
+        : dates[0]!;
+
+  const hours = await loadHours();
   const bookings = await db.booking.findMany({
     where: { date: { in: dates }, status: { in: ["PENDING", "HELD", "RELEASED"] } },
     include: { team: true, releasedFromTeam: true },
@@ -69,6 +82,9 @@ export default async function CalendarPage({
   const byDate = new Map(dates.map((d) => [d, [] as typeof bookings]));
   for (const booking of bookings) byDate.get(booking.date)?.push(booking);
 
+  const selectedHours = hours[weekdayOf(selected)]!;
+  const agenda = dayAgenda(selectedHours, byDate.get(selected) ?? []);
+
   const mine = bookings.filter((b) => b.teamId && b.teamId === user.team?.id && b.date >= today);
   const available = bookings.filter((b) => b.status === "RELEASED" && b.date >= today);
 
@@ -76,7 +92,7 @@ export default async function CalendarPage({
     <div className="min-h-dvh flex flex-col">
       <AppHeader user={user} active="calendar" />
 
-      <main className="grow p-7 flex flex-col gap-4">
+      <main className="grow p-4 pb-24 md:p-7 md:pb-7 flex flex-col gap-4">
         <Flash message={msg} kind={kind} />
 
         <div className="flex items-center gap-3.5 flex-wrap">
@@ -110,14 +126,14 @@ export default async function CalendarPage({
           </Link>
 
           {user.team && (
-            <Link href="/request" className="btn btn-primary btn-sm no-underline">
+            <Link href="/request" className="hidden md:inline-flex btn btn-primary btn-sm no-underline">
               Request time
             </Link>
           )}
 
           <div className="grow" />
 
-          <div className="flex items-center gap-4 text-[12.5px] text-ink-2">
+          <div className="hidden md:flex items-center gap-4 text-[12.5px] text-ink-2">
             <span className="inline-flex items-center gap-2">
               <span className="w-3.5 h-3.5 rounded-[2px] bg-crimson" /> Reserved
             </span>
@@ -138,7 +154,7 @@ export default async function CalendarPage({
           </div>
         </div>
 
-        <div className="card overflow-hidden">
+        <div className="card overflow-hidden hidden md:block">
           <div className="flex h-11 bg-ink">
             <div className="w-[76px] shrink-0" />
             {dates.map((date) => (
@@ -265,6 +281,155 @@ export default async function CalendarPage({
           </div>
         </div>
 
+        {/* The phone gets one day as a list — seven columns do not fit, and a
+            column of empty half-hours reads far worse than "Open · 1 hour". */}
+        <div className="md:hidden flex flex-col gap-3">
+          <div className="flex gap-1.5">
+            {dates.map((date) => {
+              const isSelected = date === selected;
+              return (
+                <Link
+                  key={date}
+                  href={{ pathname: "/calendar", query: { week: sunday, day: date } }}
+                  data-day={date}
+                  aria-current={isSelected ? "date" : undefined}
+                  className={`grow basis-0 flex flex-col items-center gap-0.5 py-2 rounded-[4px] no-underline border ${
+                    isSelected
+                      ? "bg-crimson border-crimson text-white"
+                      : date === today
+                        ? "bg-white border-crimson-line text-ink"
+                        : "bg-white border-line-soft text-ink-2"
+                  }`}
+                >
+                  <span className="font-[family-name:var(--font-display)] text-[11px] font-semibold tracking-[0.08em] uppercase opacity-80">
+                    {formatWeekdayShort(date).slice(0, 1)}
+                  </span>
+                  <span className="font-[family-name:var(--font-display)] text-[17px] font-bold leading-none">
+                    {Number(date.slice(8))}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+
+          <div className="card p-4">
+            <div className="flex items-baseline justify-between gap-3 mb-3">
+              <h2 className="display text-[21px]">{formatDateLong(selected)}</h2>
+              <span className="text-[12px] text-faint shrink-0">
+                {selectedHours.isOpen
+                  ? `open ${formatRange(selectedHours.openMinutes, selectedHours.closeMinutes)}`
+                  : "not open to requests"}
+              </span>
+            </div>
+
+            <ul className="list-none p-0 m-0 flex flex-col gap-1.5">
+              {agenda.length === 0 && (
+                <li className="text-[13.5px] text-muted">
+                  Nothing booked, and the facility isn&rsquo;t open to requests this day.
+                </li>
+              )}
+              {agenda.map((entry) => {
+                if (entry.kind === "free") {
+                  const minutes = entry.endMinutes - entry.startMinutes;
+                  const body = (
+                    <>
+                      <span className="w-[68px] shrink-0 font-[family-name:var(--font-mono)] text-[12.5px] text-ink-2">
+                        {formatTimeOfDay(entry.startMinutes)}
+                      </span>
+                      <span className="grow text-[13.5px] text-muted">
+                        Open · {describeLength(minutes)}
+                      </span>
+                    </>
+                  );
+                  const className =
+                    "flex items-center gap-3 min-h-[52px] px-3 py-2 rounded-[4px] border-[1.5px] border-dashed border-line no-underline text-ink";
+                  return (
+                    <li key={`free-${entry.startMinutes}`}>
+                      {user.team && selected >= today ? (
+                        <Link
+                          href={{
+                            pathname: "/request",
+                            query: { date: selected, start: entry.startMinutes },
+                          }}
+                          data-free={entry.startMinutes}
+                          className={className}
+                        >
+                          {body}
+                        </Link>
+                      ) : (
+                        <div className={className}>{body}</div>
+                      )}
+                    </li>
+                  );
+                }
+
+                const booking = entry.booking;
+                const released = booking.status === "RELEASED";
+                const pending = booking.status === "PENDING";
+                const isMine = Boolean(user.team) && booking.teamId === user.team?.id;
+                return (
+                  <li key={booking.id}>
+                    <Link
+                      href={`/booking/${booking.id}`}
+                      data-slot={booking.id}
+                      data-status={booking.status}
+                      style={
+                        pending
+                          ? {
+                              background:
+                                "repeating-linear-gradient(135deg,#F7DADA 0 5px,#FFFFFF 5px 10px)",
+                            }
+                          : undefined
+                      }
+                      className={`flex items-center gap-3 min-h-[52px] px-3 py-2 rounded-[4px] no-underline ${
+                        pending
+                          ? "border-[1.5px] border-dashed border-crimson text-crimson-deep"
+                          : released
+                            ? "bg-white border-[1.5px] border-dashed border-ink text-ink"
+                            : "bg-crimson border border-crimson-deep text-white"
+                      }`}
+                    >
+                      <span
+                        className={`w-[68px] shrink-0 font-[family-name:var(--font-mono)] text-[12.5px] ${
+                          pending ? "text-crimson" : released ? "text-ink-2" : "text-[#F2C9C9]"
+                        }`}
+                      >
+                        {formatTimeOfDay(booking.startMinutes)}
+                      </span>
+                      <span className="grow min-w-0">
+                        <span className="block font-[family-name:var(--font-display)] text-[16px] font-bold uppercase leading-tight truncate">
+                          {released ? "Available" : (booking.team?.name ?? "—")}
+                        </span>
+                        <span
+                          className={`block font-[family-name:var(--font-mono)] text-[11px] mt-0.5 ${
+                            pending ? "text-crimson" : released ? "text-muted" : "text-[#F2C9C9]"
+                          }`}
+                        >
+                          {formatRange(booking.startMinutes, booking.endMinutes)}
+                          {pending && " · pending"}
+                          {isMine && !released && " · your team"}
+                          {released && booking.releasedFromTeam
+                            ? ` · from ${booking.releasedFromTeam.name}`
+                            : ""}
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+          {user.team && (
+            <Link
+              href={{ pathname: "/request", query: { date: selected } }}
+              className="btn btn-primary no-underline justify-center h-12"
+            >
+              Request time on {formatDateShort(selected)}
+            </Link>
+          )}
+        </div>
+
         <div className="flex gap-4 flex-wrap">
           <section className="card p-4 grow min-w-[320px]">
             <h2 className="display text-xl mb-2">
@@ -328,6 +493,7 @@ export default async function CalendarPage({
           </section>
         </div>
       </main>
+      <MobileNav user={user} active="calendar" />
     </div>
   );
 }

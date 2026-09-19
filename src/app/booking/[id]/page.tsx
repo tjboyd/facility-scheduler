@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { FACILITY_TIMEZONE } from "@/lib/env";
 import { requireUser } from "@/lib/guards";
-import { AppHeader } from "@/components/AppHeader";
+import { AppHeader, MobileNav } from "@/components/AppHeader";
 import { Flash } from "@/components/Flash";
 import {
   canClaim,
@@ -57,7 +57,7 @@ export default async function BookingPage({
     <div className="min-h-dvh flex flex-col">
       <AppHeader user={user} active="calendar" />
 
-      <main className="grow p-7 flex flex-col gap-4 max-w-[760px]">
+      <main className="grow p-4 pb-24 md:p-7 md:pb-7 flex flex-col gap-4 max-w-[760px]">
         <Link
           href={{ pathname: "/calendar", query: { week: startOfWeek(booking.date) } }}
           className="text-[13px] font-semibold no-underline"
@@ -172,6 +172,7 @@ export default async function BookingPage({
           </div>
         </div>
       </main>
+      <MobileNav user={user} active="calendar" />
     </div>
   );
 }

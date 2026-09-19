@@ -2,10 +2,11 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { FACILITY_TIMEZONE } from "@/lib/env";
 import { requireUser } from "@/lib/guards";
-import { AppHeader } from "@/components/AppHeader";
+import { AppHeader, MobileNav } from "@/components/AppHeader";
 import { Flash } from "@/components/Flash";
 import { requestContextFor } from "@/lib/requests";
-import { closureFor, describeLength, lengthChoices, openingsFor } from "@/lib/rules";
+import { closureFor, describeLength, lengthChoices, OCCUPYING, openingsFor } from "@/lib/rules";
+import { db } from "@/lib/db";
 import {
   addDays,
   formatDateLong,
@@ -33,7 +34,7 @@ export default async function RequestPage({
     return (
       <div className="min-h-dvh flex flex-col">
         <AppHeader user={user} active="calendar" />
-        <main className="grow p-7">
+        <main className="grow p-4 pb-24 md:p-7 md:pb-7">
           <h1 className="display text-[34px]">Request time</h1>
           <div className="card p-6 mt-4 max-w-[560px]">
             <p className="text-[14.5px] text-muted m-0">
@@ -42,6 +43,7 @@ export default async function RequestPage({
             </p>
           </div>
         </main>
+      <MobileNav user={user} active="calendar" />
       </div>
     );
   }
@@ -63,13 +65,29 @@ export default async function RequestPage({
   const wanted = len ? Number(len) : null;
   const length = (wanted && lengths.includes(wanted) ? wanted : lengths.at(-1)) ?? null;
 
+  // What stops the chosen start running the full length, so the screen can say
+  // so rather than silently offering less. The mockup asked for this and it is
+  // the difference between "why can't I have 90 minutes" and knowing.
+  const blocker =
+    selected && selected.maxMinutes < settings.maxRequestMinutes
+      ? await db.booking.findFirst({
+          where: {
+            date,
+            status: { in: [...OCCUPYING] },
+            startMinutes: { gte: selected.startMinutes },
+          },
+          orderBy: { startMinutes: "asc" },
+          select: { startMinutes: true, team: { select: { name: true } } },
+        })
+      : null;
+
   const horizonEnd = addDays(startOfWeek(today), settings.weeksAhead * 7 + 6);
 
   return (
     <div className="min-h-dvh flex flex-col">
       <AppHeader user={user} active="calendar" />
 
-      <main className="grow p-7 flex flex-col gap-4 max-w-[760px]">
+      <main className="grow p-4 pb-24 md:p-7 md:pb-7 flex flex-col gap-4 max-w-[760px]">
         <Link href="/calendar" className="text-[13px] font-semibold no-underline">
           ‹ Back to the calendar
         </Link>
@@ -173,7 +191,7 @@ export default async function RequestPage({
               <input type="hidden" name="lengthMinutes" value={length ?? ""} />
               <div>
                 <span className="field-label">Length</span>
-                <div className="flex gap-2 flex-wrap">
+                <div className="grid grid-cols-3 gap-2">
                   {lengths.map((minutes) => (
                     <Link
                       key={minutes}
@@ -183,7 +201,7 @@ export default async function RequestPage({
                       }}
                       data-length={minutes}
                       aria-current={minutes === length}
-                      className={`grow min-w-[110px] h-11 flex items-center justify-center rounded-[4px] border no-underline font-[family-name:var(--font-display)] text-[17px] font-semibold uppercase tracking-[0.05em] ${
+                      className={`h-11 flex items-center justify-center rounded-[4px] border no-underline font-[family-name:var(--font-display)] text-[17px] font-semibold uppercase tracking-[0.05em] ${
                         minutes === length
                           ? "bg-crimson border-crimson text-white"
                           : "bg-white border-line text-ink"
@@ -194,9 +212,18 @@ export default async function RequestPage({
                   ))}
                 </div>
                 <p className="text-xs text-faint mt-1.5">
-                  {describeLength(settings.maxRequestMinutes)} is the most you can request at once.
-                  {selected.maxMinutes < settings.maxRequestMinutes &&
-                    ` Only ${describeLength(selected.maxMinutes)} is free from this start.`}
+                  {selected.maxMinutes < settings.maxRequestMinutes ? (
+                    <>
+                      Only {describeLength(selected.maxMinutes)} is free from this start
+                      {blocker
+                        ? ` — ${blocker.team?.name ?? "another team"} has the floor at ${formatTimeOfDay(blocker.startMinutes)}.`
+                        : blocker === null && hours.isOpen
+                          ? ` — the facility closes at ${formatTimeOfDay(hours.closeMinutes)}.`
+                          : "."}
+                    </>
+                  ) : (
+                    `${describeLength(settings.maxRequestMinutes)} is the most you can request at once.`
+                  )}
                 </p>
               </div>
 
@@ -228,16 +255,21 @@ export default async function RequestPage({
                 />
               </div>
 
-              <div className="flex items-center gap-3 pt-4 border-t border-line-faint">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-4 border-t border-line-faint">
                 <p className="m-0 grow text-[12.5px] leading-snug text-muted">
                   Goes to the approvers. The slot shows as pending until it&rsquo;s decided.
                 </p>
-                <Link href="/calendar" className="btn btn-secondary no-underline">
-                  Cancel
-                </Link>
-                <button type="submit" className="btn btn-primary">
-                  Send request
-                </button>
+                <div className="flex gap-2.5">
+                  <Link
+                    href="/calendar"
+                    className="btn btn-secondary no-underline grow sm:grow-0 justify-center h-11 sm:h-auto"
+                  >
+                    Cancel
+                  </Link>
+                  <button type="submit" className="btn btn-primary grow sm:grow-0 justify-center h-11 sm:h-auto">
+                    Send request
+                  </button>
+                </div>
               </div>
             </>
           )}
@@ -251,6 +283,7 @@ export default async function RequestPage({
         */}
         <form id="pick" action="/request" className="hidden" />
       </main>
+      <MobileNav user={user} active="calendar" />
     </div>
   );
 }
