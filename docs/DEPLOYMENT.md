@@ -34,28 +34,44 @@ Budget about an hour, most of which is waiting for DNS. You can stop after step
 Do this before anything else, because DNS can take from ten minutes to a few
 hours to propagate and you want it finished by the time you need it.
 
-**Send from a subdomain**, not the club's main domain — `mail.yourdomain.org`.
+**Send from a subdomain**, not the club's main domain — `mail.jrchargersbaseball.com`.
 If the scheduler ever generates bounces, that keeps the damage away from the
 domain the club sends its ordinary mail from.
 
-1. In Postmark: **Sender Signatures → Add Domain**, enter `mail.yourdomain.org`.
+This also means you touch nothing that is already working. The records below all
+sit under `mail.`, so the root domain's existing MX, SPF and any Google or
+Microsoft verification records are left exactly as they are. Check what is there
+before you start, so you know what you are adding to:
+
+```bash
+dig +short MX jrchargersbaseball.com
+dig +short TXT jrchargersbaseball.com
+dig +short TXT _dmarc.jrchargersbaseball.com
+```
+
+If `_dmarc` already returns a policy, leave it alone — step 3 below is only for
+a domain that has none.
+
+1. In Postmark: **Sender Signatures → Add Domain**, enter `mail.jrchargersbaseball.com`.
 2. Postmark shows the records to add. Add them at your DNS host:
 
 | Type | Host | Value |
 | --- | --- | --- |
-| TXT | `<selector>._domainkey.mail.yourdomain.org` | the DKIM key Postmark shows you |
-| CNAME | `pm-bounces.mail.yourdomain.org` | `pm.mtasv.net` |
+| TXT | `<selector>._domainkey.mail.jrchargersbaseball.com` | the DKIM key Postmark shows you |
+| CNAME | `pm-bounces.mail.jrchargersbaseball.com` | `pm.mtasv.net` |
 
    The CNAME is Postmark's custom Return-Path. It is what makes SPF *align* for
    DMARC, and it is why you do **not** need to add Postmark to your main
    domain's SPF record.
 
-3. While you are in DNS, add a DMARC record if the domain has none. Start
-   permissive and tighten once you can see reports:
+3. While you are in DNS, add a DMARC record **if the domain has none** — the
+   `dig` above tells you. Start permissive and tighten once you can see reports;
+   going straight to `p=reject` on a domain whose other senders you have not
+   audited will bounce real club mail:
 
 | Type | Host | Value |
 | --- | --- | --- |
-| TXT | `_dmarc.yourdomain.org` | `v=DMARC1; p=none; rua=mailto:you@yourdomain.org` |
+| TXT | `_dmarc.jrchargersbaseball.com` | `v=DMARC1; p=none; rua=mailto:admin@jrchargersbaseball.com` |
 
 4. Back in Postmark, click **Verify**. Come back later if it has not propagated.
 
@@ -117,8 +133,8 @@ Still in the app service's **Variables**, add:
 | `ORG_NAME` | `Hamilton Jr Chargers` |
 | `FACILITY_TIMEZONE` | `America/Chicago` |
 | `MAIL_TRANSPORT` | `postmark` |
-| `MAIL_FROM` | `Jr Chargers Facility <no-reply@mail.yourdomain.org>` |
-| `MAIL_REPLY_TO` | `facility@yourdomain.org` |
+| `MAIL_FROM` | `Jr Chargers Facility <no-reply@mail.jrchargersbaseball.com>` |
+| `MAIL_REPLY_TO` | `facility@jrchargersbaseball.com` — an address somebody reads |
 | `POSTMARK_SERVER_TOKEN` | the token from step 1 |
 | `POSTMARK_MESSAGE_STREAM` | `outbound` |
 
@@ -178,7 +194,7 @@ npm install
 
 DATABASE_URL="<DATABASE_PUBLIC_URL>" \
 DIRECT_DATABASE_URL="<DATABASE_PUBLIC_URL>" \
-SEED_SUPER_ADMIN_EMAIL="you@yourdomain.org" \
+SEED_SUPER_ADMIN_EMAIL="you@jrchargersbaseball.com" \
 SEED_SUPER_ADMIN_NAME="Your Name" \
 npm run db:seed
 ```
